@@ -11,6 +11,16 @@
 std::string handle_advance(httplib::Client &cli, picojson::value data)
 {
     std::cout << "Received advance request data " << data << std::endl;
+
+    std::string payload = hexToString(data.get("payload").to_str());
+
+    picojson::value parsed_payload;
+    picojson::parse(parsed_payload, payload);
+
+    std::string method = parsed_payload.get("method").to_str();
+
+    std::cout << "method: " << method << std::endl;
+
     return "accept";
 }
 
