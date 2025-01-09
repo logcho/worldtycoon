@@ -2,7 +2,7 @@ CXX  := g++
 
 .PHONY: clean 3rdparty
 
-dapp: dapp.cpp
+dapp: dapp.cpp $(wildcard engine/*.cpp)
 	make -C 3rdparty
 	$(CXX) -pthread -std=c++11 -o $@ $^
 

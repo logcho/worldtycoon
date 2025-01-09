@@ -4,6 +4,7 @@
 #include "3rdparty/cpp-httplib/httplib.h"
 #include "3rdparty/picojson/picojson.h"
 
+#include "engine/micropolis.h"
 
 
 std::string handle_advance(httplib::Client &cli, picojson::value data)
