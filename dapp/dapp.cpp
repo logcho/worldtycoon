@@ -6,6 +6,7 @@
 
 #include "engine/micropolis.h"
 
+#include "util.h"
 
 std::string handle_advance(httplib::Client &cli, picojson::value data)
 {
