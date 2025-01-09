@@ -8,9 +8,14 @@
     "start": "next start"
   },
   "dependencies": {
+    "@cartesi/rollups": "^1.4.3",
+    "@pixi/react": "7",
     "@rainbow-me/rainbowkit": "^2.2.1",
+    "@sunodo/wagmi-plugin-hardhat-deploy": "^0.3.0",
     "@tanstack/react-query": "^5.55.3",
+    "@wagmi/cli": "^2.1.22",
     "next": "^14.2.10",
+    "pixi.js": "7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "viem": "2.17.0",

@@ -12,12 +12,10 @@ const Home: NextPage = () => {
 
       {/* Header  */}
       <div className='flex flex-row justify-between items-center p-2 bg-black'>
-
         <h1 className='text-white font-semibold text-2xl'>
           World Tycoon
         </h1>
         <ConnectButton />
-
       </div>
 
       {/* Content  */}
