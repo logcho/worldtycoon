@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <iostream>
+#include <unordered_map>
+
 
 #include "3rdparty/cpp-httplib/httplib.h"
 #include "3rdparty/picojson/picojson.h"
@@ -8,18 +10,43 @@
 
 #include "util.h"
 
+std::unordered_map<std::string, Micropolis*> games;
+
 std::string handle_advance(httplib::Client &cli, picojson::value data)
 {
     std::cout << "Received advance request data " << data << std::endl;
 
+    // User and payload
+    std::string user = data.get("metadata").get("msg_sender").to_str();
     std::string payload = hexToString(data.get("payload").to_str());
 
+    // Cout to confirm
+    std::cout << "user: " << user << std::endl;
+    std::cout << "payload: " << payload << std::endl;
+    
+
+    // JSON payload parsed
     picojson::value parsed_payload;
     picojson::parse(parsed_payload, payload);
 
+    // Method: start, doTool
     std::string method = parsed_payload.get("method").to_str();
 
     std::cout << "method: " << method << std::endl;
+
+    if(method == "start"){
+        // Check is user is already in games
+        if(games.find(user) == games.end()) games[user] = new Micropolis();
+
+        // TODO: add a param for seed
+        games[user]->generateSomeCity(0);
+
+        std::cout << "Generated city: success" << std::endl;
+    }
+    else if(method == "doTool"){
+        // Check is user is already in games
+        if(games.find(user) == games.end()) return "reject";
+    }
 
     return "accept";
 }
@@ -27,6 +54,24 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
 std::string handle_inspect(httplib::Client &cli, picojson::value data)
 {
     std::cout << "Received inspect request data " << data << std::endl;
+    std::string payload = hexToString(data.get("payload").to_str());
+
+    std::cout << "payload: " << payload << std::endl;
+
+    if(games.find(payload) != games.end()){
+
+        unsigned short *map = games[payload]->map[0];
+
+        std::cout << "map w:" << WORLD_W << std::endl;
+        std::cout << "map h:" << WORLD_H << std::endl;
+
+        std::vector<uint16_t> mapArray = convertMap(map, WORLD_W, WORLD_H);
+        printGrid(mapArray, WORLD_W, WORLD_H);
+    }
+    else{
+        std::cout << "User is not foundd in games" << std::endl;
+    }
+
     return "accept";
 }
 
