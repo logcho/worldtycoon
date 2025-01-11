@@ -3,6 +3,8 @@
 #define UTIL_H
 
 #include <string>
+#include <sstream>
+#include <iomanip>
 #include <vector>
 #include <cstdint>
 
@@ -15,6 +17,37 @@ std::string hexToString(const std::string &hex){
         result += ch;
     }
     return result;
+}
+
+// Converts a string to a hex string with a "0x" prefix
+std::string stringToHex(const std::string &str) {
+    std::string hexStr = "0x";  // Add the "0x" prefix
+    // Convert each character to a two-digit hex value
+    for (unsigned char c : str) {
+        char buf[3];
+        snprintf(buf, sizeof(buf), "%02x", c);
+        hexStr.append(buf);
+    }
+    return hexStr;
+}
+
+std::string intToHex(int value) {
+    std::stringstream ss;
+    ss << "0x" << std::hex << value;
+    return ss.str();
+}
+
+
+std::string vectorToHex(const std::vector<uint16_t>& vec) {
+    std::ostringstream oss;
+    oss << "0x";  // Add the prefix
+
+    for (const auto& num : vec) {
+        // Convert each uint16_t to a 4-character hex string (zero-padded)
+        oss << std::setfill('0') << std::setw(4) << std::hex << num;
+    }
+
+    return oss.str();
 }
 
 // Convert the map to a vector<uint16_t> with dynamic width and height
