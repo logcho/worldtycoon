@@ -140,6 +140,7 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
 
     if(method == "getEngine"){
         std::string user = parsed_payload.get("user").to_str();
+        std::for_each(user.begin(), user.end(), [](char &c) { c = std::tolower(c); });
         if(games.find(user) != games.end()){
             createEngineReport(cli, games[user]);
         }
