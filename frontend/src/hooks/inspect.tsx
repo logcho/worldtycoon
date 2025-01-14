@@ -46,11 +46,14 @@ export const useInspect = (
         () => (key ? `${url}${key}` : false),
         options
     );
+    console.log(`${url}${key}`);
 
     const response = swr.data;
     let reports: InspectReport[] = [];
     if (response && response.status == InspectStatus.Accepted) {
         reports = response.reports;
+        console.log(response)
+        console.log(reports.map((r) => r.payload))
     }
 
     return { ...swr, reports: reports.map((r) => r.payload) };

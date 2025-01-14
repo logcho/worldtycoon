@@ -4,9 +4,25 @@ import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import Button from '../../components/Button';
 import { useRouter } from 'next/router';
+import { useAccount } from "wagmi";
+import { useInspectEngine } from '../../hooks/game';
+import { notFound } from "next/navigation";
+import { GameStage } from '../../components/GameStage';
 
 const Home: NextPage = () => {
   const router = useRouter()
+
+  const { address } = useAccount();
+
+  if (!address) {
+    notFound();
+  }
+  console.log(address);
+
+  const { map } = useInspectEngine(address);
+
+  // console.log(map);
+
   return (
     <>
 
@@ -20,9 +36,11 @@ const Home: NextPage = () => {
 
       {/* Content  */}
       {/* h-[calc(100vh-64px)] calculated height from header  */}
-      <div className='flex flex-row justify-center items-center h-[calc(100vh-64px)] w-screen'>
-        <h1>play scene</h1>
-        
+      <div className='flex flex-col justify-center items-center h-full w-screen'>
+        {/* <h1>play scene</h1> */}
+        <GameStage 
+          map={map}
+        />        
       </div>
     </>
   );

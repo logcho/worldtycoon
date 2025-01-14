@@ -9,17 +9,12 @@ import {
 import { UseInspect, useInspect } from "./inspect";
 import { SWRConfiguration } from "swr";
 
-const inspectAbi = parseAbi([
-    "function getMap(uint32 seed)",
-    "function getUserMap(address)",
-    "function balanceOf(address)",
-]);
 
 export type GameInspect = {
     map?: Hex;
-    population?: number;
-    totalFunds?: number;
-    cityTime?: number;
+    // population?: number;
+    // totalFunds?: number;
+    // cityTime?: number;
 };
 
 
