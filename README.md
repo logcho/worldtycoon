@@ -16,7 +16,7 @@ cartesi run
 
 ### Send input to start game 
 ```shell
-caretsi send
+cartesi send
 Select send sub-command Send generic input to the application.
 ? Chain Foundry
 ? RPC URL http://127.0.0.1:8545
