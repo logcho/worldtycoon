@@ -8,33 +8,44 @@
 #include <vector>
 #include <cstdint>
 
-std::string hexToString(const std::string &hex){
-    std::string cleanedHex = (hex.substr(0, 2) == "0x") ? hex.substr(2) : hex;
+// Function to convert a string to hex with 0x prefix
+std::string stringToHex(const std::string& input) {
+    std::ostringstream hexStream;
+    hexStream << "0x";
+    for (unsigned char c : input) {
+        hexStream << std::hex << std::setw(2) << std::setfill('0') << (int)c;
+    }
+    return hexStream.str();
+}
+
+// Function to convert hex to string
+std::string hexToString(const std::string& hexInput) {
+    if (hexInput.substr(0, 2) != "0x") {
+        throw std::invalid_argument("Invalid hex input: Missing 0x prefix");
+    }
     std::string result;
-    for (size_t i = 0; i < cleanedHex.length(); i += 2) {
-        std::string byteString = cleanedHex.substr(i, 2);
-        char ch = static_cast<char>(std::stoi(byteString, nullptr, 16));
-        result += ch;
+    for (size_t i = 2; i < hexInput.size(); i += 2) {
+        std::string byteString = hexInput.substr(i, 2);
+        char byte = static_cast<char>(std::stoul(byteString, nullptr, 16));
+        result.push_back(byte);
     }
     return result;
 }
 
-// Converts a string to a hex string with a "0x" prefix
-std::string stringToHex(const std::string &str) {
-    std::string hexStr = "0x";  // Add the "0x" prefix
-    // Convert each character to a two-digit hex value
-    for (unsigned char c : str) {
-        char buf[3];
-        snprintf(buf, sizeof(buf), "%02x", c);
-        hexStr.append(buf);
-    }
-    return hexStr;
+
+// Function to convert an integer to hex with 0x prefix
+std::string intToHex(int number) {
+    std::ostringstream hexStream;
+    hexStream << "0x" << std::hex << number;
+    return hexStream.str();
 }
 
-std::string intToHex(int value) {
-    std::stringstream ss;
-    ss << "0x" << std::hex << value;
-    return ss.str();
+// Function to convert hex to int
+int hexToInt(const std::string& hexInput) {
+    if (hexInput.substr(0, 2) != "0x") {
+        throw std::invalid_argument("Invalid hex input: Missing 0x prefix");
+    }
+    return std::stoi(hexInput.substr(2), nullptr, 16);
 }
 
 

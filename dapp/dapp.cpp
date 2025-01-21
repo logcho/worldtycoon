@@ -34,6 +34,15 @@ void createNotice(httplib::Client &cli, const std::string &payload) {
     std::cout << "Received notice status " << r.value().status << std::endl;
 }
 
+void createVoucher(httplib::Client &cli, const std::string& address, int amount){
+    // Create JSON object with the message (payload)
+    auto voucher = std::string("{\"payload\":\"") + payload + std::string("\"}");
+
+    // Send the POST request to the /report endpoint with the JSON payload
+    auto r = cli.Post("/notice", notice, "application/json");
+    
+    std::cout << "Received notice status " << r.value().status << std::endl;
+}
 // Create Reports and Notices for engine 
 void createEngineReport(httplib::Client &cli, Micropolis* game){
     createReport(cli,vectorToHex(convertMap(game->map[0], WORLD_W, WORLD_H)));
