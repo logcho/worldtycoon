@@ -2,14 +2,20 @@
 
 ## Building
 
+### Pre-requisite
 ```shell
  npm i -g @cartesi/cli
 ```
 
+### Run backend
 ```shell
 cd dapp
 cartesi build
 cartesi run
+```
+
+### Send input to start game 
+```shell
 caretsi send
 Select send sub-command Send generic input to the application.
 ? Chain Foundry
@@ -22,6 +28,7 @@ Select send sub-command Send generic input to the application.
 ? Input (as string) {"method" : "start", "seed" : 0}
 ```
 
+### Run frontend
 ```shell 
 cd frontend
 pnpm run dev
