@@ -4,8 +4,8 @@ export const nav = [
     href: "/",
   },
   {
-    name: "Trade",
-    href: "/trade",
+    name: "Bridge",
+    href: "/bridge",
   },
   {
     name: "Docs",

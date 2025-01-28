@@ -27,18 +27,25 @@ export const RulesSection: React.FC = () => {
           </h2>
         </div>
 
-        <h3 className="font-fixedsys tracking-wide md:text-xl">
-          THE FOUNDATION OF METROPOLIS
+        <h3 className="font-fixedsys tracking-wide text-neutral-200 md:text-xl">
+          BUILD, EARN & THRIVE IN THE BLOCKCHAIN ERA
         </h3>
 
         <ul className="grid list-disc gap-x-4 font-bitmap text-lg text-gray-300 *:leading-5 md:grid-cols-2 md:text-xl">
-          <li>Build and manage your own thriving metropolis from scratch</li>
-          <li>Balance resources, population growth, and city infrastructure</li>
-          <li>Manage power, water, and transportation networks</li>
-          <li>Handle natural disasters and city emergencies</li>
-          <li>Collect taxes and maintain a healthy economy</li>
           <li>
-            Zone areas for residential, commercial, and industrial development
+            Earn real cryptocurrency tokens through successful city management
+          </li>
+          <li>
+            Strategic zoning for residential, commercial, and industrial growth
+          </li>
+          <li>
+            Powered by Cartesi&apos;s blockchain infrastructure for true
+            ownership
+          </li>
+          <li>Compete globally and trade assets in the crypto ecosystem</li>
+          <li>Build and manage essential infrastructure and public services</li>
+          <li>
+            Create a sustainable economy through smart resource allocation
           </li>
         </ul>
 
@@ -73,11 +80,11 @@ export const RulesSection: React.FC = () => {
         </div>
 
         <ul className="grid list-disc gap-x-4 font-bitmap text-lg text-gray-300 *:leading-5 md:grid-cols-2 md:text-xl">
-          <li>Multiple map types and terrain options to choose from</li>
-          <li>Dynamic weather system affecting city operations</li>
-          <li>Advanced AI citizens with realistic behavior patterns</li>
-          <li>Unlock new buildings and technologies as your city grows</li>
-          <li>Compete with other mayors on the global leaderboard</li>
+          <li>Decentralized gameplay with true asset ownership</li>
+          <li>Dynamic economy affected by player decisions</li>
+          <li>Real-time city simulation with advanced AI citizens</li>
+          <li>Strategic resource management and infrastructure planning</li>
+          <li>Global marketplace for trading city assets and resources</li>
         </ul>
 
         <a

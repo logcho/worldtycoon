@@ -20,21 +20,26 @@ export const FooterSection: React.FC = () => {
           }}
         >
           <div className="font-fixedsys text-lg text-gray-300">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eos,
-            accusantium illum? Ipsum quasi aperiam nam? <p className="py-2" />
-            Voluptatem provident iure, dicta tempore nesciunt exercitationem
-            adipisci repudiandae quidem. Sapiente eos beatae ut quae! Asperiores
-            ipsum error nulla expedita laboriosam adipisci, quidem amet ratione,
-            harum eos nesciunt veritatis beatae quis, ea odit voluptatem ad
-            recusandae mollitia quas ut? Laborum beatae sapiente maiores?
-            <p className="py-2" /> At doloremque dicta inventore quidem quae
-            fuga ducimus totam. Ipsum debitis perferendis corporis officiis
-            accusantium repellat fugiat labore sint laborum aperiam modi,
-            distinctio iste, quos harum dolores repellendus numquam quo adipisci
-            natus, nemo magni doloremque atque unde?
-            <p className="py-2" /> Assumenda maxime vero, ipsa in adipisci
-            veritatis nemo earum eius amet voluptatum dicta ducimus tempora
-            dolores eaque nesciunt harum pariatur, suscipit modi.
+            World Tycoon represents a revolutionary fusion of traditional
+            city-building gameplay with blockchain technology, creating an
+            ecosystem where your strategic decisions have real-world value.{" "}
+            <p className="py-2" />
+            Our mission is to empower players by providing a platform where
+            gaming expertise translates into tangible rewards. Through
+            Cartesi&apos;s advanced blockchain infrastructure, we&apos;ve
+            created a decentralized gaming experience that maintains the depth
+            and engagement of classic city simulators while introducing
+            innovative economic mechanics. <p className="py-2" />
+            We believe in a future where gaming transcends entertainment,
+            becoming a legitimate avenue for wealth creation and economic
+            participation. By combining immersive gameplay with cryptocurrency
+            integration, we&apos;re building more than just a game - we&apos;re
+            creating an ecosystem where players can truly own their achievements
+            and trade their success. <p className="py-2" />
+            Join us in revolutionizing the gaming industry by being part of a
+            community where strategic thinking, resource management, and city
+            planning skills can lead to real-world prosperity. Welcome to the
+            future of gaming - welcome to World Tycoon.
           </div>
         </div>
       </div>
@@ -48,9 +53,9 @@ export const FooterSection: React.FC = () => {
           className="h-1.5 w-screen shadow-md"
         />
 
-        <footer className="flex h-full items-center justify-between gap-4 bg-foreground px-6">
+        <footer className="flex h-full items-center justify-between gap-4 bg-background px-6 text-foreground">
           <div className=""></div>
-          <p className="text-center font-bitmap text-xl text-background md:text-2xl">
+          <p className="text-center font-bitmap text-xl md:text-2xl">
             &copy; {new Date().getFullYear()} {siteConfig.name}. All rights
             reserved.
           </p>
