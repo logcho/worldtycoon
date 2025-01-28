@@ -1,15 +1,9 @@
 import * as React from "react";
 
-import { StageArea } from "./_components/stage-area";
-import { ToolsSidebar } from "./_components/tools-sidebar";
+import { Playground } from "./_components/playground";
 
 const PlayPage: React.FC = () => {
-  return (
-    <div className="w-dvh flex">
-      <ToolsSidebar className="w-1/5" />
-      <StageArea className="!w-4/5" />
-    </div>
-  );
+  return <Playground />;
 };
 
 export default PlayPage;

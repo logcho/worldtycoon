@@ -2,12 +2,16 @@
 
 import * as React from "react";
 
-import { Sprite } from "@pixi/react";
+import { Container, Sprite } from "@pixi/react";
 import { Spritesheet, Texture } from "pixi.js";
 
 import type { Hex } from "viem";
 
+import type { Tool } from "~/config/tools";
+
 import { HEIGHT, WIDTH } from "~/config/constants";
+import { TOOLS } from "~/config/tools";
+import { isOverlapping, loadToolsSpritesheet } from "~/lib/sprites";
 
 export type Tile = {
   x: number;
@@ -19,6 +23,12 @@ export type Tile = {
   animated: boolean;
   center: boolean;
   type: number;
+};
+
+export type PlacedSprite = {
+  x: number;
+  y: number;
+  tool: Tool;
 };
 
 const decodeTile = (x: number, y: number, tile: number): Tile => ({
@@ -43,12 +53,16 @@ export const Map: React.FC<{
   value?: Hex;
   scale: number;
   loading?: boolean;
+  selectedTool?: Tool;
   onMouseMove?: (tile: Tile) => void;
   onMouseClick?: (tile: Tile) => void;
-}> = ({ value, onMouseMove }) => {
+}> = ({ value, scale, selectedTool, onMouseMove }) => {
   const [spritesheet, setSpritesheet] = React.useState<Spritesheet | null>(
     null,
   );
+  const [toolsSpritesheet, setToolsSpritesheet] =
+    React.useState<Spritesheet | null>(null);
+  const [placedSprites, setPlacedSprites] = React.useState<PlacedSprite[]>([]);
 
   // default value is a blank map
   value =
@@ -82,13 +96,36 @@ export const Map: React.FC<{
       meta: { scale: "1" },
     });
 
-    console.log({ sheet });
-
     sheet
       .parse()
       .then(() => setSpritesheet(sheet))
       .catch(console.error);
   }, []);
+
+  // Load tools spritesheet
+  React.useLayoutEffect(() => {
+    loadToolsSpritesheet().then(setToolsSpritesheet).catch(console.error);
+  }, []);
+
+  const handleTileClick = (x: number, y: number) => {
+    if (selectedTool) {
+      // Check if the new tool would overlap with any existing tools
+      const wouldOverlap = placedSprites.some((sprite) =>
+        isOverlapping(
+          x,
+          y,
+          selectedTool.size,
+          sprite.x,
+          sprite.y,
+          sprite.tool.size,
+        ),
+      );
+
+      if (!wouldOverlap) {
+        setPlacedSprites((prev) => [...prev, { x, y, tool: selectedTool }]);
+      }
+    }
+  };
 
   const TileImage = (x: number, y: number) => {
     const t = map[x * 100 + y] ?? 0;
@@ -96,22 +133,47 @@ export const Map: React.FC<{
     const coord = `(${x},${y})`;
 
     return spritesheet ?
-        <Sprite
-          key={coord}
-          eventMode="static"
-          // cursor={loading ? "wait" : "cell"}
-          texture={spritesheet.textures[tile.type]}
-          // onpointerdown={(_event) => {
-          //     onMouseClick && onMouseClick(tile);
-          // }}
-          onpointermove={() => onMouseMove?.(tile)}
-          width={16}
-          height={16}
-          x={x * 16}
-          y={y * 16}
-        />
-      : <React.Fragment key={coord} />;
+        <Container>
+          <Sprite
+            key={coord}
+            eventMode="static"
+            cursor={selectedTool ? "pointer" : "default"}
+            texture={spritesheet.textures[tile.type]}
+            x={x * 16 * scale}
+            y={y * 16 * scale}
+            scale={scale}
+            onmousemove={() => onMouseMove?.(tile)}
+            onclick={() => handleTileClick(x, y)}
+          />
+        </Container>
+      : null;
   };
 
-  return COORDINATES.map(({ x, y }) => TileImage(x, y));
+  return (
+    <Container>
+      {COORDINATES.map(({ x, y }) => TileImage(x, y))}
+      {toolsSpritesheet &&
+        placedSprites.map((sprite, index) => {
+          const toolIndex = TOOLS.findIndex((t) => t.id === sprite.tool.id);
+          if (toolIndex === -1) return null;
+
+          return (
+            <Container
+              key={index}
+              x={
+                16 * (sprite.x - Math.floor((sprite.tool.size - 1) / 2)) * scale
+              }
+              y={
+                16 * (sprite.y - Math.floor((sprite.tool.size - 1) / 2)) * scale
+              }
+            >
+              <Sprite
+                texture={toolsSpritesheet.textures[toolIndex]}
+                scale={scale}
+              />
+            </Container>
+          );
+        })}
+    </Container>
+  );
 };

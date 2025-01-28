@@ -15,7 +15,7 @@ const PlayLayout: React.FCC = ({ children }) => {
   //   router.replace("/");
   // }
 
-  return <StoreProvider>{children}</StoreProvider>;
+  return children;
 };
 
 export default PlayLayout;
