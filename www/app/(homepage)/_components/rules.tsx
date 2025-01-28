@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 
 export const RulesSection: React.FC = () => {
   return (
-    <section className="flex h-dvh snap-center flex-col items-center justify-center gap-8 bg-gradient-to-b from-[#2D0808] via-[#1A0505] to-[#0D0303] p-4 text-background">
+    <section className="flex h-dvh snap-center flex-col items-center justify-center gap-8 bg-gradient-to-b from-[#2D0808] via-[#1A0505] to-[#0D0303] p-4 pt-24 text-background">
       {/* Utility/Rules Section */}
       <div
         className="h-[36vh] w-full max-w-4xl space-y-2 rounded-[2rem] bg-[#151515]/80 p-2 backdrop-blur-sm duration-700 animate-in slide-in-from-right-1/2 md:space-y-4 md:p-6"

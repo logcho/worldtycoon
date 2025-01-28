@@ -34,6 +34,9 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_ENABLE_TESTNETS: z.string(),
+    NEXT_PUBLIC_CHAIN_ID: z.string(),
+    NEXT_PUBLIC_GRAPHQL_URL: z.string(),
+    NEXT_PUBLIC_INSPECT_URL: z.string(),
   },
 
   /**
@@ -44,6 +47,9 @@ export const env = createEnv({
   experimental__runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_ENABLE_TESTNETS: process.env.NEXT_PUBLIC_ENABLE_TESTNETS,
+    NEXT_PUBLIC_CHAIN_ID: process.env.NEXT_PUBLIC_CHAIN_ID,
+    NEXT_PUBLIC_GRAPHQL_URL: process.env.NEXT_PUBLIC_GRAPHQL_URL,
+    NEXT_PUBLIC_INSPECT_URL: process.env.NEXT_PUBLIC_INSPECT_URL,
   },
 
   /**

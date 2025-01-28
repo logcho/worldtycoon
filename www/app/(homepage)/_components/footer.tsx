@@ -19,7 +19,7 @@ export const FooterSection: React.FC = () => {
             borderImage: "url('/images/border.png') 16 stretch",
           }}
         >
-          <p className="font-fixedsys text-lg text-gray-300">
+          <div className="font-fixedsys text-lg text-gray-300">
             Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eos,
             accusantium illum? Ipsum quasi aperiam nam? <p className="py-2" />
             Voluptatem provident iure, dicta tempore nesciunt exercitationem
@@ -35,7 +35,7 @@ export const FooterSection: React.FC = () => {
             <p className="py-2" /> Assumenda maxime vero, ipsa in adipisci
             veritatis nemo earum eius amet voluptatum dicta ducimus tempora
             dolores eaque nesciunt harum pariatur, suscipit modi.
-          </p>
+          </div>
         </div>
       </div>
 
