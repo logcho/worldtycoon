@@ -52,11 +52,12 @@ const COORDINATES = Array.from(ROWS, (_, y) =>
 export const Map: React.FC<{
   value?: Hex;
   scale: number;
+  position: { x: number; y: number };
   loading?: boolean;
   selectedTool?: Tool;
   onMouseMove?: (tile: Tile) => void;
   onMouseClick?: (tile: Tile) => void;
-}> = ({ value, scale, selectedTool, onMouseMove }) => {
+}> = ({ value, scale, position, selectedTool, onMouseMove }) => {
   const [spritesheet, setSpritesheet] = React.useState<Spritesheet | null>(
     null,
   );
@@ -150,7 +151,7 @@ export const Map: React.FC<{
   };
 
   return (
-    <Container>
+    <Container position={[position.x, position.y]}>
       {COORDINATES.map(({ x, y }) => TileImage(x, y))}
       {toolsSpritesheet &&
         placedSprites.map((sprite, index) => {

@@ -16,7 +16,9 @@ import { loadToolsSpritesheet } from "~/lib/sprites";
 export const ToolOverlay: React.FC<{
   selectedTool?: Tool;
   coordinates: { x: number; y: number };
-}> = ({ selectedTool, coordinates }) => {
+  scale: number;
+  position: { x: number; y: number };
+}> = ({ selectedTool, coordinates, scale, position }) => {
   const spriteRef = React.useRef<PixiRef<typeof Sprite>>(null);
   const [spritesheet, setSpritesheet] = React.useState<Spritesheet | null>(
     null,
@@ -31,12 +33,18 @@ export const ToolOverlay: React.FC<{
       const toolIndex = TOOLS.findIndex((t) => t.id === selectedTool.id);
       if (toolIndex !== -1) {
         spriteRef.current.x =
-          16 * (coordinates.x - Math.floor((selectedTool.size - 1) / 2));
+          16 *
+            (coordinates.x - Math.floor((selectedTool.size - 1) / 2)) *
+            scale +
+          position.x;
         spriteRef.current.y =
-          16 * (coordinates.y - Math.floor((selectedTool.size - 1) / 2));
+          16 *
+            (coordinates.y - Math.floor((selectedTool.size - 1) / 2)) *
+            scale +
+          position.y;
       }
     }
-  }, [selectedTool, coordinates]);
+  }, [selectedTool, coordinates, scale, position]);
 
   return (
     <Container>
@@ -49,6 +57,7 @@ export const ToolOverlay: React.FC<{
             ]
           }
           alpha={0.5}
+          scale={scale}
         />
       )}
       <Text
