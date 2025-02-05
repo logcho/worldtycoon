@@ -24,32 +24,14 @@ void createNotice(httplib::Client &cli, const std::string &payload) {
     std::cout << "Received notice status " << r.value().status << std::endl;
 }
 
-// void depositErc20(httplib::Client &cli, std::string account, std::string erc20, std::string amount){
-//     picojson::object content{
-//         {"address", picojson::value(account)},
-//         {"erc20", picojson::value(erc20)},
-//         {"amount", picojson::value(amount)}
-//     };
-//     picojson::object noticePayload{
-//         {"type", picojson::value("erc20deposit")},
-//         {"content", picojson::value(content)}
-//     };
-//     std::string payload = picojson::value(noticePayload).serialize();
-//     auto response = cli.Post("/voucher", payload, "application/json");    
-// }
-
-// void createEngineReport(httplib::Client &cli, Micropolis* game){
-//     createReport(cli,vectorToHex(convertMap(game->map[0], WORLD_W, WORLD_H)));
-//     // createReport(cli,intToHex(game->totalFunds))
-//     // createReport(cli,intToHex(game->cityPop));
-//     // createReport(cli,intToHex(game->cityTime));
-// }
-// void createEngineNotice(httplib::Client &cli, Micropolis* game){
-//     createNotice(cli,vectorToHex(convertMap(game->map[0], WORLD_W, WORLD_H)));
-//     // createNotice(cli,intToHex(game->totalFunds))
-//     // createNotice(cli,intToHex(game->cityPop));
-//     // createNotice(cli,intToHex(game->cityTime));
-// }
+picojson::object parseERC20DepositToJson(const std::string& payload) {    
+    picojson::object obj;
+    obj["success"] = picojson::value(hexToBool(slice(payload, 0, 1)));
+    obj["token"] = picojson::value(slice(payload, 1, 21));
+    obj["sender"] = picojson::value(slice(payload, 21, 41));
+    obj["amount"] = picojson::value(slice(payload, 41, 73));
+    return obj;
+}
 
 std::unordered_map<std::string, Micropolis*> games;
 
@@ -94,52 +76,10 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
 std::string handle_inspect(httplib::Client &cli, picojson::value data)
 {
     std::string payload = data.get("payload").to_str();
-<<<<<<< HEAD
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
     std::cout << "Payload: " << payload << std::endl;
     std::cout << "Converted Payload: " << hexToString(payload) << std::endl;
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
-=======
-    std::cout << payload << std::endl;
-    payload = hexToString(payload);
-    std::cout << payload << std::endl;
-
-    // JSON payload parsed
-    picojson::value parsed_payload;
-    std::string err = picojson::parse(parsed_payload, payload);
-    if (!err.empty()) {
-        std::cerr << "JSON parsing error: " << err << std::endl;
-        return "accept";
-    }
-    // Check if the "method" field is present
-    if (!parsed_payload.contains("method")) {
-        std::cerr << "Missing 'method' field in payload" << std::endl;
-        return "accept";
-    }
-    // Extract the method field
-    std::string method = parsed_payload.get("method").to_str();
-    // std::cout << "method: " << method << std::endl;
-
-    if(method == "getEngine"){
-        std::string user = parsed_payload.get("user").to_str();
-        std::for_each(user.begin(), user.end(), [](char &c) { c = std::tolower(c); });
-        if(games.find(user) != games.end()){
-            createEngineReport(cli, games[user]);
-        }
-        return "accept";
-    }
-
-    // if(games.find(payload) != games.end()){
-    //     unsigned short *map = games[payload]->map[0];
-    //     std::vector<uint16_t> mapArray = convertMap(map, WORLD_W, WORLD_H);
-    //     // Cout map and dimenstions
-    //     // std::cout << "map w:" << WORLD_W << std::endl;
-    //     // std::cout << "map h:" << WORLD_H << std::endl;
-    //     // printGrid(mapArray, WORLD_W, WORLD_H);
-    //     std::string mapHex = vectorToHex(mapArray);
-    //     createReport(cli, mapHex);
-    // }
->>>>>>> frontend
     
     return "accept";
 }
