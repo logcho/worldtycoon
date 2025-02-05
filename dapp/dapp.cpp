@@ -94,10 +94,52 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
 std::string handle_inspect(httplib::Client &cli, picojson::value data)
 {
     std::string payload = data.get("payload").to_str();
+<<<<<<< HEAD
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
     std::cout << "Payload: " << payload << std::endl;
     std::cout << "Converted Payload: " << hexToString(payload) << std::endl;
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
+=======
+    std::cout << payload << std::endl;
+    payload = hexToString(payload);
+    std::cout << payload << std::endl;
+
+    // JSON payload parsed
+    picojson::value parsed_payload;
+    std::string err = picojson::parse(parsed_payload, payload);
+    if (!err.empty()) {
+        std::cerr << "JSON parsing error: " << err << std::endl;
+        return "accept";
+    }
+    // Check if the "method" field is present
+    if (!parsed_payload.contains("method")) {
+        std::cerr << "Missing 'method' field in payload" << std::endl;
+        return "accept";
+    }
+    // Extract the method field
+    std::string method = parsed_payload.get("method").to_str();
+    // std::cout << "method: " << method << std::endl;
+
+    if(method == "getEngine"){
+        std::string user = parsed_payload.get("user").to_str();
+        std::for_each(user.begin(), user.end(), [](char &c) { c = std::tolower(c); });
+        if(games.find(user) != games.end()){
+            createEngineReport(cli, games[user]);
+        }
+        return "accept";
+    }
+
+    // if(games.find(payload) != games.end()){
+    //     unsigned short *map = games[payload]->map[0];
+    //     std::vector<uint16_t> mapArray = convertMap(map, WORLD_W, WORLD_H);
+    //     // Cout map and dimenstions
+    //     // std::cout << "map w:" << WORLD_W << std::endl;
+    //     // std::cout << "map h:" << WORLD_H << std::endl;
+    //     // printGrid(mapArray, WORLD_W, WORLD_H);
+    //     std::string mapHex = vectorToHex(mapArray);
+    //     createReport(cli, mapHex);
+    // }
+>>>>>>> frontend
     
     return "accept";
 }
