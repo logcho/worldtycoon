@@ -9,6 +9,17 @@
 #include "engine/micropolis.h"
 
 #include "util.h"
+#include "uint256_t/uint256_t.h"
+
+std::string const ERC20_PORTAL_ADDRESS = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
+std::string const TOKEN = "0x92c6bca388e99d6b304f1af3c3cd749ff0b591e2";
+
+uint256_t gameBalance;
+uint256_t peopleBalance;
+
+bool isERC20Deposit(const std::string& address) {
+    return address == ERC20_PORTAL_ADDRESS;
+}
 
 void createReport(httplib::Client &cli, const std::string &payload) {
     std::string report = std::string("{\"payload\":\"") + payload + std::string("\"}");
@@ -24,49 +35,50 @@ void createNotice(httplib::Client &cli, const std::string &payload) {
     std::cout << "Received notice status " << r.value().status << std::endl;
 }
 
-picojson::object parseERC20DepositToJson(const std::string& payload) {    
-    picojson::object obj;
-    obj["success"] = picojson::value(hexToBool(slice(payload, 0, 1)));
-    obj["token"] = picojson::value(slice(payload, 1, 21));
-    obj["sender"] = picojson::value(slice(payload, 21, 41));
-    obj["amount"] = picojson::value(slice(payload, 41, 73));
-    return obj;
+uint256_t ERC20DepositAmount(const std::string& payload) {    
+    return uint256_t(slice(payload, 41, 73).substr(2), 16);
 }
 
 std::unordered_map<std::string, Micropolis*> games;
 
 std::string handle_advance(httplib::Client &cli, picojson::value data)
 {
-    std::string user = data.get("metadata").get("msg_sender").to_str();
+    std::string address = data.get("metadata").get("msg_sender").to_str();
     std::string payload = data.get("payload").to_str();
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
-    std::cout << "User: " << user << std::endl;
+    std::cout << "address: " << address << std::endl;
     std::cout << "Payload: " << payload << std::endl;
-    std::cout << "Converted Payload: " << hexToString(payload) << std::endl;
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
-
-    picojson::value parsed_payload;
-    std::string err = picojson::parse(parsed_payload, payload);
-    if (!err.empty()) return "reject";
-
-    std::string method = parsed_payload.get("method").to_str();
-    std::cout << "method: " << method << std::endl;
-
-    if(method == "start"){
-        if (games.find(user) != games.end()) return "reject";
-        games[user] = new Micropolis();
-        games[user]->generateMap();
-        std::cout << "City generated for" << user << std::endl;
+    if(isERC20Deposit(address)){
+        std::cout << "Previous game balance: " << gameBalance << std::endl;        
+        uint256_t depositAmount = ERC20DepositAmount(payload);
+        gameBalance += depositAmount;
+        std::cout << depositAmount << " transeferred to game balance" << std::endl;
+        std::cout << "Game balance after deposit: " << gameBalance << std::endl;     
         return "accept";
-    }
-    else if(method == "doTool"){
-        if (games.find(user) == games.end()) return "reject";
-        EditingTool tool = static_cast<EditingTool>(std::stoi(parsed_payload.get("tool").to_str()));
-        int x = std::stoi(parsed_payload.get("x").to_str());
-        int y = std::stoi(parsed_payload.get("y").to_str());
-        games[user]->doTool(tool, x, y);
-        std::cout << "Using tool " << parsed_payload.get("tool").to_str() << " at (" << x << ", " << y << ") to game " << user << std::endl;
-        return "accept";
+    }   
+    else{
+        picojson::value parsed_payload;
+        std::string err = picojson::parse(parsed_payload, payload);
+        if (!err.empty()) return "reject";
+        std::string method = parsed_payload.get("method").to_str();
+        std::cout << "method: " << method << std::endl;
+        if(method == "start"){
+            if (games.find(address) != games.end()) return "reject";
+            games[address] = new Micropolis();
+            games[address]->generateMap();
+            std::cout << "City generated for" << address << std::endl;
+            return "accept";
+        }
+        else if(method == "doTool"){
+            if (games.find(address) == games.end()) return "reject";
+            EditingTool tool = static_cast<EditingTool>(std::stoi(parsed_payload.get("tool").to_str()));
+            int x = std::stoi(parsed_payload.get("x").to_str());
+            int y = std::stoi(parsed_payload.get("y").to_str());
+            games[address]->doTool(tool, x, y);
+            std::cout << "Using tool " << parsed_payload.get("tool").to_str() << " at (" << x << ", " << y << ") to game " << address << std::endl;
+            return "accept";
+        }
     }
 
     return "reject";
