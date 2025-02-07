@@ -6,7 +6,7 @@ import { siteConfig } from "~/config/site";
 
 export const FooterSection: React.FC = () => {
   return (
-    <section className="flex h-dvh snap-center flex-col bg-[url('/images/do_pets.png')] bg-cover bg-center bg-no-repeat">
+    <section className="flex h-dvh snap-center flex-col bg-[url('/images/bg2.png')] bg-cover bg-center bg-no-repeat">
       <div className="container flex w-full grow flex-col gap-6 px-10 pt-24">
         <h1 className="border-b-2 border-b-red-500 pb-2 font-fixedsys text-3xl text-red-500 [text-shadow:_2px_4px_0_#000] md:text-4xl">
           Our Mission
