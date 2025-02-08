@@ -4,8 +4,13 @@ import "@rainbow-me/rainbowkit/styles.css";
 
 import * as React from "react";
 
-import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import {
+  darkTheme,
+  getDefaultConfig,
+  RainbowKitProvider,
+} from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { WagmiProvider } from "wagmi";
 import {
   arbitrum,
@@ -41,7 +46,11 @@ export const Providers: React.FCC<{
   return (
     <WagmiProvider config={rainbowConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>{children}</RainbowKitProvider>
+        <NuqsAdapter>
+          <RainbowKitProvider theme={darkTheme()}>
+            {children}
+          </RainbowKitProvider>
+        </NuqsAdapter>
       </QueryClientProvider>
     </WagmiProvider>
   );

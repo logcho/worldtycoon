@@ -31,9 +31,9 @@ export const StageArea: React.FC<
   const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
   const [coordinates, setCoordinates] = React.useState({ x: 0, y: 0 });
 
-  if (!address) {
-    router.replace("/");
-  }
+  // if (!address) {
+  //   router.replace("/");
+  // }
 
   const { data } = useInspect(
     JSON.stringify({

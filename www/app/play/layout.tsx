@@ -1,11 +1,10 @@
 "use client";
 
-import * as React from "react";
 import { useRouter } from "next/navigation";
 
 import { useAccount } from "wagmi";
 
-import { StoreProvider } from "~/hooks/use-store";
+import type * as React from "react";
 
 const PlayLayout: React.FCC = ({ children }) => {
   const router = useRouter();
