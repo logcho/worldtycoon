@@ -21,7 +21,7 @@ export const NavLink: React.FCC<LinkProps & { className?: string }> = ({
   return (
     <Link
       {...props}
-      className={cn(isActive && "text-red-500", className)}
+      className={cn(isActive && "text-yellow-500", className)}
       href={href}
     >
       {children}

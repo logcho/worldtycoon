@@ -40,7 +40,7 @@ export const Navbar: React.FC = () => {
               />
             </Link>
           : <Link href="/" className="-mt-2 hidden md:block">
-              <p className="font-bitmap text-4xl font-semibold text-red-500 [text-shadow:_1px_1px_0_#e1e1e1]">
+              <p className="font-bitmap text-4xl font-semibold text-yellow-500 [text-shadow:_1px_1px_0_#e1e1e1]">
                 {siteConfig.name}
               </p>
             </Link>
@@ -62,7 +62,7 @@ export const Navbar: React.FC = () => {
                 key={name}
                 href={href}
                 className={cn(
-                  "relative z-0 flex items-center gap-4 px-3 py-1 uppercase transition-colors hover:text-red-400",
+                  "relative z-0 flex items-center gap-4 px-3 py-1 uppercase transition-colors hover:text-yellow-400",
                   "before:absolute before:inset-0 before:-z-10 before:h-full before:w-0 before:bg-stone-500 before:transition-all before:duration-300 hover:before:w-full",
                 )}
               >
@@ -84,7 +84,7 @@ export const Navbar: React.FC = () => {
                   key={name}
                   href={href}
                   className={cn(
-                    "relative z-0 flex min-w-32 items-center justify-center gap-4 px-3 py-1 text-center text-2xl uppercase transition-colors hover:text-red-400",
+                    "relative z-0 flex min-w-32 items-center justify-center gap-4 px-3 py-1 text-center text-2xl uppercase transition-colors hover:text-yellow-400",
                     "before:absolute before:inset-0 before:-z-10 before:h-full before:w-0 before:bg-stone-500 before:transition-all before:duration-300 hover:before:w-full",
                   )}
                 >

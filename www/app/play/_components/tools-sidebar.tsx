@@ -24,7 +24,7 @@ export const ToolsSidebar: React.FC<
           key={tool.label}
           onClick={() => onSelectTool(tool)}
           className={cn(
-            "flex cursor-pointer items-center gap-2 rounded-md border bg-muted px-4 py-2 font-bitmap text-3xl ring-red-500 ring-offset-2 ring-offset-background transition hover:shadow-md",
+            "flex cursor-pointer items-center gap-2 rounded-md border bg-muted px-4 py-2 font-bitmap text-3xl ring-yellow-500 ring-offset-2 ring-offset-background transition hover:shadow-md",
             selectedTool?.id === tool.id && "ring-2",
           )}
         >

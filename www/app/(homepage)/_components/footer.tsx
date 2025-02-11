@@ -8,7 +8,7 @@ export const FooterSection: React.FC = () => {
   return (
     <section className="flex h-dvh snap-center flex-col bg-[url('/images/bg2.png')] bg-cover bg-center bg-no-repeat">
       <div className="container flex w-full grow flex-col gap-6 px-10 pt-24">
-        <h1 className="border-b-2 border-b-red-500 pb-2 font-fixedsys text-3xl text-red-500 [text-shadow:_2px_4px_0_#000] md:text-4xl">
+        <h1 className="border-b-2 border-b-yellow-500 pb-2 font-fixedsys text-3xl text-yellow-500 [text-shadow:_2px_4px_0_#000] md:text-4xl">
           Our Mission
         </h1>
 
@@ -64,7 +64,7 @@ export const FooterSection: React.FC = () => {
               href={siteConfig.links.discord.url}
               title="Discord"
               target="_blank"
-              className="text-red-500 transition-colors hover:text-rose-600 hover:drop-shadow-md"
+              className="text-yellow-500 transition-colors hover:text-yellow-600 hover:drop-shadow-md"
             >
               <Icons.DiscordIcon size={36} />
             </a>
@@ -72,7 +72,7 @@ export const FooterSection: React.FC = () => {
               href={siteConfig.links.x.url}
               title="Twitter"
               target="_blank"
-              className="text-red-500 transition-colors hover:text-rose-600 hover:drop-shadow-md"
+              className="text-yellow-500 transition-colors hover:text-yellow-600 hover:drop-shadow-md"
             >
               <Icons.TwitterIcon size={32} />
             </a>

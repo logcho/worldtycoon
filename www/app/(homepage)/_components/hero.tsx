@@ -19,7 +19,7 @@ export const HeroSection: React.FC = () => {
           Build Your Empire, Earn Real Crypto, Rule the World
         </p>
 
-        <p className="font-fixedsys text-3xl font-medium -tracking-wider text-red-600 [text-shadow:_2px_4px_0_#111] md:text-4xl">
+        <p className="font-fixedsys text-center text-3xl font-medium -tracking-wider text-yellow-600 [text-shadow:_2px_4px_0_#111] md:text-4xl">
           Join the blockchain revolution in city building!
         </p>
 
