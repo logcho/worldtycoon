@@ -36,10 +36,16 @@ export const BridgeTabs: React.FC = () => {
 
       <TabsContent value="deposit" className="space-y-4">
         <div className="space-y-2 rounded-xl bg-card/50 p-4 shadow-md">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-start">
             <p className="text-sm text-muted-foreground">From:</p>
             <div className="flex items-center gap-2">
-              <ConnectButton />
+              <ConnectButton
+                showBalance={{
+                  smallScreen: false,
+                  largeScreen: false,
+                }}
+                chainStatus="none"
+              />
             </div>
           </div>
 
@@ -62,10 +68,16 @@ export const BridgeTabs: React.FC = () => {
         <ArrowDownIcon />
 
         <div className="space-y-2 rounded-xl bg-card/50 p-4 shadow-md">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-start">
             <p className="text-sm text-muted-foreground">To:</p>
             <div className="flex items-center gap-1">
-              <ConnectButton />
+              <ConnectButton 
+                showBalance={{
+                  smallScreen: false,
+                  largeScreen: false,
+                }}
+                chainStatus="none"  
+              />
               <span className="font-bitmap text-muted-foreground">
                 @Cryptopolis
               </span>
@@ -84,11 +96,17 @@ export const BridgeTabs: React.FC = () => {
 
       <TabsContent value="withdraw" className="space-y-4">
         <div className="space-y-2 rounded-xl bg-card/50 p-4 shadow-md">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-start">
             <p className="text-sm text-muted-foreground">From:</p>
 
             <div className="flex items-center gap-1 [&_div]:truncate">
-              <ConnectButton />
+              <ConnectButton 
+                showBalance={{
+                  smallScreen: false,
+                  largeScreen: false,
+                }}
+                chainStatus="none"
+              />
               <span className="font-bitmap text-muted-foreground">
                 @Cryptopolis
               </span>
@@ -109,10 +127,16 @@ export const BridgeTabs: React.FC = () => {
         <ArrowDownIcon />
 
         <div className="space-y-2 rounded-lg bg-card/50 p-4 shadow-md">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-start">
             <p className="text-sm text-muted-foreground">To:</p>
             <div className="flex items-center gap-2">
-              <ConnectButton />
+              <ConnectButton 
+                showBalance={{
+                  smallScreen: false,
+                  largeScreen: false,
+                }}
+                chainStatus="none"
+              />
             </div>
           </div>
           <p className="text-sm text-muted-foreground">Balance: 0 SIM</p>
