@@ -49,7 +49,7 @@ export const Navbar: React.FC = () => {
           <Button
             size="icon"
             onClick={() => setIsOpen(!isOpen)}
-            className="rounded-none p-1 md:hidden"
+            className="rounded-none p-1 md:hidden bg-[#111] text-white hover:bg-[#222]"
           >
             {isOpen ?
               <X className="size-8" />
