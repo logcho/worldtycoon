@@ -23,8 +23,8 @@ export const Navbar: React.FC = () => {
   return (
     <header
       className={cn(
-        "sticky inset-0 z-50 h-14 bg-[#111] p-4",
-        pathname === "/" && "fixed h-20",
+        "sticky inset-0 z-50 h-20 bg-[#111] p-4",
+        // pathname === "/" && "fixed h-20",
       )}
     >
       <div className="flex h-full items-center justify-between">
