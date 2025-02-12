@@ -10,9 +10,9 @@ const PlayLayout: React.FCC = ({ children }) => {
   const router = useRouter();
   const { isDisconnected } = useAccount();
 
-  // if (isDisconnected) {
-  //   router.replace("/");
-  // }
+  if (isDisconnected) {
+    router.replace("/");
+  }
 
   return children;
 };

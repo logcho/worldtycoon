@@ -6,7 +6,7 @@ import { useAccount } from "wagmi";
 
 import type * as React from "react";
 
-const BridgeLayout: React.FCC = ({ children }) => {
+const CreateLayout: React.FCC = ({ children }) => {
   const router = useRouter();
   const { isDisconnected } = useAccount();
 
@@ -17,4 +17,4 @@ const BridgeLayout: React.FCC = ({ children }) => {
   return children;
 };
 
-export default BridgeLayout;
+export default CreateLayout;
