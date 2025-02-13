@@ -9,13 +9,16 @@
 #include "engine/micropolis.h"
 
 #include "util.h"
-#include "uint256_t/uint256_t.h"
+#include "wallet.h"
 
-std::string const ERC20_PORTAL_ADDRESS = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
-std::string const TOKEN = "0x92c6bca388e99d6b304f1af3c3cd749ff0b591e2";
+const std::string ERC20_PORTAL_ADDRESS = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
+const std::string TOKEN = "0x92c6bca388e99d6b304f1af3c3cd749ff0b591e2";
 
-uint256_t gameBalance;
-uint256_t peopleBalance;
+const std::string GAME_WALLET = "0x0000000000000000000000000000000000000001";
+const std::string PEOPLE_WALLET = "0x0000000000000000000000000000000000000002";
+
+Wallet* walletHandler = new Wallet();
+std::unordered_map<std::string, Micropolis*> games;
 
 bool isERC20Deposit(const std::string& address) {
     return address == ERC20_PORTAL_ADDRESS;
@@ -35,11 +38,14 @@ void createNotice(httplib::Client &cli, const std::string &payload) {
     std::cout << "Received notice status " << r.value().status << std::endl;
 }
 
-uint256_t ERC20DepositAmount(const std::string& payload) {    
-    return uint256_t(slice(payload, 41, 73).substr(2), 16);
+picojson::object parseERC20Deposit(const std::string& payload) {    
+    picojson::object obj;
+    obj["success"] = picojson::value(hexToBool(slice(payload, 0, 1)));
+    obj["token"] = picojson::value(slice(payload, 1, 21));
+    obj["sender"] = picojson::value(slice(payload, 21, 41));
+    obj["amount"] = picojson::value(slice(payload, 41, 73));
+    return obj;
 }
-
-std::unordered_map<std::string, Micropolis*> games;
 
 std::string handle_advance(httplib::Client &cli, picojson::value data)
 {
@@ -50,11 +56,12 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
     std::cout << "Payload: " << payload << std::endl;
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
     if(isERC20Deposit(address)){
-        std::cout << "Previous game balance: " << gameBalance << std::endl;        
-        uint256_t depositAmount = ERC20DepositAmount(payload);
-        gameBalance += depositAmount;
-        std::cout << depositAmount << " transeferred to game balance" << std::endl;
-        std::cout << "Game balance after deposit: " << gameBalance << std::endl;     
+        picojson::object deposit = parseERC20Deposit(payload);
+        std::string user = deposit["sender"].to_str();;
+        
+        // gameBalance += depositAmount;
+        walletHandler->depositERC20(user, deposit["value"].to_str().substr(2));
+        std::cout << "Game balance after deposit: " << walletHandler->getERC20Balance(user) << std::endl;     
         return "accept";
     }   
     else{
