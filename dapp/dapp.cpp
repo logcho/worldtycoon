@@ -61,12 +61,13 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
         
         // gameBalance += depositAmount;
         walletHandler->depositERC20(user, deposit["value"].to_str().substr(2));
-        std::cout << "Game balance after deposit: " << walletHandler->getERC20Balance(user) << std::endl;     
+        std::cout << "User " << user << " balance after deposit: " << walletHandler->getERC20Balance(user) << std::endl;     
         return "accept";
     }   
     else{
         picojson::value parsed_payload;
-        std::string err = picojson::parse(parsed_payload, payload);
+        std::string decoded_payload = hexToString(payload);
+        std::string err = picojson::parse(parsed_payload, decoded_payload);
         if (!err.empty()) return "reject";
         std::string method = parsed_payload.get("method").to_str();
         std::cout << "method: " << method << std::endl;
