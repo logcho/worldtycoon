@@ -13,15 +13,41 @@ import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { cn } from "~/lib/utils";
 
+import { useInspectBalance } from "~/hooks/game";
+import {
+  useReadErc20BalanceOf,
+  useReadErc20Allowance,
+  useWriteErc20Approve,
+} from "~/hooks/wagmi";
+import { formatUnits } from 'viem'
+
+
 export const BridgeTabs: React.FC = () => {
   const router = useRouter();
   const { address } = useAccount();
 
-  const [tab, setTab] = useQueryState("tab", { defaultValue: "deposit" });
-
   if (!address) {
     router.replace("/");
   }
+
+  const [tab, setTab] = useQueryState("tab", { defaultValue: "deposit" });
+  const { balance, isLoading, error } = useInspectBalance(address);
+  // console.log(balance);
+
+  const token = "0x92C6bcA388E99d6B304f1Af3c3Cd749Ff0b591e2";
+  const erc20PortalAddress = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db"
+  const { data: l1Balance, isLoading: l1BalanceLoading } = useReadErc20BalanceOf({
+    address: token,
+    args: [address],
+    watch: true,
+  });
+  const { data: allowance, isLoading: allowanceLoading } = useReadErc20Allowance({
+    address: token,
+    args: [address, erc20PortalAddress],
+    watch: true,
+  });
+
+
 
   return (
     <Tabs
@@ -60,8 +86,8 @@ export const BridgeTabs: React.FC = () => {
           />
 
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Balance: 0 SIM</span>
-            <span className="text-muted-foreground">Allowance: 0 SIM</span>
+            <span className="text-muted-foreground">Balance: {l1BalanceLoading ? "Loading..." : `${formatUnits(l1Balance ?? 0n, 18)} SIM`}</span>
+            <span className="text-muted-foreground">Allowance: {allowanceLoading ? "Loading..." : `${allowance} SIM`}</span>
           </div>
         </div>
 
@@ -83,7 +109,7 @@ export const BridgeTabs: React.FC = () => {
               </span>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">Balance: 0 SIM</p>
+          <p className="text-sm text-muted-foreground">Balance: {isLoading ? "Loading..." : error ? "Error" : `${balance} SIM`}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

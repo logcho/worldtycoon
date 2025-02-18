@@ -13,12 +13,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { WagmiProvider } from "wagmi";
 import {
-  arbitrum,
-  base,
+  anvil,
   mainnet,
-  optimism,
-  polygon,
   sepolia,
+  arbitrum,
+  arbitrumGoerli,
+  optimismGoerli,
+  optimism,
+  base,
+  baseSepolia,
 } from "wagmi/chains";
 
 import { env } from "~/lib/env";
@@ -33,11 +36,15 @@ export const Providers: React.FCC<{
     appName: RAINBOW_APP_NAME,
     projectId: RAINBOW_PROJECT_ID,
     chains: [
+      anvil,
       mainnet,
-      polygon,
-      optimism,
+      sepolia,
       arbitrum,
+      arbitrumGoerli,
+      optimismGoerli,
+      optimism,
       base,
+      baseSepolia,
       ...(env.NEXT_PUBLIC_ENABLE_TESTNETS === "true" ? [sepolia] : []),
     ],
     ssr: true,
