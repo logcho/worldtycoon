@@ -79,6 +79,8 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             games[address] = new Micropolis();
             games[address]->generateMap();
             std::cout << "City generated for" << address << std::endl;
+            walletHandler->transferERC20(address, GAME_WALLET, "0x00000000000000000000000000000000000000000000043c33c1937564800000");
+            // walletHandler->transferERC20(address, GAME_WALLET, 20000000000000000000000);
             return "accept";
         }
         else if(method == "doTool"){

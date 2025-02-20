@@ -31,6 +31,20 @@ class Wallet {
             auto it = erc20.find(address);
             return (it != erc20.end()) ? it->second : uint256_t(0); // Return balance or 0 if not found 
         }
+
+        bool transferERC20(const std::string& sender, const std::string& recipient, uint256_t amount) {
+            if (erc20[sender] < amount) {
+                return false; // Not enough balance
+            }
+            erc20[sender] -= amount;
+            erc20[recipient] += amount;
+            return true; // Transfer successful
+        }
+
+        bool transferERC20(const std::string& sender, const std::string& recipient, const std::string& hexAmount) {
+            uint256_t amount(hexAmount.substr(2), 16);  // Convert from hex string (remove "0x")
+            return transferERC20(sender, recipient, amount);
+        }
 };
 
 #endif // WALLET_H
