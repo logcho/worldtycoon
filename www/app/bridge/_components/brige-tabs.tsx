@@ -18,8 +18,9 @@ import {
   useReadErc20BalanceOf,
   useReadErc20Allowance,
   useWriteErc20Approve,
+  useWriteErc20PortalDepositErc20Tokens,
 } from "~/hooks/wagmi";
-import { formatUnits, parseUnits, Address } from 'viem'
+import { formatUnits, parseUnits, Address, stringToHex } from 'viem'
 import { useState } from "react";
 
 
@@ -27,9 +28,10 @@ export const BridgeTabs: React.FC = () => {
   const symbol = "SIM"; // XXX: should actually come from querying token metadata
   const decimals = 18; // XXX: should actually come from querying token metadata
 
-  const token = "0x92C6bcA388E99d6B304f1Af3c3Cd749Ff0b591e2";
+  const tokenAddress = "0x92C6bcA388E99d6B304f1Af3c3Cd749Ff0b591e2";
   const erc20PortalAddress = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
-  
+  const dAppAddress = "0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e";
+
   const router = useRouter();
   const { address } = useAccount();
 
@@ -42,18 +44,25 @@ export const BridgeTabs: React.FC = () => {
   // console.log(balance);
 
   const { data: l1Balance, isLoading: l1BalanceLoading } = useReadErc20BalanceOf({
-    address: token,
+    address: tokenAddress,
     args: [address],
     watch: true,
   });
   const { data: allowance, isLoading: allowanceLoading} = useReadErc20Allowance({
-    address: token,
+    address: tokenAddress,
     args: [address, erc20PortalAddress],
     watch: true,
   });
   
   const [amount, setAmount] = useState<bigint>(0n);
+
   const {  writeContractAsync: approveToken } = useWriteErc20Approve();
+  const {
+    isPending,
+    isSuccess,
+    writeContractAsync: depositToken,
+  } = useWriteErc20PortalDepositErc20Tokens();
+
   const approve = async (address: Address, amount: string) => {
     try {
       await approveToken({
@@ -66,6 +75,21 @@ export const BridgeTabs: React.FC = () => {
       throw error;
     }
   };
+  
+  const deposit = async (amount: string) => {
+    try {
+      const data = stringToHex(`Deposited (${amount}).`);
+      await depositToken({
+        args: [tokenAddress, dAppAddress,  parseUnits(amount, decimals), data],
+      });
+      console.log("ERC20 Deposit successful");
+    } catch (error) {
+      console.error("Error in depositting ERC20:", error);
+      throw error;
+    }
+  };
+
+
 
   const canApprove =
     l1Balance != undefined &&
@@ -146,21 +170,22 @@ export const BridgeTabs: React.FC = () => {
               </span>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">Balance: {isLoading ? "Loading..." : error ? "Error" : `${balance} SIM`}</p>
+          <p className="text-sm text-muted-foreground">Balance: {isLoading ? "Loading..." : error ? "Error" : `${formatUnits(balance ?? 0n, decimals)} SIM`}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <Button 
             variant="outline" 
             className="shadow-md"
-            onClick={() => approve(token, amount)}
             disabled={!canApprove}
+            onClick={() => approve(tokenAddress, amount)}
           >
             Approve
           </Button>
           <Button 
             className="shadow-md"
             disabled={!canDeposit}
+            onClick={() => deposit(amount)}
           >
             Deposit
           </Button>

@@ -8,8 +8,12 @@ import { useRouter } from "next/navigation";
 
 import { useInspectBalance } from "~/hooks/game";
 import { useAccount } from "wagmi";
+import { formatUnits } from "viem";
 
 const CreatePage: React.FC = () => {
+  const symbol = "SIM"; // XXX: should actually come from querying token metadata
+  const decimals = 18; // XXX: should actually come from querying token metadata
+
   const router = useRouter();
   const { address } = useAccount();
 
@@ -24,7 +28,7 @@ const CreatePage: React.FC = () => {
     <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center bg-[url('/images/bg.png')] bg-cover bg-center bg-no-repeat">
       <div className="w-full max-w-xl space-y-4 rounded-2xl bg-card/40 p-6 font-fixedsys shadow-lg backdrop-blur">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl">Balance: {isLoading ? "Loading..." : error ? "Error" : `${balance} SIM`}</h2>
+          <h2 className="text-xl">Balance: {isLoading ? "Loading..." : error ? "Error" : `${formatUnits(balance ?? 0n, decimals)} ${symbol}`}</h2>
           <ConnectButton
             showBalance={{
               smallScreen: false,
