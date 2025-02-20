@@ -52,15 +52,18 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
     std::string address = data.get("metadata").get("msg_sender").to_str();
     std::string payload = data.get("payload").to_str();
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
-    std::cout << "address: " << address << std::endl;
+    std::cout << "Address: " << address << std::endl;
     std::cout << "Payload: " << payload << std::endl;
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
     if(isERC20Deposit(address)){
         picojson::object deposit = parseERC20Deposit(payload);
-        std::string user = deposit["sender"].to_str();;
+        std::string user = deposit["sender"].to_str();
+        std::cout << "Success: " << deposit["success"].to_str() << std::endl;
+        std::cout << "Token: " << deposit["token"].to_str() << std::endl;
+        std::cout << "Sender: " << deposit["sender"].to_str() << std::endl;
+        std::cout << "Amount: " << deposit["amount"].to_str() << std::endl;
         
-        // gameBalance += depositAmount;
-        walletHandler->depositERC20(user, deposit["value"].to_str().substr(2));
+        walletHandler->depositERC20(user, deposit["amount"].to_str());
         std::cout << "User " << user << " balance after deposit: " << walletHandler->getERC20Balance(user) << std::endl;     
         return "accept";
     }   
@@ -99,6 +102,24 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
     std::cout << "Payload: " << payload << std::endl;
     std::cout << "Converted Payload: " << hexToString(payload) << std::endl;
+    picojson::value parsed_payload;
+    std::string decoded_payload = hexToString(payload);
+    std::string err = picojson::parse(parsed_payload, decoded_payload);
+    if (!err.empty()) return "reject";
+    else{
+        std::string method = parsed_payload.get("method").to_str();
+        if(method == "balanceOf"){
+            std::string address = parsed_payload.get("address").to_str();
+            std::transform(address.begin(), address.end(), address.begin(), ::tolower);
+            uint256_t balance = walletHandler->getERC20Balance(address);
+            std::cout << "Balance of " << address << " is " << balance << std::endl;
+
+            std::ostringstream hexStream;
+            hexStream << "0x" << std::setw(64) << std::setfill('0') << std::hex << balance;
+            createReport(cli, hexStream.str());
+        }
+
+    }
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
     
     return "accept";

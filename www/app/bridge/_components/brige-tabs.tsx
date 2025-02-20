@@ -19,10 +19,17 @@ import {
   useReadErc20Allowance,
   useWriteErc20Approve,
 } from "~/hooks/wagmi";
-import { formatUnits } from 'viem'
+import { formatUnits, parseUnits, Address } from 'viem'
+import { useState } from "react";
 
 
 export const BridgeTabs: React.FC = () => {
+  const symbol = "SIM"; // XXX: should actually come from querying token metadata
+  const decimals = 18; // XXX: should actually come from querying token metadata
+
+  const token = "0x92C6bcA388E99d6B304f1Af3c3Cd749Ff0b591e2";
+  const erc20PortalAddress = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
+  
   const router = useRouter();
   const { address } = useAccount();
 
@@ -34,19 +41,47 @@ export const BridgeTabs: React.FC = () => {
   const { balance, isLoading, error } = useInspectBalance(address);
   // console.log(balance);
 
-  const token = "0x92C6bcA388E99d6B304f1Af3c3Cd749Ff0b591e2";
-  const erc20PortalAddress = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db"
   const { data: l1Balance, isLoading: l1BalanceLoading } = useReadErc20BalanceOf({
     address: token,
     args: [address],
     watch: true,
   });
-  const { data: allowance, isLoading: allowanceLoading } = useReadErc20Allowance({
+  const { data: allowance, isLoading: allowanceLoading} = useReadErc20Allowance({
     address: token,
     args: [address, erc20PortalAddress],
     watch: true,
   });
+  
+  const [amount, setAmount] = useState<bigint>(0n);
+  const {  writeContractAsync: approveToken } = useWriteErc20Approve();
+  const approve = async (address: Address, amount: string) => {
+    try {
+      await approveToken({
+        address,
+        args: [erc20PortalAddress, parseUnits(amount, decimals)],
+      });
+      console.log("ERC20 Approval successful");
+    } catch (error) {
+      console.error("Error in approving ERC20:", error);
+      throw error;
+    }
+  };
 
+  const canApprove =
+    l1Balance != undefined &&
+    allowance !== undefined &&
+    amount > 0 &&
+    allowance < parseUnits(amount.toString(), decimals)
+    parseUnits(amount.toString(), decimals) <= (l1Balance ?? 0n);
+
+  const canDeposit = 
+    l1Balance != undefined &&
+    allowance != undefined &&
+    amount > 0 &&
+    parseUnits(amount.toString(), decimals) <= allowance &&
+    parseUnits(amount.toString(), decimals) <= l1Balance;
+
+  
 
 
   return (
@@ -77,6 +112,8 @@ export const BridgeTabs: React.FC = () => {
 
           <Input
             type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
             placeholder="0"
             className={cn(
               "w-full bg-foreground/10 text-2xl outline-none",
@@ -86,8 +123,8 @@ export const BridgeTabs: React.FC = () => {
           />
 
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Balance: {l1BalanceLoading ? "Loading..." : `${formatUnits(l1Balance ?? 0n, 18)} SIM`}</span>
-            <span className="text-muted-foreground">Allowance: {allowanceLoading ? "Loading..." : `${allowance} SIM`}</span>
+            <span className="text-muted-foreground">Balance: {l1BalanceLoading ? "Loading..." : `${formatUnits(l1Balance ?? 0n, decimals)} ${symbol}`}</span>
+            <span className="text-muted-foreground">Allowance: {allowanceLoading ? "Loading..." : `${formatUnits(allowance ?? 0n, decimals)} ${symbol}`}</span>
           </div>
         </div>
 
@@ -113,10 +150,20 @@ export const BridgeTabs: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Button variant="outline" className="shadow-md">
+          <Button 
+            variant="outline" 
+            className="shadow-md"
+            onClick={() => approve(token, amount)}
+            disabled={!canApprove}
+          >
             Approve
           </Button>
-          <Button className="shadow-md">Deposit</Button>
+          <Button 
+            className="shadow-md"
+            disabled={!canDeposit}
+          >
+            Deposit
+          </Button>
         </div>
       </TabsContent>
 
