@@ -79,8 +79,14 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             games[address] = new Micropolis();
             games[address]->generateMap();
             std::cout << "City generated for" << address << std::endl;
-            walletHandler->transferERC20(address, GAME_WALLET, "0x00000000000000000000000000000000000000000000043c33c1937564800000");
-            // walletHandler->transferERC20(address, GAME_WALLET, 20000000000000000000000);
+            std::string hexAmount = "0x00000000000000000000000000000000000000000000043c33c1937564800000"; // 20000 18n
+            if (walletHandler->transferERC20(address, GAME_WALLET, hexAmount)) {
+                std::cout << "Transfer successful!" << std::endl;
+                std::cout << "Balance of " << address << " is " << walletHandler->getERC20Balance(address) << std::endl;
+            } else {
+                std::cout << "Transfer failed: Insufficient funds!" << std::endl;
+                std::cout << "Balance of " << address << " is " << walletHandler->getERC20Balance(address) << std::endl;
+            }
             return "accept";
         }
         else if(method == "doTool"){
@@ -120,10 +126,14 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
             hexStream << "0x" << std::setw(64) << std::setfill('0') << std::hex << balance;
             createReport(cli, hexStream.str());
         }
-
+        else if(method == "getMap"){
+            std::string address = parsed_payload.get("address").to_str();
+            std::transform(address.begin(), address.end(), address.begin(), ::tolower);
+            if (games.find(address) != games.end()) return "reject";
+            createReport(cli, vectorToHexUint16(convertMap(games[address]->map[0], WORLD_W, WORLD_H)));
+        }
     }
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
-    
     return "accept";
 }
 

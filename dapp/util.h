@@ -7,6 +7,12 @@
 #include <iomanip>
 #include <stdexcept>
 
+std::vector<uint16_t> convertMap(unsigned short* data, int width, int height) {
+    size_t size = width * height;
+    std::vector<uint16_t> mapArray(data, data + size);
+    return mapArray;
+}
+
 std::string slice(const std::string& hexInput, size_t start, size_t end) {
     if (hexInput.substr(0, 2) != "0x") {
         throw std::invalid_argument("Invalid hex input: Missing 0x prefix");
