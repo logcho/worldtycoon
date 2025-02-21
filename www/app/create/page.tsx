@@ -8,11 +8,16 @@ import { useRouter } from "next/navigation";
 
 import { useInspectBalance } from "~/hooks/game";
 import { useAccount } from "wagmi";
-import { formatUnits } from "viem";
+import { formatUnits, parseUnits, stringToHex } from "viem";
+import { useWriteInputBoxAddInput } from "~/hooks/wagmi";
 
 const CreatePage: React.FC = () => {
   const symbol = "SIM"; // XXX: should actually come from querying token metadata
   const decimals = 18; // XXX: should actually come from querying token metadata
+  
+  const dAppAddress = `0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e`; // Default address for running locally change upon deployment
+
+  const amount = "20000";
 
   const router = useRouter();
   const { address } = useAccount();
@@ -23,6 +28,20 @@ const CreatePage: React.FC = () => {
 
   const { balance, isLoading, error } = useInspectBalance(address);
 
+  const { isPending, isSuccess, writeContractAsync } = useWriteInputBoxAddInput();
+
+  const create = async () => {
+    writeContractAsync({
+      args: [
+        dAppAddress,
+        stringToHex(
+          `{"method":"start"}`,
+        ),
+      ],
+    })
+  }
+
+  const canCreate = balance != undefined && balance >= parseUnits(amount.toString(), decimals);
 
   return (
     <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center bg-[url('/images/bg.png')] bg-cover bg-center bg-no-repeat">
@@ -45,7 +64,12 @@ const CreatePage: React.FC = () => {
           </p>
         </div>
 
-        <Button className="w-full shadow-md" size="lg">
+        <Button 
+          className="w-full shadow-md" 
+          size="lg"
+          disabled={!canCreate}
+          onClick={create}
+        >
           Create City
         </Button>
       </div>

@@ -7,7 +7,8 @@ import { useAccount } from "wagmi";
 import type { Tool } from "~/config/tools";
 
 import { HEIGHT, WIDTH } from "~/config/constants";
-import { useInspect } from "~/hooks/use-inspect";
+// import { useInspect } from "~/hooks/use-inspect";
+import { useInspectMap } from "~/hooks/game";
 import { cn } from "~/lib/utils";
 
 import { Map } from "./map";
@@ -31,18 +32,11 @@ export const StageArea: React.FC<
   const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
   const [coordinates, setCoordinates] = React.useState({ x: 0, y: 0 });
 
-  // if (!address) {
-  //   router.replace("/");
-  // }
+  if (!address) {
+    router.replace("/");
+  }
 
-  const { data } = useInspect(
-    JSON.stringify({
-      method: "getEngine",
-      user: address,
-    }),
-  );
-
-  const reports = data?.reports ?? [];
+  const { map, isLoading, error } = useInspectMap(address);
 
   // Center the stage initially
   React.useEffect(() => {
@@ -161,7 +155,7 @@ export const StageArea: React.FC<
         }}
       >
         <Map
-          value={reports[0]?.payload}
+          value={map}
           scale={scale}
           position={position}
           selectedTool={selectedTool}

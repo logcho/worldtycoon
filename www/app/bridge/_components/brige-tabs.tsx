@@ -30,7 +30,7 @@ export const BridgeTabs: React.FC = () => {
 
   const tokenAddress = "0x92C6bcA388E99d6B304f1Af3c3Cd749Ff0b591e2";
   const erc20PortalAddress = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
-  const dAppAddress = "0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e";
+  const dAppAddress = `0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e`; // Default address for running locally change upon deployment
 
   const router = useRouter();
   const { address } = useAccount();

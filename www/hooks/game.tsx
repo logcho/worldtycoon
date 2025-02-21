@@ -24,3 +24,18 @@ export const useInspectBalance = (address: Address) => {
 
     return { balance, isLoading, error };
 };
+
+export const useInspectMap = (address: Address) => {
+    // Generate the hexified key
+    const key = (
+        JSON.stringify({ method: "getMap", address })
+    );
+
+    const { data, isLoading, error } = useInspect(key);
+
+    // Extract the map from the response
+    const map = data?.reports?.[0]?.payload ? data.reports[0].payload : undefined;
+
+    return { map, isLoading, error };
+};
+

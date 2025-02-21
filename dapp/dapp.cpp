@@ -129,7 +129,7 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
         else if(method == "getMap"){
             std::string address = parsed_payload.get("address").to_str();
             std::transform(address.begin(), address.end(), address.begin(), ::tolower);
-            if (games.find(address) != games.end()) return "reject";
+            if (games.find(address) == games.end()) return "reject";
             createReport(cli, vectorToHexUint16(convertMap(games[address]->map[0], WORLD_W, WORLD_H)));
         }
     }
