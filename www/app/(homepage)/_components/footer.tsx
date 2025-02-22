@@ -19,7 +19,7 @@ export const FooterSection: React.FC = () => {
             borderImage: "url('/images/border.png') 16 stretch",
           }}
         >
-          <div className="font-fixedsys text-lg text-gray-300">
+          <div className="max-h-[30rem] overflow-y-auto font-fixedsys text-sm text-gray-300 md:text-lg">
             World Tycoon represents a revolutionary fusion of traditional
             city-building gameplay with blockchain technology, creating an
             ecosystem where your strategic decisions have real-world value.{" "}
