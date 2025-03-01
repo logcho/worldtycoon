@@ -4,6 +4,7 @@ export type Tool = {
   emoji: string;
   cost: number;
   size: number;
+  num: number;
 };
 
 export const TOOLS: Tool[] = [
@@ -13,6 +14,7 @@ export const TOOLS: Tool[] = [
     emoji: "🏚️",
     cost: 100,
     size: 3,
+    num: 0,
   },
   {
     id: "commercial",
@@ -20,6 +22,7 @@ export const TOOLS: Tool[] = [
     emoji: "🏢",
     cost: 100,
     size: 3,
+    num: 0,
   },
   {
     id: "industrial",
@@ -27,6 +30,7 @@ export const TOOLS: Tool[] = [
     emoji: "🏭",
     cost: 100,
     size: 3,
+    num: 0,
   },
   {
     id: "fire-station",
@@ -34,6 +38,7 @@ export const TOOLS: Tool[] = [
     emoji: "🚒",
     cost: 500,
     size: 3,
+    num: 0,
   },
   {
     id: "police-station",
@@ -41,6 +46,7 @@ export const TOOLS: Tool[] = [
     emoji: "🚓",
     cost: 500,
     size: 3,
+    num: 0,
   },
   {
     id: "inspect",
@@ -48,6 +54,7 @@ export const TOOLS: Tool[] = [
     emoji: "🔎",
     cost: 0,
     size: 1,
+    num: 0,
   },
   {
     id: "wire",
@@ -55,6 +62,7 @@ export const TOOLS: Tool[] = [
     emoji: "🔌",
     cost: 5,
     size: 1,
+    num: 0,
   },
   {
     id: "bulldozer",
@@ -62,6 +70,7 @@ export const TOOLS: Tool[] = [
     emoji: "🚜",
     cost: 1,
     size: 1,
+    num: 0,
   },
   {
     id: "railroad",
@@ -69,6 +78,7 @@ export const TOOLS: Tool[] = [
     emoji: "🚂",
     cost: 20,
     size: 1,
+    num: 0,
   },
   {
     id: "road",
@@ -76,6 +86,7 @@ export const TOOLS: Tool[] = [
     emoji: "🚗",
     cost: 10,
     size: 1,
+    num: 0,
   },
   {
     id: "stadium",
@@ -83,6 +94,7 @@ export const TOOLS: Tool[] = [
     emoji: "🏟️",
     cost: 5000,
     size: 4,
+    num: 0,
   },
   {
     id: "park",
@@ -90,6 +102,7 @@ export const TOOLS: Tool[] = [
     emoji: "🌴",
     cost: 10,
     size: 1,
+    num: 0,
   },
   {
     id: "seaport",
@@ -97,6 +110,7 @@ export const TOOLS: Tool[] = [
     emoji: "🚢",
     cost: 3000,
     size: 4,
+    num: 0,
   },
   {
     id: "coal-power",
@@ -104,6 +118,7 @@ export const TOOLS: Tool[] = [
     emoji: "🔋",
     cost: 3000,
     size: 4,
+    num: 0,
   },
   {
     id: "nuclear-power",
@@ -111,6 +126,7 @@ export const TOOLS: Tool[] = [
     emoji: "☢️",
     cost: 5000,
     size: 4,
+    num: 0,
   },
   {
     id: "airport",
@@ -118,6 +134,7 @@ export const TOOLS: Tool[] = [
     emoji: "✈️",
     cost: 10000,
     size: 6,
+    num: 0,
   },
   {
     id: "network",
@@ -125,6 +142,7 @@ export const TOOLS: Tool[] = [
     emoji: "🚜",
     cost: 100,
     size: 1,
+    num: 0,
   },
   {
     id: "water",
@@ -132,6 +150,7 @@ export const TOOLS: Tool[] = [
     emoji: "💧",
     cost: 0,
     size: 1,
+    num: 0,
   },
   {
     id: "land",
@@ -139,6 +158,7 @@ export const TOOLS: Tool[] = [
     emoji: "⛰️",
     cost: 0,
     size: 1,
+    num: 0,
   },
   {
     id: "forest",
@@ -146,5 +166,6 @@ export const TOOLS: Tool[] = [
     emoji: "🌳",
     cost: 0,
     size: 1,
+    num: 0,
   },
 ];

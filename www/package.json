@@ -14,10 +14,16 @@
     "fmt:check": "prettier --check \"**/*.{ts,tsx,mdx,json}\" --cache",
     "clean": "rm -rf .next node_modules",
     "cleani": "rm -rf .next node_modules && bun i",
-    "ui": "bunx shadcn@latest"
+    "ui": "bunx shadcn@latest",
+    "codegen": "run-p codegen:*",
+    "codegen:graphql": "graphql-codegen",
+    "codegen:wagmi": "wagmi generate"
   },
   "dependencies": {
+    "@apollo/client": "^3.13.1",
     "@cartesi/rollups": "^1.4.3",
+    "@graphql-codegen/cli": "^5.0.5",
+    "@graphql-typed-document-node/core": "^3.2.0",
     "@pixi/react": "7",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-slot": "^1.1.1",

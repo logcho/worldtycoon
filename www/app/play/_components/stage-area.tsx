@@ -8,7 +8,7 @@ import type { Tool } from "~/config/tools";
 
 import { HEIGHT, WIDTH } from "~/config/constants";
 // import { useInspect } from "~/hooks/use-inspect";
-import { useInspectMap } from "~/hooks/game";
+import { useInspectMap, useRollupsServer } from "~/hooks/game";
 import { cn } from "~/lib/utils";
 
 import { Map } from "./map";

@@ -48,7 +48,7 @@ export const BridgeTabs: React.FC = () => {
     args: [address],
     watch: true,
   });
-  const { data: allowance, isLoading: allowanceLoading} = useReadErc20Allowance({
+  const { data: allowance, isLoading: allowanceLoading } = useReadErc20Allowance({
     address: tokenAddress,
     args: [address, erc20PortalAddress],
     watch: true,
@@ -95,7 +95,7 @@ export const BridgeTabs: React.FC = () => {
     l1Balance != undefined &&
     allowance !== undefined &&
     amount > 0 &&
-    allowance < parseUnits(amount.toString(), decimals)
+    allowance < parseUnits(amount.toString(), decimals) &&
     parseUnits(amount.toString(), decimals) <= (l1Balance ?? 0n);
 
   const canDeposit = 
