@@ -53,11 +53,11 @@ export const Map: React.FC<{
   value?: Hex;
   scale: number;
   position: { x: number; y: number };
+  coordinates: { x: number; y: number };
   loading?: boolean;
   selectedTool?: Tool;
   onMouseMove?: (tile: Tile) => void;
-  onMouseClick?: (tile: Tile) => void;
-}> = ({ value, scale, position, selectedTool, onMouseMove }) => {
+}> = ({ value, scale, position, coordinates, selectedTool, onMouseMove }) => {
   const [spritesheet, setSpritesheet] = React.useState<Spritesheet | null>(
     null,
   );
@@ -109,6 +109,7 @@ export const Map: React.FC<{
   }, []);
 
   const handleTileClick = (x: number, y: number) => {
+    // @logcho here you can use coordinates
     if (selectedTool) {
       // Check if the new tool would overlap with any existing tools
       const wouldOverlap = placedSprites.some((sprite) =>

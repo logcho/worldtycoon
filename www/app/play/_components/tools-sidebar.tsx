@@ -14,7 +14,7 @@ export const ToolsSidebar: React.FC<
   return (
     <div
       className={cn(
-        "flex h-[calc(100dvh-3.5rem)] flex-col gap-2 overflow-y-scroll bg-muted/60 p-3",
+        "flex h-[calc(100dvh-5rem)] flex-col gap-2 overflow-y-scroll bg-muted/60 p-3",
         className,
       )}
       {...props}

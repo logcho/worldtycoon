@@ -7,16 +7,15 @@ import { useAccount } from "wagmi";
 import type { Tool } from "~/config/tools";
 
 import { HEIGHT, WIDTH } from "~/config/constants";
-// import { useInspect } from "~/hooks/use-inspect";
-import { useInspectMap, useRollupsServer } from "~/hooks/game";
+import { useInspectMap } from "~/hooks/game";
 import { cn } from "~/lib/utils";
 
 import { Map } from "./map";
 import { ToolOverlay } from "./tool-overlay";
 
-const MIN_ZOOM = 0.5;
-const MAX_ZOOM = 2;
-const ZOOM_STEP = 0.1;
+// const MIN_ZOOM = 0.5;
+// const MAX_ZOOM = 2;
+// const ZOOM_STEP = 0.1;
 
 export const StageArea: React.FC<
   React.HTMLAttributes<HTMLDivElement> & {
@@ -26,17 +25,17 @@ export const StageArea: React.FC<
   const router = useRouter();
   const { address } = useAccount();
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const [scale, setScale] = React.useState(1);
+  const [scale] = React.useState(1);
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = React.useState(false);
   const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
   const [coordinates, setCoordinates] = React.useState({ x: 0, y: 0 });
 
-  if (!address) {
-    router.replace("/");
-  }
+  // if (!address) {
+  //   router.replace("/");
+  // }
 
-  const { map, isLoading, error } = useInspectMap(address);
+  const { map } = useInspectMap(address!);
 
   // Center the stage initially
   React.useEffect(() => {
@@ -50,29 +49,29 @@ export const StageArea: React.FC<
   }, []);
 
   // Handle zoom with mouse wheel
-  const handleWheel = React.useCallback(
-    (e: WheelEvent) => {
-      e.preventDefault();
+  // const handleWheel = React.useCallback(
+  //   (e: WheelEvent) => {
+  //     e.preventDefault();
 
-      const container = containerRef.current;
-      if (!container) return;
+  //     const container = containerRef.current;
+  //     if (!container) return;
 
-      const rect = container.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left - position.x;
-      const mouseY = e.clientY - rect.top - position.y;
+  //     const rect = container.getBoundingClientRect();
+  //     const mouseX = e.clientX - rect.left - position.x;
+  //     const mouseY = e.clientY - rect.top - position.y;
 
-      const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
-      const newScale = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, scale + delta));
-      const scaleFactor = newScale / scale;
+  //     const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+  //     const newScale = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, scale + delta));
+  //     const scaleFactor = newScale / scale;
 
-      setScale(newScale);
-      setPosition({
-        x: position.x - mouseX * (scaleFactor - 1),
-        y: position.y - mouseY * (scaleFactor - 1),
-      });
-    },
-    [scale, position],
-  );
+  //     setScale(newScale);
+  //     setPosition({
+  //       x: position.x - mouseX * (scaleFactor - 1),
+  //       y: position.y - mouseY * (scaleFactor - 1),
+  //     });
+  //   },
+  //   [scale, position],
+  // );
 
   // Handle drag start
   const handleMouseDown = React.useCallback(
@@ -124,16 +123,16 @@ export const StageArea: React.FC<
     const container = containerRef.current;
     if (!container) return;
 
-    container.addEventListener("wheel", handleWheel, { passive: false });
+    // container.addEventListener("wheel", handleWheel, { passive: false });
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
 
     return () => {
-      container.removeEventListener("wheel", handleWheel);
+      // container.removeEventListener("wheel", handleWheel);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [handleWheel, handleMouseMove, handleMouseUp]);
+  }, [handleMouseMove, handleMouseUp]);
 
   return (
     <div
@@ -141,7 +140,7 @@ export const StageArea: React.FC<
       ref={containerRef}
       onMouseDown={handleMouseDown}
       className={cn(
-        "!h-[calc(100dvh-3.5rem)] cursor-grab select-none overflow-hidden",
+        "!h-[calc(100dvh-5rem)] cursor-grab select-none overflow-hidden",
         isDragging && "cursor-grabbing",
         className,
       )}
@@ -158,6 +157,7 @@ export const StageArea: React.FC<
           value={map}
           scale={scale}
           position={position}
+          coordinates={coordinates}
           selectedTool={selectedTool}
           onMouseMove={(tile) => setCoordinates({ x: tile.x, y: tile.y })}
         />

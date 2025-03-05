@@ -1,28 +1,28 @@
 "use client";
 
 import * as React from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ArrowDown } from "lucide-react";
 import { useQueryState } from "nuqs";
+import { formatUnits, parseUnits, stringToHex } from "viem";
 import { useAccount } from "wagmi";
+
+import type { Address } from "viem";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { cn } from "~/lib/utils";
-
 import { useInspectBalance } from "~/hooks/game";
 import {
-  useReadErc20BalanceOf,
   useReadErc20Allowance,
+  useReadErc20BalanceOf,
   useWriteErc20Approve,
   useWriteErc20PortalDepositErc20Tokens,
 } from "~/hooks/wagmi";
-import { formatUnits, parseUnits, Address, stringToHex } from 'viem'
-import { useState } from "react";
-
+import { cn } from "~/lib/utils";
 
 export const BridgeTabs: React.FC = () => {
   const symbol = "SIM"; // XXX: should actually come from querying token metadata
@@ -40,28 +40,25 @@ export const BridgeTabs: React.FC = () => {
   }
 
   const [tab, setTab] = useQueryState("tab", { defaultValue: "deposit" });
-  const { balance, isLoading, error } = useInspectBalance(address);
+  const { balance, isLoading, error } = useInspectBalance(address!);
   // console.log(balance);
 
-  const { data: l1Balance, isLoading: l1BalanceLoading } = useReadErc20BalanceOf({
-    address: tokenAddress,
-    args: [address],
-    watch: true,
-  });
-  const { data: allowance, isLoading: allowanceLoading } = useReadErc20Allowance({
-    address: tokenAddress,
-    args: [address, erc20PortalAddress],
-    watch: true,
-  });
-  
+  const { data: l1Balance, isLoading: l1BalanceLoading } =
+    useReadErc20BalanceOf({
+      address: tokenAddress,
+      args: [address!],
+    });
+  const { data: allowance, isLoading: allowanceLoading } =
+    useReadErc20Allowance({
+      address: tokenAddress,
+      args: [address!, erc20PortalAddress],
+    });
+
   const [amount, setAmount] = useState<bigint>(0n);
 
-  const {  writeContractAsync: approveToken } = useWriteErc20Approve();
-  const {
-    isPending,
-    isSuccess,
-    writeContractAsync: depositToken,
-  } = useWriteErc20PortalDepositErc20Tokens();
+  const { writeContractAsync: approveToken } = useWriteErc20Approve();
+  const { writeContractAsync: depositToken } =
+    useWriteErc20PortalDepositErc20Tokens();
 
   const approve = async (address: Address, amount: string) => {
     try {
@@ -75,21 +72,19 @@ export const BridgeTabs: React.FC = () => {
       throw error;
     }
   };
-  
+
   const deposit = async (amount: string) => {
     try {
       const data = stringToHex(`Deposited (${amount}).`);
       await depositToken({
-        args: [tokenAddress, dAppAddress,  parseUnits(amount, decimals), data],
+        args: [tokenAddress, dAppAddress, parseUnits(amount, decimals), data],
       });
       console.log("ERC20 Deposit successful");
     } catch (error) {
-      console.error("Error in depositting ERC20:", error);
+      console.error("Error in depositing ERC20:", error);
       throw error;
     }
   };
-
-
 
   const canApprove =
     l1Balance != undefined &&
@@ -98,15 +93,12 @@ export const BridgeTabs: React.FC = () => {
     allowance < parseUnits(amount.toString(), decimals) &&
     parseUnits(amount.toString(), decimals) <= (l1Balance ?? 0n);
 
-  const canDeposit = 
+  const canDeposit =
     l1Balance != undefined &&
     allowance != undefined &&
     amount > 0 &&
     parseUnits(amount.toString(), decimals) <= allowance &&
     parseUnits(amount.toString(), decimals) <= l1Balance;
-
-  
-
 
   return (
     <Tabs
@@ -136,8 +128,8 @@ export const BridgeTabs: React.FC = () => {
 
           <Input
             type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            value={amount.toString()}
+            onChange={(e) => setAmount(BigInt(e.target.value))}
             placeholder="0"
             className={cn(
               "w-full bg-foreground/10 text-2xl outline-none",
@@ -147,8 +139,18 @@ export const BridgeTabs: React.FC = () => {
           />
 
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Balance: {l1BalanceLoading ? "Loading..." : `${formatUnits(l1Balance ?? 0n, decimals)} ${symbol}`}</span>
-            <span className="text-muted-foreground">Allowance: {allowanceLoading ? "Loading..." : `${formatUnits(allowance ?? 0n, decimals)} ${symbol}`}</span>
+            <span className="text-muted-foreground">
+              Balance:{" "}
+              {l1BalanceLoading ?
+                "Loading..."
+              : `${formatUnits(l1Balance ?? 0n, decimals)} ${symbol}`}
+            </span>
+            <span className="text-muted-foreground">
+              Allowance:{" "}
+              {allowanceLoading ?
+                "Loading..."
+              : `${formatUnits(allowance ?? 0n, decimals)} ${symbol}`}
+            </span>
           </div>
         </div>
 
@@ -158,34 +160,41 @@ export const BridgeTabs: React.FC = () => {
           <div className="flex items-center justify-start">
             <p className="text-sm text-muted-foreground">To:</p>
             <div className="flex items-center gap-1">
-              <ConnectButton 
+              <ConnectButton
                 showBalance={{
                   smallScreen: false,
                   largeScreen: false,
                 }}
-                chainStatus="none"  
+                chainStatus="none"
               />
               <span className="font-bitmap text-muted-foreground">
                 @Cryptopolis
               </span>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">Balance: {isLoading ? "Loading..." : error ? "Error" : `${formatUnits(balance ?? 0n, decimals)} SIM`}</p>
+          <p className="text-sm text-muted-foreground">
+            Balance:{" "}
+            {isLoading ?
+              "Loading..."
+            : error ?
+              "Error"
+            : `${formatUnits(balance ?? 0n, decimals)} SIM`}
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="shadow-md"
             disabled={!canApprove}
-            onClick={() => approve(tokenAddress, amount)}
+            onClick={() => approve(tokenAddress, amount.toString())}
           >
             Approve
           </Button>
-          <Button 
+          <Button
             className="shadow-md"
             disabled={!canDeposit}
-            onClick={() => deposit(amount)}
+            onClick={() => deposit(amount.toString())}
           >
             Deposit
           </Button>
@@ -198,7 +207,7 @@ export const BridgeTabs: React.FC = () => {
             <p className="text-sm text-muted-foreground">From:</p>
 
             <div className="flex items-center gap-1 [&_div]:truncate">
-              <ConnectButton 
+              <ConnectButton
                 showBalance={{
                   smallScreen: false,
                   largeScreen: false,
@@ -228,7 +237,7 @@ export const BridgeTabs: React.FC = () => {
           <div className="flex items-center justify-start">
             <p className="text-sm text-muted-foreground">To:</p>
             <div className="flex items-center gap-2">
-              <ConnectButton 
+              <ConnectButton
                 showBalance={{
                   smallScreen: false,
                   largeScreen: false,
