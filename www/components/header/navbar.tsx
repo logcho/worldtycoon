@@ -40,10 +40,11 @@ export const Navbar: React.FC = () => {
               />
             </Link>
           : <Link href="/" className="-mt-2 hidden md:block">
-              <p className="font-bitmap text-4xl font-semibold text-yellow-500 [text-shadow:_1px_1px_0_#e1e1e1]">
-                {siteConfig.name}
+              <p className="font-bitmap text-4xl font-semibold text-neutral-200 [text-shadow:_1px_1px_0_#e1e1e1]">
+                {/* {siteConfig.name} */}
+                WORLD TYCOON
               </p>
-            </Link>
+            </Link>            
           }
 
           <Button
