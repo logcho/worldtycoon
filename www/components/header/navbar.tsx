@@ -56,7 +56,7 @@ export const Navbar: React.FC = () => {
             : <Menu className="size-8" />}
           </Button>
 
-          {/* {pathname !== "/play" && ( */}
+          {pathname !== "/play" && (
             <>
               <nav className="hidden items-center gap-6 font-fixedsys text-2xl text-[#babec7] md:flex">
                 {nav.map(({ name, href }) => (
@@ -96,7 +96,7 @@ export const Navbar: React.FC = () => {
                 </div>
               </nav>
             </>
-          {/* )} */}
+          )} 
         </div>
 
         {/* {pathname === "/play" && (
