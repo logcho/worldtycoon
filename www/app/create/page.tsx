@@ -8,7 +8,7 @@ import { formatUnits, parseUnits, stringToHex } from "viem";
 import { useAccount } from "wagmi";
 
 import { Button } from "~/components/ui/button";
-import { useInspectBalance } from "~/hooks/inspect";
+import { useInspectBalance, useInspectMap } from "~/hooks/inspect";
 import { useWriteInputBoxAddInput } from "~/hooks/wagmi";
 
 const CreatePage: React.FC = () => {
@@ -27,6 +27,11 @@ const CreatePage: React.FC = () => {
   }
 
   const { balance, isLoading, error } = useInspectBalance(address!);
+  const { map } = useInspectMap(address!);
+
+  if(map){
+    router.replace("play");
+  }
 
   const { writeContractAsync } = useWriteInputBoxAddInput();
 
@@ -63,7 +68,7 @@ const CreatePage: React.FC = () => {
         <div className="rounded-xl bg-card/50 p-4 text-center shadow-md">
           <p className="text-muted-foreground">
             20000 SIM will be debited from your account and deposited into the
-            city safe
+            city safe. If you want to add funds to your account go to bridge.
           </p>
         </div>
 

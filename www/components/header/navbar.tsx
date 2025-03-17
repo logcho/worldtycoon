@@ -29,7 +29,7 @@ export const Navbar: React.FC = () => {
     >
       <div className="flex h-full items-center justify-between *:w-full">
         <div className="flex items-center gap-6">
-          {pathname === "/" ?
+          {pathname !== "/play" ?
             <Link href="/" className="mt-14 hidden md:block">
               <Image
                 src="/images/logo.png"
@@ -56,7 +56,7 @@ export const Navbar: React.FC = () => {
             : <Menu className="size-8" />}
           </Button>
 
-          {pathname !== "/play" && (
+          {/* {pathname !== "/play" && ( */}
             <>
               <nav className="hidden items-center gap-6 font-fixedsys text-2xl text-[#babec7] md:flex">
                 {nav.map(({ name, href }) => (
@@ -96,10 +96,10 @@ export const Navbar: React.FC = () => {
                 </div>
               </nav>
             </>
-          )}
+          {/* )} */}
         </div>
 
-        {pathname === "/play" && (
+        {/* {pathname === "/play" && (
           <div
             className={cn(
               "flex w-full items-center justify-center gap-4 font-fixedsys md:gap-4",
@@ -120,7 +120,7 @@ export const Navbar: React.FC = () => {
               <span>MAY 2284</span>
             </div>
           </div>
-        )}
+        )} */}
 
         <div className="flex w-full items-center justify-end">
           {/* <Link
