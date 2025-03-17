@@ -8,7 +8,7 @@ import { formatUnits, parseUnits, stringToHex } from "viem";
 import { useAccount } from "wagmi";
 
 import { Button } from "~/components/ui/button";
-import { useInspectBalance } from "~/hooks/game";
+import { useInspectBalance } from "~/hooks/inspect";
 import { useWriteInputBoxAddInput } from "~/hooks/wagmi";
 
 const CreatePage: React.FC = () => {

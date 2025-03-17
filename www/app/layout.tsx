@@ -1,18 +1,15 @@
+"use client"
 import "./globals.css";
 
 import * as React from "react";
 
 import { Navbar } from "~/components/header/navbar";
-import { Providers } from "~/components/providers";
 import { TailwindIndicator } from "~/components/tailwind-indicator";
 import { env } from "~/lib/env";
 import * as fonts from "~/lib/fonts";
 import { cn } from "~/lib/utils";
-
-export const metadata = {
-  title: "Next.js + TypeScript Starter",
-  description: "A starter template for Next.js and TypeScript",
-};
+import GraphQLProvider from "~/providers/GraphQLProvider";
+import WalletProvider from "~/providers/WalletProvider";
 
 const RootLayout: React.FCC = ({ children }) => {
   return (
@@ -22,14 +19,12 @@ const RootLayout: React.FCC = ({ children }) => {
       className={cn(Object.values(fonts).map((font) => font.variable))}
     >
       <body className="min-h-dvh scroll-smooth font-sans antialiased">
-        <Providers
-          RAINBOW_PROJECT_ID={env.RAINBOW_PROJECT_ID}
-          RAINBOW_APP_NAME={env.RAINBOW_APP_NAME}
-        >
-          <Navbar />
-          {children}
-        </Providers>
-
+        <WalletProvider>
+          <GraphQLProvider>
+            <Navbar />
+            {children}
+          </GraphQLProvider>
+        </WalletProvider>
         <TailwindIndicator />
       </body>
     </html>

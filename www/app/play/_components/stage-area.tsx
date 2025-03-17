@@ -7,7 +7,7 @@ import { useAccount } from "wagmi";
 import type { Tool } from "~/config/tools";
 
 import { HEIGHT, WIDTH } from "~/config/constants";
-import { useInspectMap } from "~/hooks/game";
+import { useInspectMap } from "~/hooks/inspect";
 import { cn } from "~/lib/utils";
 
 import { Map } from "./map";

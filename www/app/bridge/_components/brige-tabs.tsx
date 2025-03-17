@@ -15,7 +15,7 @@ import type { Address } from "viem";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { useInspectBalance } from "~/hooks/game";
+import { useInspectBalance } from "~/hooks/inspect";
 import {
   useReadErc20Allowance,
   useReadErc20BalanceOf,

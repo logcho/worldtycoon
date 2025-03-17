@@ -86,7 +86,9 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             } else {
                 std::cout << "Transfer failed: Insufficient funds!" << std::endl;
                 std::cout << "Balance of " << address << " is " << walletHandler->getERC20Balance(address) << std::endl;
+                return "reject";
             }
+            createNotice(cli, vectorToHexUint16(convertMap(games[address]->map[0], WORLD_W, WORLD_H)));
             return "accept";
         }
         else if(method == "doTool"){
@@ -96,6 +98,7 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             int y = std::stoi(parsed_payload.get("y").to_str());
             games[address]->doTool(tool, x, y);
             std::cout << "Using tool " << parsed_payload.get("tool").to_str() << " at (" << x << ", " << y << ") to game " << address << std::endl;
+            createNotice(cli, vectorToHexUint16(convertMap(games[address]->map[0], WORLD_W, WORLD_H)));
             return "accept";
         }
     }
