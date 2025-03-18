@@ -8,6 +8,12 @@ export const siteConfig = {
 
   authors: [
     {
+      name: "Logan Choi",
+      url: "https://github.com/logcho",
+      email: "",
+      x: "https://x.com/lognchoi",
+    },
+    {
       name: "rajput-hemant",
       url: "https://landing.rajputhemant.tech",
       email: "",
@@ -25,11 +31,11 @@ export const siteConfig = {
 
   links: {
     discord: {
-      url: "",
+      url: "https://discord.gg/fphJGfs67U",
       label: "Discord",
     },
     x: {
-      url: "",
+      url: "https://x.com/World_Tycoon_",
       label: "X",
     },
   },
