@@ -12,6 +12,7 @@ import type { Tool } from "~/config/tools";
 
 import { TOOLS } from "~/config/tools";
 import { loadToolsSpritesheet } from "~/lib/sprites";
+import { Hex } from "viem";
 
 export const ToolOverlay: React.FC<{
   selectedTool?: Tool;

@@ -12,6 +12,7 @@ import { cn } from "~/lib/utils";
 
 import { Map } from "./map";
 import { ToolOverlay } from "./tool-overlay";
+import { Hex } from "viem";
 
 // const MIN_ZOOM = 0.5;
 // const MAX_ZOOM = 2;

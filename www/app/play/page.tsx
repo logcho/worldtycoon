@@ -5,6 +5,7 @@ import { Playground } from "./_components/playground";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
 import { useInspectMap } from "~/hooks/inspect";
+import CreatePage from "./_components/create";
 
 
 const PlayPage: React.FC = () => {
@@ -16,9 +17,7 @@ const PlayPage: React.FC = () => {
   }
   const { map } = useInspectMap(address!);
 
-  if(!map) router.replace("/create")
-
-  return <Playground />;
+  return map ? <Playground /> : <CreatePage />;
 };
 
 export default PlayPage;
