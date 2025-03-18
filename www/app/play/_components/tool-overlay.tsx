@@ -12,14 +12,15 @@ import type { Tool } from "~/config/tools";
 
 import { TOOLS } from "~/config/tools";
 import { loadToolsSpritesheet } from "~/lib/sprites";
-import { Hex } from "viem";
+import { Hex, stringToHex } from "viem";
 
 export const ToolOverlay: React.FC<{
   selectedTool?: Tool;
   coordinates: { x: number; y: number };
   scale: number;
   position: { x: number; y: number };
-}> = ({ selectedTool, coordinates, scale, position }) => {
+  setInput?: (input: Hex) => void;
+}> = ({ selectedTool, coordinates, scale, position, setInput }) => {
   const spriteRef = React.useRef<PixiRef<typeof Sprite>>(null);
   const [spritesheet, setSpritesheet] = React.useState<Spritesheet | null>(
     null,
@@ -44,6 +45,7 @@ export const ToolOverlay: React.FC<{
             scale +
           position.y;
       }
+      if(setInput) setInput(stringToHex(`{"method": "doTool", "x": ${coordinates.x}, "y": ${coordinates.y}, "tool": ${selectedTool.num}}`));
     }
   }, [selectedTool, coordinates, scale, position]);
 
@@ -62,7 +64,7 @@ export const ToolOverlay: React.FC<{
         />
       )}
       <Text
-        text={`${selectedTool?.label ?? "No Tool"} (${coordinates.x}, ${
+        text={`${selectedTool?.num ?? "No Tool"} (${coordinates.x}, ${
           coordinates.y
         })`}
         x={10}

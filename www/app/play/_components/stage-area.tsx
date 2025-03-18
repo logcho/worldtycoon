@@ -21,8 +21,10 @@ import { Hex } from "viem";
 export const StageArea: React.FC<
   React.HTMLAttributes<HTMLDivElement> & {
     selectedTool?: Tool;
+    write?: () => void;
+    setInput?: (input: Hex) => void;
   }
-> = ({ className, selectedTool, ...props }) => {
+> = ({ className, selectedTool, write, setInput, ...props }) => {
   const router = useRouter();
   const { address } = useAccount();
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -161,12 +163,14 @@ export const StageArea: React.FC<
           coordinates={coordinates}
           selectedTool={selectedTool}
           onMouseMove={(tile) => setCoordinates({ x: tile.x, y: tile.y })}
+          write={write}
         />
         <ToolOverlay
           selectedTool={selectedTool}
           coordinates={coordinates}
           scale={scale}
           position={position}
+          setInput={setInput}
         />
       </Stage>
     </div>

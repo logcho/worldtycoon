@@ -57,7 +57,8 @@ export const Map: React.FC<{
   loading?: boolean;
   selectedTool?: Tool;
   onMouseMove?: (tile: Tile) => void;
-}> = ({ value, scale, position, coordinates, selectedTool, onMouseMove }) => {
+  write?: () => void;
+}> = ({ value, scale, position, coordinates, selectedTool, onMouseMove, write }) => {
   const [spritesheet, setSpritesheet] = React.useState<Spritesheet | null>(
     null,
   );
@@ -125,6 +126,7 @@ export const Map: React.FC<{
 
       if (!wouldOverlap) {
         setPlacedSprites((prev) => [...prev, { x, y, tool: selectedTool }]);
+        write && write();
       }
     }
   };
