@@ -17,7 +17,7 @@ const PlayPage: React.FC = () => {
   }
   const { map } = useInspectMap(address!);
 
-  return map ? <Playground /> : <CreatePage />;
+  return map ? <Playground initialMap={map} /> : <CreatePage />;
 };
 
 export default PlayPage;

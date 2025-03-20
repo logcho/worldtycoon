@@ -50,19 +50,21 @@ std::string hexToString(const std::string& hexInput){
     return result;
 }
 
-std::string intToHex(int number){
+std::string uint64ToHex(int number){
     std::ostringstream hexStream;
-    hexStream << "0x";
-    hexStream << std::hex << number;
+    hexStream << "0x" << std::hex << std::setw(64) << std::setfill('0') << number;  
     return hexStream.str();
-
 }
 
-int hexToInt(const std::string& hexInput){
-    if(hexInput.substr(0, 2) != "0x"){
+uint64_t hexToUint64(const std::string& hexInput) {
+    if (hexInput.substr(0, 2) != "0x") {
         throw std::invalid_argument("Invalid hex input: Missing 0x prefix");
     }
-    return std::stoi(hexInput.substr(2), nullptr, 16);
+    try {
+        return std::stoull(hexInput.substr(2), nullptr, 16);
+    } catch (const std::out_of_range&) {
+        throw std::overflow_error("Value too large for uint64_t");
+    }
 }
 
 std::string vectorToHexUint8(const std::vector<uint8_t>& bytes){

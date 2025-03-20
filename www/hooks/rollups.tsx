@@ -80,23 +80,31 @@ export const useRollupsServer = (dapp: Address, input?: Hex) => {
 
     useEffect(() => {
         if (inputIndex && queryData) {
-            // console.log(inputIndex.toString());
             const queriedNotices = queryData.notices.edges;
             // console.log(queriedNotices);
+            // Filter notices based on inputIndex
             const filteredNotices = queriedNotices
             .filter(({ node }: any) => {
-                if(BigInt(node.input.index) === inputIndex) console.log("node.input.index:", node.input.index); // Log the value
+                // Log the value for debugging
+                if (BigInt(node.input.index) === inputIndex) {
+                    console.log("node.input.index:", node.input.index);
+                }
                 return BigInt(node.input.index) === inputIndex; // Ensure both are `bigint`
-            })                
-            .map(({ node }: any) => node.payload);
-            // console.log(filteredNotices);
+            })
+            .map(({ node }: any) => {
+                // Ensure we are mapping to node.payload
+                return node.payload;
+            });
+
+            // Log the filteredNotices to verify its content
+            // console.log("filteredNotices:", filteredNotices);
             setNotices(filteredNotices);
         }
     }, [inputIndex, queryData]);
 
     // Console log data
     // Set true if debugging
-    if(false){
+    if(false) {
         if(simulateData){
             console.log("----------------");
             console.log("simulateData");

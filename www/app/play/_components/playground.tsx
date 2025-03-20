@@ -10,10 +10,17 @@ import { StageArea } from "./stage-area";
 import { ToolsSidebar } from "./tools-sidebar";
 import { useRollupsServer } from "~/hooks/rollups";
 import { useState } from "react";
-import { Hex, stringToHex } from "viem";
+import { fromHex, Hex, stringToHex } from "viem";
 import { json } from "stream/consumers";
+import { Navbar } from "./header/navbar";
 
-export const Playground: React.FC = () => {
+interface PlaygroundProps {
+  initialMap: Hex;  // Hex parameter
+}
+
+export const Playground: React.FC<PlaygroundProps> = ({
+  initialMap
+}) => {
   const [selectedTool, setSelectedTool] = React.useState<Tool>();
 
   // TODO: implement rollup server
@@ -21,8 +28,9 @@ export const Playground: React.FC = () => {
   const dapp = "0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e";
   const [input, setInput] = useState<Hex>();
   const { loading, success, error, write, notices } = useRollupsServer(dapp, input);
-
-  
+  const [map, population, totalFunds, cityTime] = notices;
+  // console.log(map);
+  // if(totalFunds) console.log(fromHex(totalFunds, 'bigint')); verified works
 
   useEventListener("keydown", (event) => {
     if (event.key === "Escape") {
@@ -31,18 +39,26 @@ export const Playground: React.FC = () => {
   });
 
   return (
-    <div className="w-dvh flex">
-      <ToolsSidebar
-        selectedTool={selectedTool}
-        onSelectTool={(tool) => setSelectedTool(tool)}
-        className="w-1/5"
+    <>
+      <Navbar 
+        population={population}
+        totalFunds={totalFunds}
+        cityTime={cityTime}
       />
-      <StageArea 
-        selectedTool={selectedTool} 
-        className="!w-4/5" 
-        write={write}
-        setInput={setInput}
-      />
-    </div>
+      <div className="w-dvh flex">
+        <ToolsSidebar
+          selectedTool={selectedTool}
+          onSelectTool={(tool) => setSelectedTool(tool)}
+          className="w-1/5"
+        />
+        <StageArea 
+          selectedTool={selectedTool} 
+          className="!w-4/5" 
+          write={write}
+          setInput={setInput}
+          map={map || initialMap}
+        />
+      </div>
+    </>
   );
 };

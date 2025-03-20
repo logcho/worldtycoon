@@ -38,6 +38,13 @@ void createNotice(httplib::Client &cli, const std::string &payload) {
     std::cout << "Received notice status " << r.value().status << std::endl;
 }
 
+void createGameNotices(httplib::Client &cli, const Micropolis *game){
+    createNotice(cli, vectorToHexUint16(convertMap(game->map[0], WORLD_W, WORLD_H))); // Map
+    createNotice(cli, uint64ToHex(game->cityPop)); // Population
+    createNotice(cli, uint64ToHex(game->totalFunds)); // City funds
+    createNotice(cli, uint64ToHex(game->cityTime)); // City time
+}
+
 picojson::object parseERC20Deposit(const std::string& payload) {    
     picojson::object obj;
     obj["success"] = picojson::value(hexToBool(slice(payload, 0, 1)));
@@ -88,7 +95,7 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
                 std::cout << "Balance of " << address << " is " << walletHandler->getERC20Balance(address) << std::endl;
                 return "reject";
             }
-            createNotice(cli, vectorToHexUint16(convertMap(games[address]->map[0], WORLD_W, WORLD_H)));
+            createGameNotices(cli, games[address]);
             return "accept";
         }
         else if(method == "doTool"){
@@ -97,8 +104,11 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             int x = std::stoi(parsed_payload.get("x").to_str());
             int y = std::stoi(parsed_payload.get("y").to_str());
             games[address]->doTool(tool, x, y);
+            for(int i = 0; i < 200; i++){
+                games[address]->simTick();
+            }
             std::cout << "Using tool " << parsed_payload.get("tool").to_str() << " at (" << x << ", " << y << ") to game " << address << std::endl;
-            createNotice(cli, vectorToHexUint16(convertMap(games[address]->map[0], WORLD_W, WORLD_H)));
+            createGameNotices(cli, games[address]);
             return "accept";
         }
     }

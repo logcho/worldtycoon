@@ -23,8 +23,9 @@ export const StageArea: React.FC<
     selectedTool?: Tool;
     write?: () => void;
     setInput?: (input: Hex) => void;
+    map: Hex;
   }
-> = ({ className, selectedTool, write, setInput, ...props }) => {
+> = ({ className, selectedTool, write, setInput, map, ...props }) => {
   const router = useRouter();
   const { address } = useAccount();
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -37,8 +38,6 @@ export const StageArea: React.FC<
   if (!address) {
     router.replace("/");
   }
-
-  const { map } = useInspectMap(address!);
 
   // Center the stage initially
   React.useEffect(() => {
