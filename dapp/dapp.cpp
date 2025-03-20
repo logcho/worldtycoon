@@ -84,6 +84,7 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
         if(method == "start"){
             if (games.find(address) != games.end()) return "reject";
             games[address] = new Micropolis();
+            games[address]->setSpeed(3);
             games[address]->generateMap();
             std::cout << "City generated for" << address << std::endl;
             std::string hexAmount = "0x00000000000000000000000000000000000000000000043c33c1937564800000"; // 20000 18n
@@ -104,7 +105,7 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             int x = std::stoi(parsed_payload.get("x").to_str());
             int y = std::stoi(parsed_payload.get("y").to_str());
             games[address]->doTool(tool, x, y);
-            for(int i = 0; i < 200; i++){
+            for(int i = 0; i < 10; i++){
                 games[address]->simTick();
             }
             std::cout << "Using tool " << parsed_payload.get("tool").to_str() << " at (" << x << ", " << y << ") to game " << address << std::endl;

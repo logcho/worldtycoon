@@ -64,7 +64,7 @@ export const ToolOverlay: React.FC<{
         />
       )}
       <Text
-        text={`${selectedTool?.num ?? "No Tool"} (${coordinates.x}, ${
+        text={`${selectedTool?.label ?? "No Tool"} (${coordinates.x}, ${
           coordinates.y
         })`}
         x={10}

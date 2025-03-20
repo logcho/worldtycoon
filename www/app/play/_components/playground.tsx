@@ -10,7 +10,7 @@ import { StageArea } from "./stage-area";
 import { ToolsSidebar } from "./tools-sidebar";
 import { useRollupsServer } from "~/hooks/rollups";
 import { useState } from "react";
-import { fromHex, Hex, stringToHex } from "viem";
+import { fromHex, Hex, hexToNumber, stringToHex } from "viem";
 import { json } from "stream/consumers";
 import { Navbar } from "./header/navbar";
 
@@ -29,7 +29,6 @@ export const Playground: React.FC<PlaygroundProps> = ({
   const [input, setInput] = useState<Hex>();
   const { loading, success, error, write, notices } = useRollupsServer(dapp, input);
   const [map, population, totalFunds, cityTime] = notices;
-  // console.log(map);
   // if(totalFunds) console.log(fromHex(totalFunds, 'bigint')); verified works
 
   useEventListener("keydown", (event) => {
