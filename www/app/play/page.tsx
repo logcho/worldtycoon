@@ -1,12 +1,14 @@
-"use client"
+"use client";
+
 import * as React from "react";
-
-import { Playground } from "./_components/playground";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
-import { useInspectMap } from "~/hooks/inspect";
-import CreatePage from "./_components/create";
 
+import { useAccount } from "wagmi";
+
+import { useInspectMap } from "~/hooks/inspect";
+
+import CreatePage from "./_components/create";
+import { Playground } from "./_components/playground";
 
 const PlayPage: React.FC = () => {
   const router = useRouter();

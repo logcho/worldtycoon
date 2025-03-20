@@ -1,11 +1,12 @@
-"use client"
+"use client";
+
 import * as React from "react";
+import { useRouter } from "next/navigation";
+
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { useAccount } from "wagmi";
 
 import { BridgeTabs } from "./_components/brige-tabs";
-import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
-
 
 const BridgePage: React.FC = () => {
   const router = useRouter();
@@ -17,7 +18,6 @@ const BridgePage: React.FC = () => {
         <BridgeTabs />
       </div>
     </NuqsAdapter>
-    
   );
 };
 

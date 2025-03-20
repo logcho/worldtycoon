@@ -15,7 +15,7 @@ export const HeroSection: React.FC = () => {
           className="mx-auto drop-shadow-md"
         />
 
-        <p className="-mt-4 text-center font-bitmap text-3xl font-semibold [text-shadow:_1px_2px_0_#000] md:text-4xl">
+        <p className="font-bitmap -mt-4 text-center text-3xl font-semibold [text-shadow:_1px_2px_0_#000] md:text-4xl">
           Build Your Empire, Earn Real Crypto, Rule the World
         </p>
 

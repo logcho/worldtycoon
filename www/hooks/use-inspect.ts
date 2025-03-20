@@ -65,5 +65,3 @@ export const useInspect = (
     error,
   };
 };
-
-

@@ -2,6 +2,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 
 import { Stage } from "@pixi/react";
+import { Hex } from "viem";
 import { useAccount } from "wagmi";
 
 import type { Tool } from "~/config/tools";
@@ -12,7 +13,6 @@ import { cn } from "~/lib/utils";
 
 import { Map } from "./map";
 import { ToolOverlay } from "./tool-overlay";
-import { Hex } from "viem";
 
 // const MIN_ZOOM = 0.5;
 // const MAX_ZOOM = 2;
@@ -142,7 +142,7 @@ export const StageArea: React.FC<
       ref={containerRef}
       onMouseDown={handleMouseDown}
       className={cn(
-        "!h-[calc(100dvh-5rem)] cursor-grab select-none overflow-hidden",
+        "h-[calc(100dvh-5rem)]! cursor-grab overflow-hidden select-none",
         isDragging && "cursor-grabbing",
         className,
       )}

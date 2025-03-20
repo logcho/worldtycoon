@@ -10,6 +10,7 @@ import { useAccount } from "wagmi";
 import { Button } from "~/components/ui/button";
 import { useInspectBalance, useInspectMap } from "~/hooks/inspect";
 import { useWriteInputBoxAddInput } from "~/hooks/wagmi";
+
 import { Navbar } from "./header/navbar";
 
 const CreatePage: React.FC = () => {
@@ -30,7 +31,7 @@ const CreatePage: React.FC = () => {
   const { balance, isLoading, error } = useInspectBalance(address!);
   const { map } = useInspectMap(address!);
 
-  if(map){
+  if (map) {
     router.replace("play");
   }
 
@@ -49,7 +50,7 @@ const CreatePage: React.FC = () => {
     <>
       <Navbar />
       <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center bg-[url('/images/bg.png')] bg-cover bg-center bg-no-repeat">
-        <div className="w-full max-w-xl space-y-4 rounded-2xl bg-card/40 p-6 font-fixedsys shadow-lg backdrop-blur">
+        <div className="bg-card/40 font-fixedsys w-full max-w-xl space-y-4 rounded-2xl p-6 shadow-lg backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <h2 className="text-xl">
               Balance:{" "}
@@ -68,7 +69,7 @@ const CreatePage: React.FC = () => {
             />
           </div>
 
-          <div className="rounded-xl bg-card/50 p-4 text-center shadow-md">
+          <div className="bg-card/50 rounded-xl p-4 text-center shadow-md">
             <p className="text-muted-foreground">
               20000 SIM will be debited from your account and deposited into the
               city safe. If you want to add funds to your account go to bridge.

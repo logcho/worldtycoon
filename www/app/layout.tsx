@@ -1,4 +1,5 @@
-"use client"
+"use client";
+
 import "./globals.css";
 
 import * as React from "react";

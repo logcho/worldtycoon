@@ -104,17 +104,17 @@ export const BridgeTabs: React.FC = () => {
     <Tabs
       value={tab}
       onValueChange={setTab}
-      className="w-full max-w-xl space-y-4 rounded-2xl bg-card/40 p-6 font-fixedsys shadow-lg backdrop-blur"
+      className="bg-card/40 font-fixedsys w-full max-w-xl space-y-4 rounded-2xl p-6 shadow-lg backdrop-blur-sm"
     >
-      <TabsList className="grid w-full grid-cols-2 rounded-xl bg-card/50 shadow-md *:rounded-lg data-[state=active]:*:shadow-md">
+      <TabsList className="bg-card/50 grid w-full grid-cols-2 rounded-xl shadow-md *:rounded-lg *:data-[state=active]:shadow-md">
         <TabsTrigger value="deposit">Deposit</TabsTrigger>
         <TabsTrigger value="withdraw">Withdraw</TabsTrigger>
       </TabsList>
 
       <TabsContent value="deposit" className="space-y-4">
-        <div className="space-y-2 rounded-xl bg-card/50 p-4 shadow-md">
+        <div className="bg-card/50 space-y-2 rounded-xl p-4 shadow-md">
           <div className="flex items-center justify-start">
-            <p className="text-sm text-muted-foreground">From:</p>
+            <p className="text-muted-foreground text-sm">From:</p>
             <div className="flex items-center gap-2">
               <ConnectButton
                 showBalance={{
@@ -132,7 +132,7 @@ export const BridgeTabs: React.FC = () => {
             onChange={(e) => setAmount(BigInt(e.target.value))}
             placeholder="0"
             className={cn(
-              "w-full bg-foreground/10 text-2xl outline-none",
+              "bg-foreground/10 w-full text-2xl outline-hidden",
               // hide number arrows
               "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
             )}
@@ -156,9 +156,9 @@ export const BridgeTabs: React.FC = () => {
 
         <ArrowDownIcon />
 
-        <div className="space-y-2 rounded-xl bg-card/50 p-4 shadow-md">
+        <div className="bg-card/50 space-y-2 rounded-xl p-4 shadow-md">
           <div className="flex items-center justify-start">
-            <p className="text-sm text-muted-foreground">To:</p>
+            <p className="text-muted-foreground text-sm">To:</p>
             <div className="flex items-center gap-1">
               <ConnectButton
                 showBalance={{
@@ -172,7 +172,7 @@ export const BridgeTabs: React.FC = () => {
               </span>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Balance:{" "}
             {isLoading ?
               "Loading..."
@@ -202,9 +202,9 @@ export const BridgeTabs: React.FC = () => {
       </TabsContent>
 
       <TabsContent value="withdraw" className="space-y-4">
-        <div className="space-y-2 rounded-xl bg-card/50 p-4 shadow-md">
+        <div className="bg-card/50 space-y-2 rounded-xl p-4 shadow-md">
           <div className="flex items-center justify-start">
-            <p className="text-sm text-muted-foreground">From:</p>
+            <p className="text-muted-foreground text-sm">From:</p>
 
             <div className="flex items-center gap-1 [&_div]:truncate">
               <ConnectButton
@@ -224,18 +224,18 @@ export const BridgeTabs: React.FC = () => {
             type="number"
             placeholder="0"
             className={cn(
-              "w-full bg-foreground/10 text-2xl outline-none",
+              "bg-foreground/10 w-full text-2xl outline-hidden",
               "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
             )}
           />
-          <p className="text-sm text-muted-foreground">Balance: 0 SIM</p>
+          <p className="text-muted-foreground text-sm">Balance: 0 SIM</p>
         </div>
 
         <ArrowDownIcon />
 
-        <div className="space-y-2 rounded-lg bg-card/50 p-4 shadow-md">
+        <div className="bg-card/50 space-y-2 rounded-lg p-4 shadow-md">
           <div className="flex items-center justify-start">
-            <p className="text-sm text-muted-foreground">To:</p>
+            <p className="text-muted-foreground text-sm">To:</p>
             <div className="flex items-center gap-2">
               <ConnectButton
                 showBalance={{
@@ -246,7 +246,7 @@ export const BridgeTabs: React.FC = () => {
               />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">Balance: 0 SIM</p>
+          <p className="text-muted-foreground text-sm">Balance: 0 SIM</p>
         </div>
 
         <Button className="w-full shadow-md">Withdraw</Button>
@@ -257,7 +257,7 @@ export const BridgeTabs: React.FC = () => {
 
 export const ArrowDownIcon: React.FC = () => (
   <div className="flex justify-center">
-    <span className="aspect-square rounded-full bg-card/50 p-2 shadow-md">
+    <span className="bg-card/50 aspect-square rounded-full p-2 shadow-md">
       <ArrowDown className="size-4" />
     </span>
   </div>

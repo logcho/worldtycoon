@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { Container, Sprite, Text } from "@pixi/react";
 import { TextStyle } from "pixi.js";
+import { Hex, stringToHex } from "viem";
 
 import type { PixiRef } from "@pixi/react";
 import type { Spritesheet } from "pixi.js";
@@ -12,7 +13,6 @@ import type { Tool } from "~/config/tools";
 
 import { TOOLS } from "~/config/tools";
 import { loadToolsSpritesheet } from "~/lib/sprites";
-import { Hex, stringToHex } from "viem";
 
 export const ToolOverlay: React.FC<{
   selectedTool?: Tool;
@@ -45,7 +45,12 @@ export const ToolOverlay: React.FC<{
             scale +
           position.y;
       }
-      if(setInput) setInput(stringToHex(`{"method": "doTool", "x": ${coordinates.x}, "y": ${coordinates.y}, "tool": ${selectedTool.num}}`));
+      if (setInput)
+        setInput(
+          stringToHex(
+            `{"method": "doTool", "x": ${coordinates.x}, "y": ${coordinates.y}, "tool": ${selectedTool.num}}`,
+          ),
+        );
     }
   }, [selectedTool, coordinates, scale, position]);
 

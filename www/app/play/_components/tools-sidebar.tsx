@@ -14,7 +14,7 @@ export const ToolsSidebar: React.FC<
   return (
     <div
       className={cn(
-        "flex h-[calc(100dvh-5rem)] flex-col gap-2 overflow-y-scroll bg-muted/60 p-3",
+        "bg-muted/60 flex h-[calc(100dvh-5rem)] flex-col gap-2 overflow-y-scroll p-3",
         className,
       )}
       {...props}
@@ -24,13 +24,13 @@ export const ToolsSidebar: React.FC<
           key={tool.label}
           onClick={() => onSelectTool(tool)}
           className={cn(
-            "flex cursor-pointer items-center gap-2 rounded-md border bg-muted px-4 py-2 font-bitmap text-3xl ring-yellow-500 ring-offset-2 ring-offset-background transition hover:shadow-md",
+            "bg-muted font-bitmap ring-offset-background flex cursor-pointer items-center gap-2 rounded-md border px-4 py-2 text-3xl ring-yellow-500 ring-offset-2 transition hover:shadow-md",
             selectedTool?.id === tool.id && "ring-2",
           )}
         >
           <span>{tool.emoji}</span>
           <span className="truncate font-medium">{tool.label}</span>
-          <span className="ml-auto rounded-md bg-foreground/10 px-2 py-1 font-fixedsys text-sm font-medium shadow">
+          <span className="bg-foreground/10 font-fixedsys ml-auto rounded-md px-2 py-1 text-sm font-medium shadow-sm">
             ${tool.cost}
           </span>
         </div>

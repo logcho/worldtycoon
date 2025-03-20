@@ -8,18 +8,18 @@ export const FooterSection: React.FC = () => {
   return (
     <section className="flex h-dvh snap-center flex-col bg-[url('/images/bg2.png')] bg-cover bg-center bg-no-repeat">
       <div className="container flex w-full grow flex-col gap-6 px-10 pt-24">
-        <h1 className="border-b-2 border-b-yellow-500 pb-2 font-fixedsys text-3xl text-yellow-500 [text-shadow:_2px_4px_0_#000] md:text-4xl">
+        <h1 className="font-fixedsys border-b-2 border-b-yellow-500 pb-2 text-3xl text-yellow-500 [text-shadow:_2px_4px_0_#000] md:text-4xl">
           Our Mission
         </h1>
 
         <div
-          className="m-auto h-fit w-full max-w-4xl space-y-2 rounded-[2rem] bg-[#151515]/80 p-2 backdrop-blur-sm duration-700 animate-in slide-in-from-left-1/2 md:space-y-4 md:p-6"
+          className="animate-in slide-in-from-left-1/2 m-auto h-fit w-full max-w-4xl space-y-2 rounded-[2rem] bg-[#151515]/80 p-2 backdrop-blur-xs duration-700 md:space-y-4 md:p-6"
           style={{
             border: "16px solid transparent",
             borderImage: "url('/images/border.png') 16 stretch",
           }}
         >
-          <div className="max-h-[30rem] overflow-y-auto font-fixedsys text-sm text-gray-300 md:text-lg">
+          <div className="font-fixedsys max-h-[30rem] overflow-y-auto text-sm text-gray-300 md:text-lg">
             World Tycoon represents a revolutionary fusion of traditional
             city-building gameplay with blockchain technology, creating an
             ecosystem where your strategic decisions have real-world value.{" "}
@@ -53,9 +53,9 @@ export const FooterSection: React.FC = () => {
           className="h-1.5 w-screen shadow-md"
         />
 
-        <footer className="flex h-full items-center justify-between gap-4 bg-background px-6 text-foreground">
+        <footer className="bg-background text-foreground flex h-full items-center justify-between gap-4 px-6">
           <div className=""></div>
-          <p className="text-center font-bitmap text-xl md:text-2xl">
+          <p className="font-bitmap text-center text-xl md:text-2xl">
             &copy; {new Date().getFullYear()} {siteConfig.name}. All rights
             reserved.
           </p>

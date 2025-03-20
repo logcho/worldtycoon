@@ -58,7 +58,15 @@ export const Map: React.FC<{
   selectedTool?: Tool;
   onMouseMove?: (tile: Tile) => void;
   write?: () => void;
-}> = ({ value, scale, position, coordinates, selectedTool, onMouseMove, write }) => {
+}> = ({
+  value,
+  scale,
+  position,
+  coordinates,
+  selectedTool,
+  onMouseMove,
+  write,
+}) => {
   const [spritesheet, setSpritesheet] = React.useState<Spritesheet | null>(
     null,
   );
