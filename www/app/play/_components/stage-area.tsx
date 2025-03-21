@@ -8,7 +8,6 @@ import { useAccount } from "wagmi";
 import type { Tool } from "~/config/tools";
 
 import { HEIGHT, WIDTH } from "~/config/constants";
-import { useInspectMap } from "~/hooks/inspect";
 import { cn } from "~/lib/utils";
 
 import { Map } from "./map";
@@ -30,6 +29,10 @@ export const StageArea: React.FC<
   const { address } = useAccount();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [scale] = React.useState(1);
+  const [windowSize, setWindowSize] = React.useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = React.useState(false);
   const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
@@ -136,6 +139,23 @@ export const StageArea: React.FC<
     };
   }, [handleMouseMove, handleMouseUp]);
 
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleResize = () => {
+      setWindowSize({
+        width: container.clientWidth,
+        height: container.clientHeight,
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
     <div
       {...props}
@@ -148,8 +168,8 @@ export const StageArea: React.FC<
       )}
     >
       <Stage
-        width={WIDTH * 16}
-        height={HEIGHT * 16}
+        width={windowSize.width}
+        height={windowSize.height}
         options={{
           autoDensity: true,
           antialias: true,

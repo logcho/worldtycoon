@@ -46,7 +46,7 @@ export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
         totalFunds={totalFunds}
         cityTime={cityTime}
       />
-      <div className="flex w-dvh">
+      <div className="flex w-dvw">
         <ToolsSidebar
           selectedTool={selectedTool}
           onSelectTool={(tool) => setSelectedTool(tool)}
