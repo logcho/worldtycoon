@@ -127,16 +127,19 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             return "accept";
         }
         else if(method == "withdraw"){
-            // if (games.find(address) == games.end()) return "reject";
-            std::cout << parsed_payload.get("amount").to_str() << std::endl;
-            uint256_t amount(parsed_payload.get("amount").to_str(), 10);
-            std::string hexAmount = "0x" + amount.str(16, 32);
-            std::cout << parsed_payload.get("amount").to_str() << std::endl;
-            std::cout << amount << std::endl;
-            std::cout << hexAmount << std::endl;
-            // // if(games[address]->totalFunds < amount)
-
+            if (games.find(address) == games.end()) return "reject";
+            // std::cout << parsed_payload.get("amount").to_str() << std::endl;
+            // uint256_t amount(parsed_payload.get("amount").to_str(), 10);
+            uint256_t decimals("1000000000000000000", 10); // 18 decimals
+            uint256_t formattedBalance = games[address]->totalFunds * decimals;
+            // std::cout << decimals << std::endl;
+            // std::cout << formattedBalance << std::endl;
+            // std::cout << amount << std::endl;
+            std::string hexAmount = "0x" + formattedBalance.str(16, 32);
+            // std::cout << hexAmount << std::endl;
             generateVoucher(cli, address, hexAmount);
+            delete games[address];     // Deallocate the memory
+            games.erase(address); 
             return "accept";
         }
     }
@@ -170,6 +173,12 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
             std::transform(address.begin(), address.end(), address.begin(), ::tolower);
             if (games.find(address) == games.end()) return "reject";
             createReport(cli, vectorToHexUint16(convertMap(games[address]->map[0], WORLD_W, WORLD_H)));
+        }
+        else if(method == "getFunds"){
+            std::string address = parsed_payload.get("address").to_str();
+            std::transform(address.begin(), address.end(), address.begin(), ::tolower);
+            if (games.find(address) == games.end()) createReport(cli, uint64ToHex(0)); // Funds is 0 if city does not exist
+            createReport(cli, uint64ToHex(games[address]->totalFunds));
         }
     }
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;

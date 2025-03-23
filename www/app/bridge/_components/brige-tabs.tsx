@@ -15,7 +15,7 @@ import type { Address } from "viem";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { useInspectBalance } from "~/hooks/inspect";
+import { useInspectBalance, useInspectFunds } from "~/hooks/inspect";
 import {
   useReadErc20Allowance,
   useReadErc20BalanceOf,
@@ -41,7 +41,8 @@ export const BridgeTabs: React.FC = () => {
   }
 
   const [tab, setTab] = useQueryState("tab", { defaultValue: "deposit" });
-  const { balance, isLoading, error } = useInspectBalance(address!);
+  const { balance: l2Balance, isLoading: l2BalanceLoading, error: l2BalanceError } = useInspectBalance(address!);
+  const { funds, isLoading: fundsLoading, error: fundsError } = useInspectFunds(address!);
   // console.log(balance);
 
   const { data: l1Balance, isLoading: l1BalanceLoading } =
@@ -92,7 +93,7 @@ export const BridgeTabs: React.FC = () => {
       const data = await write({
         args: [
           dAppAddress,
-          stringToHex(`{"method": "withdraw", "amount": "${parseUnits(amount, decimals)}"}`),
+          stringToHex(`{"method": "withdraw"}`),
         ]
       });
     } catch (error) {
@@ -189,11 +190,11 @@ export const BridgeTabs: React.FC = () => {
           </div>
           <p className="text-muted-foreground text-sm">
             Balance:{" "}
-            {isLoading ?
+            {l2BalanceLoading ?
               "Loading..."
-            : error ?
+            : l2BalanceError ?
               "Error"
-            : `${formatUnits(balance ?? 0n, decimals)} SIM`}
+            : `${formatUnits(l2Balance ?? 0n, decimals)} SIM`}
           </p>
         </div>
 
@@ -234,8 +235,8 @@ export const BridgeTabs: React.FC = () => {
               </span>
             </div>
           </div>
-
-          <Input
+          {/* No need for input withdraw will delete city in exchange for city funds  */}
+          {/* <Input
             type="number"
             value={amount.toString()}
             onChange={(e) => setAmount(BigInt(e.target.value))}
@@ -245,8 +246,15 @@ export const BridgeTabs: React.FC = () => {
               // hide number arrows
               "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
             )}
-          />
-          <p className="text-muted-foreground text-sm">Balance: 0 SIM</p>
+          /> */}
+          <p className="text-muted-foreground text-sm">
+            Funds:{" "}
+              {fundsLoading ?
+                "Loading..."
+              : fundsError ?
+                "Error"
+              : `${funds} SIM`}
+          </p>
         </div>
 
         <ArrowDownIcon />

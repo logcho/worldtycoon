@@ -42,3 +42,18 @@ export const useInspectMap = (address: Address) => {
 
   return { map, isLoading, error };
 };
+
+export const useInspectFunds = (address: Address) => {
+  // Generate the hexified key
+  const key = JSON.stringify({ method: "getFunds", address });
+
+  const { data, isLoading, error } = useInspect(key);
+
+  // Extract the balance from the response
+  const funds =
+    data?.reports?.[0]?.payload ?
+      hexToBigInt(data.reports[0].payload)
+    : undefined;
+
+  return { funds, isLoading, error };
+};
