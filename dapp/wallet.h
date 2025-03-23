@@ -8,42 +8,43 @@
 
 class Wallet {
     private:
-        std::unordered_map<std::string, uint256_t> erc20;
+        std::unordered_map<std::string, uint256_t> wallets;
     public:
         Wallet(){}
-
-        void depositERC20(const std::string& address, uint256_t amount){
-            erc20[address] += amount; // Add amount to the existing balance
+        void depositToken(const std::string& address, uint256_t amount){
+            wallets[address] += amount; // Add amount to the existing balance
         }
-        void depositERC20(const std::string& address, const std::string& hexAmount) {
+        void depositToken(const std::string& address, const std::string& hexAmount) {
             uint256_t amount(hexAmount.substr(2), 16);  // Convert from hex string (remove "0x")
-            depositERC20(address, amount); // Call the original method
+            depositToken(address, amount); // Call the original method
         }
-        void withdrawERC20(const std::string& address, uint256_t amount){
-            erc20[address] -= amount; // Deduct amount from balance
+        bool withdrawToken(const std::string& address, uint256_t amount) {
+            auto it = wallets.find(address);
+            if (it == wallets.end() || it->second < amount) {
+                return false;  // Insufficient balance or address not found
+            }
+            it->second -= amount;  // Deduct amount from balance
+            return true;
         }
-        void withdrawERC20(const std::string& address, const std::string& hexAmount) {
+        bool withdrawToken(const std::string& address, const std::string& hexAmount) {
             uint256_t amount(hexAmount.substr(2), 16);  // Convert from hex string (remove "0x")
-            withdrawERC20(address, amount); // Call the original method
+            return withdrawToken(address, amount); // Call the original method with checks
         }
-
-        uint256_t getERC20Balance(const std::string& address){
-            auto it = erc20.find(address);
-            return (it != erc20.end()) ? it->second : uint256_t(0); // Return balance or 0 if not found 
+        uint256_t getTokenBalance(const std::string& address){
+            auto it = wallets.find(address);
+            return (it != wallets.end()) ? it->second : uint256_t(0); // Return balance or 0 if not found 
         }
-
-        bool transferERC20(const std::string& sender, const std::string& recipient, uint256_t amount) {
-            if (erc20[sender] < amount) {
+        bool transferToken(const std::string& sender, const std::string& recipient, uint256_t amount) {
+            if (wallets[sender] < amount) {
                 return false; // Not enough balance
             }
-            erc20[sender] -= amount;
-            erc20[recipient] += amount;
+            wallets[sender] -= amount;
+            wallets[recipient] += amount;
             return true; // Transfer successful
         }
-
-        bool transferERC20(const std::string& sender, const std::string& recipient, const std::string& hexAmount) {
+        bool transferToken(const std::string& sender, const std::string& recipient, const std::string& hexAmount) {
             uint256_t amount(hexAmount.substr(2), 16);  // Convert from hex string (remove "0x")
-            return transferERC20(sender, recipient, amount);
+            return transferToken(sender, recipient, amount);
         }
 };
 

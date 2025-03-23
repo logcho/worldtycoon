@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ArrowDown } from "lucide-react";
 import { useQueryState } from "nuqs";
-import { formatUnits, parseUnits, stringToHex } from "viem";
+import { formatUnits, numberToHex, parseUnits, stringToHex } from "viem";
 import { useAccount } from "wagmi";
 
 import type { Address } from "viem";
@@ -21,6 +21,7 @@ import {
   useReadErc20BalanceOf,
   useWriteErc20Approve,
   useWriteErc20PortalDepositErc20Tokens,
+  useWriteInputBoxAddInput,
 } from "~/hooks/wagmi";
 import { cn } from "~/lib/utils";
 
@@ -57,8 +58,8 @@ export const BridgeTabs: React.FC = () => {
   const [amount, setAmount] = useState<bigint>(0n);
 
   const { writeContractAsync: approveToken } = useWriteErc20Approve();
-  const { writeContractAsync: depositToken } =
-    useWriteErc20PortalDepositErc20Tokens();
+  const { writeContractAsync: depositToken } = useWriteErc20PortalDepositErc20Tokens();
+  const { writeContractAsync: write } = useWriteInputBoxAddInput();
 
   const approve = async (address: Address, amount: string) => {
     try {
@@ -84,7 +85,21 @@ export const BridgeTabs: React.FC = () => {
       console.error("Error in depositing ERC20:", error);
       throw error;
     }
-  };
+  };  
+
+  const withdraw = async (amount: string) => {
+    try {
+      const data = await write({
+        args: [
+          dAppAddress,
+          stringToHex(`{"method": "withdraw", "amount": "${parseUnits(amount, decimals)}"}`),
+        ]
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      throw error
+    }
+  }
 
   const canApprove =
     l1Balance != undefined &&
@@ -222,9 +237,12 @@ export const BridgeTabs: React.FC = () => {
 
           <Input
             type="number"
+            value={amount.toString()}
+            onChange={(e) => setAmount(BigInt(e.target.value))}
             placeholder="0"
             className={cn(
               "bg-foreground/10 w-full text-2xl outline-hidden",
+              // hide number arrows
               "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
             )}
           />
@@ -246,10 +264,19 @@ export const BridgeTabs: React.FC = () => {
               />
             </div>
           </div>
-          <p className="text-muted-foreground text-sm">Balance: 0 SIM</p>
+          <p className="text-muted-foreground text-sm">
+            {l1BalanceLoading ?
+              "Loading..."
+              : `${formatUnits(l1Balance ?? 0n, decimals)} ${symbol}`}
+          </p>
         </div>
 
-        <Button className="w-full shadow-md">Withdraw</Button>
+        <Button 
+          className="w-full shadow-md"
+          onClick={() => withdraw(amount.toString())}
+        >
+          Withdraw
+        </Button>
       </TabsContent>
     </Tabs>
   );
