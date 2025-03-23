@@ -133,7 +133,7 @@ export const Map: React.FC<{
       );
 
       if (!wouldOverlap) {
-        setPlacedSprites((prev) => [...prev, { x, y, tool: selectedTool }]);
+        // setPlacedSprites((prev) => [...prev, { x, y, tool: selectedTool }]);
         write && write();
       }
     }

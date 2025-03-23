@@ -38,6 +38,19 @@ void createNotice(httplib::Client &cli, const std::string &payload) {
     std::cout << "Received notice status " << r.value().status << std::endl;
 }
 
+void generateVoucher(httplib::Client &cli, const std::string &recipient, std::string amount) {
+    // Format the payload expected by Cartesi
+    std::string payload = "{\"destination\":\"" + recipient + "\",\"payload\":\"" + amount + "\"}";
+    auto r = cli.Post("/voucher", payload, "application/json");
+
+    if (r) {
+        std::cout << "[VOUCHER] Sent: " << payload << std::endl;
+        std::cout << "Received status: " << r->status << std::endl;
+    } else {
+        std::cerr << "[ERROR] Failed to send voucher" << std::endl;
+    }
+}
+
 void createGameNotices(httplib::Client &cli, const Micropolis *game){
     createNotice(cli, vectorToHexUint16(convertMap(game->map[0], WORLD_W, WORLD_H))); // Map
     createNotice(cli, uint64ToHex(game->cityPop)); // Population
@@ -84,7 +97,7 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
         if(method == "start"){
             if (games.find(address) != games.end()) return "reject";
             games[address] = new Micropolis();
-            games[address]->setSpeed(3);
+            games[address]->setSpeed(1000);
             games[address]->generateMap();
             std::cout << "City generated for" << address << std::endl;
             std::string hexAmount = "0x00000000000000000000000000000000000000000000043c33c1937564800000"; // 20000 18n
@@ -105,11 +118,15 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             int x = std::stoi(parsed_payload.get("x").to_str());
             int y = std::stoi(parsed_payload.get("y").to_str());
             games[address]->doTool(tool, x, y);
-            for(int i = 0; i < 10; i++){
-                games[address]->simTick();
-            }
+            games[address]->simTick();
             std::cout << "Using tool " << parsed_payload.get("tool").to_str() << " at (" << x << ", " << y << ") to game " << address << std::endl;
             createGameNotices(cli, games[address]);
+            return "accept";
+        }
+        else if(method == "withdraw"){
+            if (games.find(address) == games.end()) return "reject";
+            std::string amount = parsed_payload.get("amount").to_str();
+            generateVoucher(cli, address, amount);
             return "accept";
         }
     }
