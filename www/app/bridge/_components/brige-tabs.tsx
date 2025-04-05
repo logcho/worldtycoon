@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ArrowDown } from "lucide-react";
 import { useQueryState } from "nuqs";
-import { formatUnits, numberToHex, parseUnits, stringToHex } from "viem";
-import { useAccount } from "wagmi";
+import { erc20Abi, formatUnits, numberToHex, parseUnits, stringToHex } from "viem";
+import { useAccount, useContractRead } from "wagmi";
 
 import type { Address } from "viem";
 
@@ -26,12 +26,24 @@ import {
 import { cn } from "~/lib/utils";
 
 export const BridgeTabs: React.FC = () => {
-  const symbol = "SIM"; // XXX: should actually come from querying token metadata
-  const decimals = 18; // XXX: should actually come from querying token metadata
+  // const symbol = "SIM"; // XXX: should actually come from querying token metadata
+  // const decimals = 18; // XXX: should actually come from querying token metadata
 
   const tokenAddress = "0x92C6bcA388E99d6B304f1Af3c3Cd749Ff0b591e2";
   const erc20PortalAddress = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
   const dAppAddress = `0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e`; // Default address for running locally change upon deployment
+
+  const { data: symbol } = useContractRead({
+    address: tokenAddress,
+    abi: erc20Abi,
+    functionName: "symbol",
+  });
+
+  const { data: decimals } = useContractRead({
+    address: tokenAddress,
+    abi: erc20Abi,
+    functionName: "decimals",
+  });
 
   const router = useRouter();
   const { address } = useAccount();
@@ -66,7 +78,7 @@ export const BridgeTabs: React.FC = () => {
     try {
       await approveToken({
         address,
-        args: [erc20PortalAddress, parseUnits(amount, decimals)],
+        args: [erc20PortalAddress, parseUnits(amount, decimals || 18)],
       });
       console.log("ERC20 Approval successful");
     } catch (error) {
@@ -79,7 +91,7 @@ export const BridgeTabs: React.FC = () => {
     try {
       const data = stringToHex(`Deposited (${amount}).`);
       await depositToken({
-        args: [tokenAddress, dAppAddress, parseUnits(amount, decimals), data],
+        args: [tokenAddress, dAppAddress, parseUnits(amount, decimals || 18), data],
       });
       console.log("ERC20 Deposit successful");
     } catch (error) {
@@ -106,7 +118,7 @@ export const BridgeTabs: React.FC = () => {
     l1Balance != undefined &&
     allowance !== undefined &&
     amount > 0 &&
-    allowance < parseUnits(amount.toString(), decimals) &&
+    allowance < parseUnits(amount.toString(), decimals || 18) &&
     parseUnits(amount.toString(), decimals) <= (l1Balance ?? 0n);
 
   const canDeposit =
