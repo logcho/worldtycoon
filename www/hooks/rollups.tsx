@@ -66,7 +66,7 @@ export const useRollupsServer = (dapp: Address, input?: Hex) => {
     isPending: writePending,
     isSuccess: writeSuccess,
     error: writeError,
-    writeContract,
+    writeContractAsync,
     data: writeData,
   } = useWriteInputBoxAddInput();
 
@@ -77,7 +77,7 @@ export const useRollupsServer = (dapp: Address, input?: Hex) => {
   const [notices, setNotices] = useState<Hex[]>([]);
 
   const write = async () => {
-    if (simulateData) await writeContract(simulateData.request);
+    if (simulateData) await writeContractAsync(simulateData.request);
   };
 
   const inputIndex = useInputIndex(reciept);

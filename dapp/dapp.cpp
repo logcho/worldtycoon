@@ -20,6 +20,23 @@ const std::string PEOPLE_WALLET = "0x0000000000000000000000000000000000000002";
 Wallet* walletHandler = new Wallet();
 std::unordered_map<std::string, Micropolis*> games;
 
+// Left-pads a hex string to 64 characters (32 bytes)
+std::string padTo32Bytes(const std::string &hex) {
+    std::string clean = (hex.substr(0, 2) == "0x") ? hex.substr(2) : hex;
+    return std::string(64 - clean.length(), '0') + clean;
+}
+
+// Prepares the calldata for ERC-20 transfer(address,uint256)
+std::string encodeTransferCall(const std::string &recipient, const std::string &amountHex) {
+    std::string methodId = "a9059cbb"; // Precomputed for transfer(address,uint256)
+
+    // Pad recipient address and amount
+    std::string paddedRecipient = padTo32Bytes(recipient);
+    std::string paddedAmount = padTo32Bytes(amountHex);
+
+    return "0x" + methodId + paddedRecipient + paddedAmount;
+}
+
 void createReport(httplib::Client &cli, const std::string &payload) {
     std::string report = std::string("{\"payload\":\"") + payload + std::string("\"}");
     auto r = cli.Post("/report", report, "application/json");    
@@ -35,8 +52,10 @@ void createNotice(httplib::Client &cli, const std::string &payload) {
 }
 
 void generateVoucher(httplib::Client &cli, const std::string &recipient, std::string amount) {
+    std::string transferCall = encodeTransferCall(recipient, amount);
     // Format the payload expected by Cartesi
-    std::string payload = "{\"destination\":\"" + recipient + "\",\"payload\":\"" + amount + "\"}";
+    std::string payload = "{\"destination\":\"" + TOKEN + "\",\"payload\":\"" + transferCall + "\"}";
+    // Payload should be abi transfer to erc20 address
     auto r = cli.Post("/voucher", payload, "application/json");
     if (r) {
         std::cout << "[VOUCHER] Sent: " << payload << std::endl;
@@ -100,7 +119,8 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
         if(method == "start"){
             if (games.find(address) != games.end()) return "reject";
             games[address] = new Micropolis();
-            games[address]->setSpeed(1000);
+            games[address]->setSpeed(3);
+            games[address]->setPasses(100);
             games[address]->generateMap();
             std::cout << "City generated for" << address << std::endl;
             std::string hexAmount = "0x00000000000000000000000000000000000000000000043c33c1937564800000"; // 20000 18n
@@ -121,6 +141,9 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             int x = std::stoi(parsed_payload.get("x").to_str());
             int y = std::stoi(parsed_payload.get("y").to_str());
             games[address]->doTool(tool, x, y);
+            // for(int i = 0; i < 100; i++){
+            //     games[address]->simTick();
+            // }
             games[address]->simTick();
             std::cout << "Using tool " << parsed_payload.get("tool").to_str() << " at (" << x << ", " << y << ") to game " << address << std::endl;
             createGameNotices(cli, games[address]);
@@ -178,7 +201,7 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
             std::string address = parsed_payload.get("address").to_str();
             std::transform(address.begin(), address.end(), address.begin(), ::tolower);
             if (games.find(address) == games.end()) createReport(cli, uint64ToHex(0)); // Funds is 0 if city does not exist
-            createReport(cli, uint64ToHex(games[address]->totalFunds));
+            else createReport(cli, uint64ToHex(games[address]->totalFunds));
         }
     }
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
