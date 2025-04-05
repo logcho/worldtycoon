@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
@@ -14,6 +14,7 @@ import type { Address } from "viem";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Spinner } from "~/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useInspectBalance, useInspectFunds } from "~/hooks/inspect";
 import {
@@ -71,7 +72,7 @@ export const BridgeTabs: React.FC = () => {
   const [amount, setAmount] = useState<bigint>(0n);
 
   const { writeContractAsync: approveToken } = useWriteErc20Approve();
-  const { writeContractAsync: depositToken } = useWriteErc20PortalDepositErc20Tokens();
+  const { writeContractAsync: depositToken} = useWriteErc20PortalDepositErc20Tokens();
   const { writeContractAsync: write } = useWriteInputBoxAddInput();
 
   const approve = async (address: Address, amount: string) => {
@@ -87,18 +88,19 @@ export const BridgeTabs: React.FC = () => {
     }
   };
 
+  const [isDepositing, setIsDepositing] = useState(false); // New loading state
   const deposit = async (amount: string) => {
     try {
       const data = stringToHex(`Deposited (${amount}).`);
       await depositToken({
         args: [tokenAddress, dAppAddress, parseUnits(amount, decimals || 18), data],
       });
-      console.log("ERC20 Deposit successful");
     } catch (error) {
       console.error("Error in depositing ERC20:", error);
       throw error;
     }
   };  
+  // TODO: Add loading states to deposit 
 
   const withdraw = async (amount: string) => {
     try {
@@ -224,7 +226,11 @@ export const BridgeTabs: React.FC = () => {
             disabled={!canDeposit}
             onClick={() => deposit(amount.toString())}
           >
-            Deposit
+            {isDepositing ? (
+              <Spinner className="text-black" />
+            ) : (
+              "Deposit"
+            )}
           </Button>
         </div>
       </TabsContent>
