@@ -8,17 +8,24 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Hex, hexToNumber } from "viem";
 
 import { CityStats } from "./citystats";
-
+import { Budget } from "./budget";
 interface NavbarProps {
   population?: Hex;
   totalFunds?: Hex;
   cityTime?: Hex;
+
+  loading?: boolean;
+  setInput?: (input: Hex) => void;
+  write?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   population,
   totalFunds,
   cityTime,
+  loading,
+  setInput,
+  write,
 }) => {
   const loaded = !!population && !!totalFunds && !!cityTime;
   return (
@@ -29,14 +36,33 @@ export const Navbar: React.FC<NavbarProps> = ({
             WORLD TYCOON
           </p>
         </Link>
-
-        {loaded ?
+        {loaded &&
+          <div className="flex gap-4">
           <CityStats
             population={hexToNumber(population)}
             totalFunds={hexToNumber(totalFunds)}
             cityTime={hexToNumber(cityTime)}
           />
-        : <></>}
+          <Budget 
+              cityTax={20}
+              cashFlow={0}
+              funds={hexToNumber(totalFunds)}
+              taxFund={0}
+              roadPercent={0}
+              roadFund={0}
+              firePercent={0}
+              fireFund={0}
+              policePercent={0}
+              policeFund={0}
+              loading={loading}
+              setInput={setInput}
+              write={write}
+          />
+          </div>
+        }
+
+
+
 
         <div className="flex w-full items-center justify-end">
           <ConnectButton />

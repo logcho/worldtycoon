@@ -45,6 +45,9 @@ export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
         population={population}
         totalFunds={totalFunds}
         cityTime={cityTime}
+        loading={loading}
+        setInput={setInput}
+        write={write}
       />
       <div className="flex w-dvw">
         <ToolsSidebar
