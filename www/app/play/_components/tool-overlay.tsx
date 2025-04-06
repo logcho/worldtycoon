@@ -13,38 +13,49 @@ import type { Tool } from "~/config/tools";
 
 import { TOOLS } from "~/config/tools";
 import { loadToolsSpritesheet } from "~/lib/sprites";
+import { FC, useEffect, useRef, useState } from "react";
 
-export const ToolOverlay: React.FC<{
+export type ToolOverProps= {
   selectedTool?: Tool;
   coordinates: { x: number; y: number };
+  endCoordinates: { x: number; y: number };
+  startCoordinates: { x: number; y: number };
   scale: number;
-  position: { x: number; y: number };
+  // position: { x: number; y: number };
   setInput?: (input: Hex) => void;
   isBudgeting: boolean;
-}> = ({ selectedTool, coordinates, scale, position, setInput, isBudgeting }) => {
-  const spriteRef = React.useRef<PixiRef<typeof Sprite>>(null);
-  const [spritesheet, setSpritesheet] = React.useState<Spritesheet | null>(
-    null,
-  );
+}
+export const ToolOverlay: FC<ToolOverProps> = ({ 
+  selectedTool, 
+  coordinates, 
+  endCoordinates,
+  startCoordinates,
+  scale, 
+  // position, 
+  setInput, 
+  isBudgeting,
+}) => {
+  const spriteRef = useRef<PixiRef<typeof Sprite>>(null);
+  const [spritesheet, setSpritesheet] = useState<Spritesheet | null>(null,);
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadToolsSpritesheet().then(setSpritesheet).catch(console.error);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (spriteRef.current && selectedTool) {
       const toolIndex = TOOLS.findIndex((t) => t.id === selectedTool.id);
       if (toolIndex !== -1) {
         spriteRef.current.x =
           16 *
             (coordinates.x - Math.floor((selectedTool.size - 1) / 2)) *
-            scale +
-          position.x;
+            scale;
+          // position.x;
         spriteRef.current.y =
           16 *
             (coordinates.y - Math.floor((selectedTool.size - 1) / 2)) *
-            scale +
-          position.y;
+            scale;
+          // position.y;
       }
       if (setInput && !isBudgeting){
         setInput(
@@ -52,9 +63,26 @@ export const ToolOverlay: React.FC<{
             `{"method": "doTool", "x": ${coordinates.x}, "y": ${coordinates.y}, "tool": ${selectedTool.num}}`,
           ),
         );
+        const isDraggable = selectedTool.num == 5 || selectedTool.num == 6 || selectedTool.num == 8 || selectedTool.num == 9
+        if(isDraggable){
+          if(startCoordinates != endCoordinates){
+            setInput(
+              stringToHex(
+                `{"method": "dragTool", "fromX": ${startCoordinates.x}, "fromY": ${startCoordinates.y}, "toX": ${endCoordinates.x}, "toY": ${endCoordinates.y}, "tool": ${selectedTool.num}}`,
+              ),
+            );
+          }
+        }
+        // else if(setInput){
+        //   setInput(
+        //     stringToHex(
+        //       `{"method": "dragTool", "fromX": ${coordinates.x}, "fromY": ${coordinates.y}, "toX": ${endCoordinates.x}, "toY": ${endCoordinates.y}, "tool": ${selectedTool.num}}`,
+        //     ),
+        //   );
+        // }
       }
     }
-  }, [selectedTool, coordinates, scale, position]);
+  }, [selectedTool, coordinates, scale]);
 
   return (
     <Container>

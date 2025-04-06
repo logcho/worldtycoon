@@ -79,9 +79,8 @@ void createGameNotices(httplib::Client &cli, const Micropolis *game){
     createNotice(cli, uint64ToHex(game->policeFund));
     createNotice(cli, uint64ToHex(game->roadFund));
     createNotice(cli, stringToHex(std::to_string(game->cashFlow)));
-    std::cout << std::to_string(game->cashFlow) << std::endl;
+    // std::cout << std::to_string(game->cashFlow) << std::endl;
     // std::cout << static_cast<int>(game->firePercent * 100) << std::endl;
-
     // std::cout << game->cityTax << std::endl;
 }
 
@@ -133,7 +132,8 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             if (games.find(address) != games.end()) return "reject";
             games[address] = new Micropolis();
             games[address]->setSpeed(3);
-            games[address]->setPasses(100);
+            // games[address]->setPasses(100);
+            games[address]->setPasses(50);            
             games[address]->generateMap();
             std::cout << "City generated for" << address << std::endl;
             std::string hexAmount = "0x00000000000000000000000000000000000000000000043c33c1937564800000"; // 20000 18n
@@ -164,6 +164,22 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             // }
             games[address]->simTick();
             std::cout << "Using tool " << parsed_payload.get("tool").to_str() << " at (" << x << ", " << y << ") to game " << address << std::endl;
+            createGameNotices(cli, games[address]);
+            return "accept";
+        }
+        else if(method == "dragTool"){
+            if (games.find(address) == games.end()) return "reject";
+            EditingTool tool = static_cast<EditingTool>(std::stoi(parsed_payload.get("tool").to_str()));
+            int fromX = std::stoi(parsed_payload.get("fromX").to_str());
+            int fromY = std::stoi(parsed_payload.get("fromY").to_str());
+            int toX = std::stoi(parsed_payload.get("toX").to_str());
+            int toY = std::stoi(parsed_payload.get("toY").to_str());
+            games[address]->toolDrag(tool, fromX, fromY, toX, toY);
+            // for(int i = 0; i < 100; i++){
+            //     games[address]->simTick();
+            // }
+            // games[address]->simTick();
+            std::cout << "Dragging tool " << parsed_payload.get("tool").to_str() << " from (" << fromX << ", " << fromY << ") to (" << toX << ", " << toY << ") for game at" << address << std::endl;
             createGameNotices(cli, games[address]);
             return "accept";
         }

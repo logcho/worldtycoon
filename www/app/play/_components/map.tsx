@@ -12,6 +12,7 @@ import type { Tool } from "~/config/tools";
 import { HEIGHT, WIDTH } from "~/config/constants";
 import { TOOLS } from "~/config/tools";
 import { isOverlapping, loadToolsSpritesheet } from "~/lib/sprites";
+import { FC, useLayoutEffect, useState } from "react";
 
 export type Tile = {
   x: number;
@@ -49,32 +50,33 @@ const COORDINATES = Array.from(ROWS, (_, y) =>
   Array.from(COLS, (_, x) => ({ x, y })),
 ).flat();
 
-export const Map: React.FC<{
+export type MapProps = {
   value?: Hex;
   scale: number;
-  position: { x: number; y: number };
-  coordinates: { x: number; y: number };
+  // position: { x: number; y: number };
+  // coordinates: { x: number; y: number };
   loading?: boolean;
   selectedTool?: Tool;
   onMouseMove?: (tile: Tile) => void;
-  write?: () => void;
+  onMouseDown?: (tile: Tile) => void;
+  onMouseUp?: (tile: Tile) => void;
   isBudgeting: boolean;
-}> = ({
+}
+
+export const Map: FC<MapProps> = ({
   value,
   scale,
-  position,
-  coordinates,
+  // position,
+  // coordinates,
   selectedTool,
   onMouseMove,
-  write,
+  onMouseDown,
+  onMouseUp,
   isBudgeting,
 }) => {
-  const [spritesheet, setSpritesheet] = React.useState<Spritesheet | null>(
-    null,
-  );
-  const [toolsSpritesheet, setToolsSpritesheet] =
-    React.useState<Spritesheet | null>(null);
-  const [placedSprites, setPlacedSprites] = React.useState<PlacedSprite[]>([]);
+  const [spritesheet, setSpritesheet] = useState<Spritesheet | null>(null,);
+  // const [toolsSpritesheet, setToolsSpritesheet] = useState<Spritesheet | null>(null);
+  // const [placedSprites, setPlacedSprites] = useState<PlacedSprite[]>([]);
 
   // default value is a blank map
   value =
@@ -88,7 +90,7 @@ export const Map: React.FC<{
   const map = new Uint16Array(pairs!.map((pair) => parseInt(pair, 16)));
 
   // create optimized spritesheet
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const texture = Texture.from("/images/micropolis_tiles.png");
 
     const frames = [...Array(1024).keys()].map((i) => ({
@@ -115,31 +117,31 @@ export const Map: React.FC<{
   }, []);
 
   // Load tools spritesheet
-  React.useLayoutEffect(() => {
-    loadToolsSpritesheet().then(setToolsSpritesheet).catch(console.error);
-  }, []);
+  // useLayoutEffect(() => {
+  //   loadToolsSpritesheet().then(setToolsSpritesheet).catch(console.error);
+  // }, []);
 
-  const handleTileClick = (x: number, y: number) => {
-    // @logcho here you can use coordinates
-    if (selectedTool) {
-      // Check if the new tool would overlap with any existing tools
-      const wouldOverlap = placedSprites.some((sprite) =>
-        isOverlapping(
-          x,
-          y,
-          selectedTool.size,
-          sprite.x,
-          sprite.y,
-          sprite.tool.size,
-        ),
-      );
+  // const handleTileClick = (x: number, y: number) => {
+  //   // @logcho here you can use coordinates
+  //   if (selectedTool) {
+  //     // Check if the new tool would overlap with any existing tools
+  //     const wouldOverlap = placedSprites.some((sprite) =>
+  //       isOverlapping(
+  //         x,
+  //         y,
+  //         selectedTool.size,
+  //         sprite.x,
+  //         sprite.y,
+  //         sprite.tool.size,
+  //       ),
+  //     );
 
-      if (!isBudgeting && !wouldOverlap) {
-        // setPlacedSprites((prev) => [...prev, { x, y, tool: selectedTool }]);
-        write && write();
-      }
-    }
-  };
+  //     if (!isBudgeting && !wouldOverlap) {
+  //       // setPlacedSprites((prev) => [...prev, { x, y, tool: selectedTool }]);
+  //       write && write();
+  //     }
+  //   }
+  // };
 
   const TileImage = (x: number, y: number) => {
     const t = map[x * 100 + y] ?? 0;
@@ -157,37 +159,39 @@ export const Map: React.FC<{
             y={y * 16 * scale}
             scale={scale}
             onmousemove={() => onMouseMove?.(tile)}
-            onclick={() => handleTileClick(x, y)}
+            onmousedown={() => onMouseDown?.(tile)}
+            onmouseup={() => onMouseUp?.(tile)}
           />
         </Container>
       : null;
   };
 
-  return (
-    <Container position={[position.x, position.y]}>
-      {COORDINATES.map(({ x, y }) => TileImage(x, y))}
-      {toolsSpritesheet &&
-        placedSprites.map((sprite, index) => {
-          const toolIndex = TOOLS.findIndex((t) => t.id === sprite.tool.id);
-          if (toolIndex === -1) return null;
+  return <>{COORDINATES.map(({ x, y }) => TileImage(x, y))}</>;
+  // return (
+  //   <Container position={[position.x, position.y]}>
+  //     {COORDINATES.map(({ x, y }) => TileImage(x, y))}
+  //     {toolsSpritesheet &&
+  //       placedSprites.map((sprite, index) => {
+  //         const toolIndex = TOOLS.findIndex((t) => t.id === sprite.tool.id);
+  //         if (toolIndex === -1) return null;
 
-          return (
-            <Container
-              key={index}
-              x={
-                16 * (sprite.x - Math.floor((sprite.tool.size - 1) / 2)) * scale
-              }
-              y={
-                16 * (sprite.y - Math.floor((sprite.tool.size - 1) / 2)) * scale
-              }
-            >
-              <Sprite
-                texture={toolsSpritesheet.textures[toolIndex]}
-                scale={scale}
-              />
-            </Container>
-          );
-        })}
-    </Container>
-  );
+  //         return (
+  //           <Container
+  //             key={index}
+  //             x={
+  //               16 * (sprite.x - Math.floor((sprite.tool.size - 1) / 2)) * scale
+  //             }
+  //             y={
+  //               16 * (sprite.y - Math.floor((sprite.tool.size - 1) / 2)) * scale
+  //             }
+  //           >
+  //             <Sprite
+  //               texture={toolsSpritesheet.textures[toolIndex]}
+  //               scale={scale}
+  //             />
+  //           </Container>
+  //         );
+  //       })}
+  //   </Container>
+  // );
 };

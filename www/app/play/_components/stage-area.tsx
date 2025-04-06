@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 // const MIN_ZOOM = 0.5;
 // const MAX_ZOOM = 2;
 // const ZOOM_STEP = 0.1;
-interface StageAreaProps {
+export type StageAreaProps = {
   selectedTool?: Tool;
   write?: () => void;
   setInput?: (input: Hex) => void;
@@ -39,16 +39,17 @@ export const StageArea: React.FC<StageAreaProps> = ({
     router.replace("/");
   }
 
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const [scale] = React.useState(1);
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  // const containerRef = React.useRef<HTMLDivElement>(null);
+  // const [scale] = React.useState(1);
+  // const [windowSize, setWindowSize] = useState({
+  //   width: window.innerWidth,
+  //   height: window.innerHeight,
+  // });
+  // const [isDragging, setIsDragging] = useState(false);
+  // const [position, setPosition] = useState({ x: 0, y: 0 });
   const [coordinates, setCoordinates] = useState({ x: 0, y: 0 });
+  const [startCoordinates, setStartCoordinates] = useState({ x: 0, y: 0})
+  const [endCoordinates, setEndCoordinates] = useState({ x: 0, y: 0})
 
   const width = 120;
   const height = 100;
@@ -56,15 +57,15 @@ export const StageArea: React.FC<StageAreaProps> = ({
   
 
   // Center the stage initially
-  useEffect(() => {
-    if (containerRef.current) {
-      const { clientWidth, clientHeight } = containerRef.current;
-      setPosition({
-        x: (clientWidth - WIDTH * 16) / 2,
-        y: (clientHeight - HEIGHT * 16) / 2,
-      });
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (containerRef.current) {
+  //     const { clientWidth, clientHeight } = containerRef.current;
+  //     setPosition({
+  //       x: (clientWidth - WIDTH * 16) / 2,
+  //       y: (clientHeight - HEIGHT * 16) / 2,
+  //     });
+  //   }
+  // }, []);
 
   // Handle zoom with mouse wheel
   // const handleWheel = React.useCallback(
@@ -92,48 +93,48 @@ export const StageArea: React.FC<StageAreaProps> = ({
   // );
 
   // Handle drag start
-  const handleMouseDown = React.useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.button === 0 && !(e.target as HTMLElement).closest("button")) {
-        setIsDragging(true);
-        setDragStart({
-          x: e.clientX - position.x,
-          y: e.clientY - position.y,
-        });
-      }
-    },
-    [position],
-  );
+  // const handleMouseDown = React.useCallback(
+  //   (e: React.MouseEvent<HTMLDivElement>) => {
+  //     if (e.button === 0 && !(e.target as HTMLElement).closest("button")) {
+  //       setIsDragging(true);
+  //       setDragStart({
+  //         x: e.clientX - position.x,
+  //         y: e.clientY - position.y,
+  //       });
+  //     }
+  //   },
+  //   [position],
+  // );
 
   // Handle drag
-  const handleMouseMove = React.useCallback(
-    (e: MouseEvent) => {
-      if (isDragging) {
-        const container = containerRef.current;
-        if (!container) return;
+  // const handleMouseMove = React.useCallback(
+  //   (e: MouseEvent) => {
+  //     if (isDragging) {
+  //       const container = containerRef.current;
+  //       if (!container) return;
 
-        const { clientWidth, clientHeight } = container;
-        const minX = -(WIDTH * 16 * scale - clientWidth);
-        const minY = -(HEIGHT * 16 * scale - clientHeight);
+  //       const { clientWidth, clientHeight } = container;
+  //       const minX = -(WIDTH * 16 * scale - clientWidth);
+  //       const minY = -(HEIGHT * 16 * scale - clientHeight);
 
-        const newX = e.clientX - dragStart.x;
-        const newY = e.clientY - dragStart.y;
-        setPosition({
-          x: Math.min(clientWidth / 4, Math.max(minX - clientWidth / 4, newX)),
-          y: Math.min(
-            clientHeight / 4,
-            Math.max(minY - clientHeight / 4, newY),
-          ),
-        });
-      }
-    },
-    [isDragging, dragStart, scale],
-  );
+  //       const newX = e.clientX - dragStart.x;
+  //       const newY = e.clientY - dragStart.y;
+  //       setPosition({
+  //         x: Math.min(clientWidth / 4, Math.max(minX - clientWidth / 4, newX)),
+  //         y: Math.min(
+  //           clientHeight / 4,
+  //           Math.max(minY - clientHeight / 4, newY),
+  //         ),
+  //       });
+  //     }
+  //   },
+  //   [isDragging, dragStart, scale],
+  // );
 
   // Handle drag end
-  const handleMouseUp = React.useCallback(() => {
-    setIsDragging(false);
-  }, []);
+  // const handleMouseUp = React.useCallback(() => {
+  //   setIsDragging(false);
+  // }, []);
 
   // Add event listeners
   // React.useEffect(() => {
@@ -195,19 +196,49 @@ export const StageArea: React.FC<StageAreaProps> = ({
       >
         <Map
           value={map}
-          scale={scale}
-          position={position}
-          coordinates={coordinates}
+          scale={1}
+          // position={position}
+          // coordinates={coordinates}
           selectedTool={selectedTool}
-          onMouseMove={(tile) => setCoordinates({ x: tile.x, y: tile.y })}
-          write={write}
+          onMouseDown={(tile) => {
+            if(selectedTool){
+              setStartCoordinates({ x: tile.x, y: tile.y })
+              if(selectedTool.num != 5 && selectedTool.num != 6 && selectedTool.num != 8 && selectedTool.num != 9){
+                write && write();
+              }
+            }
+          }}
+          onMouseMove={(tile) => {
+            // setEndCoordinates({ x: tile.x, y: tile.y })
+            setEndCoordinates({ x: tile.x, y: tile.y })
+            setCoordinates({ x: tile.x, y: tile.y })
+
+            // if(mouseDown){
+            //   setEndCoordinates({ x: tile.x, y: tile.y })
+            // } else{
+            //   setCoordinates({ x: tile.x, y: tile.y })
+            // }
+          }}
+          onMouseUp={(tile) => {
+            if(selectedTool){
+              // setMouseDown(false);
+              // setDeltaX(tile.x);
+              // setDeltaY(tile.y);    
+              if(selectedTool.num == 6 || selectedTool.num == 8 || selectedTool.num == 9){
+                  // setEndCoordinates({ x: tile.x, y: tile.y })
+                  write && write();
+              }
+            }
+          }}
           isBudgeting={isBudgeting}
         />
         <ToolOverlay
           selectedTool={selectedTool}
           coordinates={coordinates}
-          scale={scale}
-          position={position}
+          endCoordinates={endCoordinates}
+          startCoordinates={startCoordinates}
+          scale={1}
+          // position={position}
           setInput={setInput}
           isBudgeting={isBudgeting}
         />
