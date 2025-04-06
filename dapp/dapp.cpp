@@ -70,6 +70,19 @@ void createGameNotices(httplib::Client &cli, const Micropolis *game){
     createNotice(cli, uint64ToHex(game->cityPop)); // Population
     createNotice(cli, uint64ToHex(game->totalFunds)); // City funds
     createNotice(cli, uint64ToHex(game->cityTime)); // City time
+    createNotice(cli, uint64ToHex(game->cityTax)); // City tax
+    createNotice(cli, uint64ToHex(game->taxFund)); // Tax Fund
+    createNotice(cli, uint64ToHex(static_cast<int>(game->firePercent * 100))); // Fire percent
+    createNotice(cli, uint64ToHex(static_cast<int>(game->policePercent * 100))); // Police percent
+    createNotice(cli, uint64ToHex(static_cast<int>(game->roadPercent * 100))); // Road percent
+    createNotice(cli, uint64ToHex(game->fireFund));
+    createNotice(cli, uint64ToHex(game->policeFund));
+    createNotice(cli, uint64ToHex(game->roadFund));
+    createNotice(cli, stringToHex(std::to_string(game->cashFlow)));
+    std::cout << std::to_string(game->cashFlow) << std::endl;
+    // std::cout << static_cast<int>(game->firePercent * 100) << std::endl;
+
+    // std::cout << game->cityTax << std::endl;
 }
 
 bool isERC20Deposit(const std::string& address) {
@@ -135,6 +148,11 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             createGameNotices(cli, games[address]);
             return "accept";
         }
+        // else if(method == "start"){
+        //     if (games.find(address) == games.end()) return "reject";
+        //     createGameNotices(cli, games[address]);
+        //     return "accept";
+        // }
         else if(method == "doTool"){
             if (games.find(address) == games.end()) return "reject";
             EditingTool tool = static_cast<EditingTool>(std::stoi(parsed_payload.get("tool").to_str()));
@@ -146,6 +164,25 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             // }
             games[address]->simTick();
             std::cout << "Using tool " << parsed_payload.get("tool").to_str() << " at (" << x << ", " << y << ") to game " << address << std::endl;
+            createGameNotices(cli, games[address]);
+            return "accept";
+        }
+        else if(method == "doBudget"){
+            if (games.find(address) == games.end()) return "reject";
+            double roads = std::stod(parsed_payload.get("roads").to_str());
+            double fire = std::stod(parsed_payload.get("fire").to_str());
+            double police = std::stod(parsed_payload.get("police").to_str());
+            int tax = std::stoi(parsed_payload.get("tax").to_str());
+
+            games[address]->firePercent = fire;
+            games[address]->policePercent = police;
+            games[address]->roadPercent = roads;
+            games[address]->setCityTax(tax);
+            
+            // for(int i = 0; i < 100; i++){
+            //     games[address]->simTick();
+            // }
+            std::cout << "Setting budget " << "roads: " << games[address]->roadPercent << " fire: " << games[address]->firePercent << " police: " << games[address]->policePercent << " tax: " << tax << " for game " << address << std::endl;
             createGameNotices(cli, games[address]);
             return "accept";
         }

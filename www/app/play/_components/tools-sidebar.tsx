@@ -18,6 +18,9 @@ export const ToolsSidebar: React.FC<
         className,
       )}
       {...props}
+      style={{
+        scrollbarWidth: "none", // Get rid of scrollbar
+      }}
     >
       {TOOLS.map((tool) => (
         <div

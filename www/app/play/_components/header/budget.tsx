@@ -1,8 +1,8 @@
 "use client";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
-import { Hex } from "viem";
+import { Hex, stringToHex } from "viem";
 import { Button } from "~/components/ui/button";
 import { 
     Dialog,
@@ -30,6 +30,8 @@ import { Input } from "~/components/ui/input"
     loading?: boolean;
     setInput?: (input: Hex) => void;
     write?: () => void;
+    setIsOpen: (input: boolean) => void;
+    isOpen: boolean;
 }
 // Time units in the game engine
 const CITYTIMES_PER_MONTH = 4;
@@ -49,21 +51,45 @@ export const Budget: FC<BudgetProps> = ({
     loading,
     setInput,
     write,
+    setIsOpen,
+    isOpen
 }) => {
-    const [visible, setVisible] = useState(false);
     const [tax, setTax] = useState(cityTax);
     const [rp, setRP] = useState(roadPercent);
     const [fp, setFP] = useState(firePercent);
     const [pp, setPP] = useState(policePercent);
 
+    // Divide percentages by 100
+    useEffect(() => {
+        if(setInput && isOpen){
+            setInput(
+                stringToHex(
+                    `{"method": "doBudget", "roads": ${rp / 100}, "fire": ${fp / 100}, "police": ${pp / 100}, "tax": ${tax}}`
+                )
+            )
+        }
+    }, [tax, rp, fp, pp])
+
     
     return (
         <div className="font-fixedsys">
-            <Dialog>
+            <Dialog 
+                open={isOpen}
+                onOpenChange={(open) => {
+                    setIsOpen(open);
+                    if (!open) {
+                    setTax(cityTax);
+                    setRP(roadPercent);
+                    setFP(firePercent);
+                    setPP(policePercent);
+                    }
+                }}
+            >
                 <DialogTrigger asChild>
                     <Button
                         variant="secondary"
                         className="bg-muted text-white text-xl"
+                        onClick={() => setIsOpen(!isOpen)}
                     >
                         Budget
                     </Button>
@@ -110,13 +136,14 @@ export const Budget: FC<BudgetProps> = ({
                             </CardContent>
                         </Card>
 
-                        <Button onClick={write} disabled={loading}>
+                        <Button onClick={() => {write && write()}} disabled={loading}>
                             {loading ? "Loading..." : "Confirm"}
                         </Button>
 
                         <DialogTrigger asChild>
                             <Button 
                                 disabled={loading}
+                                onClick={() => setIsOpen(!isOpen)}
                             >
                                 Okay
                             </Button>

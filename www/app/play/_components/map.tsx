@@ -58,6 +58,7 @@ export const Map: React.FC<{
   selectedTool?: Tool;
   onMouseMove?: (tile: Tile) => void;
   write?: () => void;
+  isBudgeting: boolean;
 }> = ({
   value,
   scale,
@@ -66,6 +67,7 @@ export const Map: React.FC<{
   selectedTool,
   onMouseMove,
   write,
+  isBudgeting,
 }) => {
   const [spritesheet, setSpritesheet] = React.useState<Spritesheet | null>(
     null,
@@ -132,7 +134,7 @@ export const Map: React.FC<{
         ),
       );
 
-      if (!wouldOverlap) {
+      if (!isBudgeting && !wouldOverlap) {
         // setPlacedSprites((prev) => [...prev, { x, y, tool: selectedTool }]);
         write && write();
       }

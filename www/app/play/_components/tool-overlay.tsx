@@ -20,7 +20,8 @@ export const ToolOverlay: React.FC<{
   scale: number;
   position: { x: number; y: number };
   setInput?: (input: Hex) => void;
-}> = ({ selectedTool, coordinates, scale, position, setInput }) => {
+  isBudgeting: boolean;
+}> = ({ selectedTool, coordinates, scale, position, setInput, isBudgeting }) => {
   const spriteRef = React.useRef<PixiRef<typeof Sprite>>(null);
   const [spritesheet, setSpritesheet] = React.useState<Spritesheet | null>(
     null,
@@ -45,12 +46,13 @@ export const ToolOverlay: React.FC<{
             scale +
           position.y;
       }
-      if (setInput)
+      if (setInput && !isBudgeting){
         setInput(
           stringToHex(
             `{"method": "doTool", "x": ${coordinates.x}, "y": ${coordinates.y}, "tool": ${selectedTool.num}}`,
           ),
         );
+      }
     }
   }, [selectedTool, coordinates, scale, position]);
 

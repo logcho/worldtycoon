@@ -12,38 +12,51 @@ import { cn } from "~/lib/utils";
 
 import { Map } from "./map";
 import { ToolOverlay } from "./tool-overlay";
+import { useEffect, useState } from "react";
 
 // const MIN_ZOOM = 0.5;
 // const MAX_ZOOM = 2;
 // const ZOOM_STEP = 0.1;
+interface StageAreaProps {
+  selectedTool?: Tool;
+  write?: () => void;
+  setInput?: (input: Hex) => void;
+  map: Hex;
+  isBudgeting: boolean;
+}
 
-export const StageArea: React.FC<
-  React.HTMLAttributes<HTMLDivElement> & {
-    selectedTool?: Tool;
-    write?: () => void;
-    setInput?: (input: Hex) => void;
-    map: Hex;
-  }
-> = ({ className, selectedTool, write, setInput, map, ...props }) => {
+export const StageArea: React.FC<StageAreaProps> = ({ 
+  selectedTool, 
+  write, 
+  setInput, 
+  map, 
+  isBudgeting, 
+}) => {
   const router = useRouter();
   const { address } = useAccount();
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const [scale] = React.useState(1);
-  const [windowSize, setWindowSize] = React.useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-  const [position, setPosition] = React.useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = React.useState(false);
-  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
-  const [coordinates, setCoordinates] = React.useState({ x: 0, y: 0 });
 
   if (!address) {
     router.replace("/");
   }
 
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [scale] = React.useState(1);
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [coordinates, setCoordinates] = useState({ x: 0, y: 0 });
+
+  const width = 120;
+  const height = 100;
+
+  
+
   // Center the stage initially
-  React.useEffect(() => {
+  useEffect(() => {
     if (containerRef.current) {
       const { clientWidth, clientHeight } = containerRef.current;
       setPosition({
@@ -105,7 +118,6 @@ export const StageArea: React.FC<
 
         const newX = e.clientX - dragStart.x;
         const newY = e.clientY - dragStart.y;
-
         setPosition({
           x: Math.min(clientWidth / 4, Math.max(minX - clientWidth / 4, newX)),
           y: Math.min(
@@ -124,52 +136,58 @@ export const StageArea: React.FC<
   }, []);
 
   // Add event listeners
-  React.useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  // React.useEffect(() => {
+  //   const container = containerRef.current;
+  //   if (!container) return;
 
-    // container.addEventListener("wheel", handleWheel, { passive: false });
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+  //   // container.addEventListener("wheel", handleWheel, { passive: false });
+  //   window.addEventListener("mousemove", handleMouseMove);
+  //   window.addEventListener("mouseup", handleMouseUp);
 
-    return () => {
-      // container.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [handleMouseMove, handleMouseUp]);
+  //   return () => {
+  //     // container.removeEventListener("wheel", handleWheel);
+  //     window.removeEventListener("mousemove", handleMouseMove);
+  //     window.removeEventListener("mouseup", handleMouseUp);
+  //   };
+  // }, [handleMouseMove, handleMouseUp]);
 
-  React.useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  // React.useEffect(() => {
+  //   const container = containerRef.current;
+  //   if (!container) return;
 
-    const handleResize = () => {
-      setWindowSize({
-        width: container.clientWidth,
-        height: container.clientHeight,
-      });
-    };
+  //   const handleResize = () => {
+  //     setWindowSize({
+  //       width: container.clientWidth,
+  //       height: container.clientHeight,
+  //     });
+  //   };
 
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  //   window.addEventListener("resize", handleResize);
+  //   return () => {
+  //     window.removeEventListener("resize", handleResize);
+  //   };
+  // }, []);
 
   return (
     <div
-      {...props}
-      ref={containerRef}
-      onMouseDown={handleMouseDown}
-      className={cn(
-        "h-[calc(100dvh-5rem)]! cursor-grab overflow-hidden select-none",
-        isDragging && "cursor-grabbing",
-        className,
-      )}
+      className="h-[calc(100dvh-5rem)]! overflow-auto"
+      style={{
+        scrollbarWidth: "none", // Get rid of scrollbar
+      }}
+      // {...props}
+      // ref={containerRef}
+      // onMouseDown={handleMouseDown}
+      // className={cn(
+      //   "h-[calc(100dvh-5rem)]! cursor-grab overflow-auto select-none",
+      //   isDragging && "cursor-grabbing",
+      //   className,
+      // )}
     >
       <Stage
-        width={windowSize.width}
-        height={windowSize.height}
+        // width={windowSize.width}
+        // height={windowSize.height}
+        width={width * 16}
+        height={height * 16}
         options={{
           autoDensity: true,
           antialias: true,
@@ -183,6 +201,7 @@ export const StageArea: React.FC<
           selectedTool={selectedTool}
           onMouseMove={(tile) => setCoordinates({ x: tile.x, y: tile.y })}
           write={write}
+          isBudgeting={isBudgeting}
         />
         <ToolOverlay
           selectedTool={selectedTool}
@@ -190,6 +209,7 @@ export const StageArea: React.FC<
           scale={scale}
           position={position}
           setInput={setInput}
+          isBudgeting={isBudgeting}
         />
       </Stage>
     </div>

@@ -2,7 +2,7 @@
 
 import { json } from "stream/consumers";
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { fromHex, Hex, hexToNumber, stringToHex } from "viem";
 
@@ -21,7 +21,7 @@ interface PlaygroundProps {
 
 export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
   const [selectedTool, setSelectedTool] = React.useState<Tool>();
-
+  const [isBudgeting, setIsBudgeting] = useState(false);
   // TODO: implement rollup server
   // note don't worry about transaction confirmation window for now
   const dapp = "0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e";
@@ -30,14 +30,19 @@ export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
     dapp,
     input,
   );
-  const [map, population, totalFunds, cityTime] = notices;
+  const [map, population, totalFunds, 
+    cityTime, cityTax, taxFund, firePercent, policePercent, roadPercent,
+    fireFund, policeFund, roadFund, cashFlow
+  ] = notices;
+  // const [map, population, totalFunds, cityTime, cityTax] = notices;
   // if(totalFunds) console.log(fromHex(totalFunds, 'bigint')); verified works
-
   useEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       setSelectedTool(undefined);
     }
   });
+
+  // console.log("Is budgeting: ", isBudgeting)
 
   return (
     <>
@@ -45,11 +50,22 @@ export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
         population={population}
         totalFunds={totalFunds}
         cityTime={cityTime}
+        cityTax={cityTax}
+        taxFund={taxFund}
         loading={loading}
+        firePercent={firePercent}
+        policePercent={policePercent}
+        roadPercent={roadPercent}
+        fireFund={fireFund}
+        policeFund={policeFund}
+        roadFund={roadFund}
+        cashFlow={cashFlow}
         setInput={setInput}
         write={write}
+        setIsOpen={setIsBudgeting}
+        isOpen={isBudgeting}
       />
-      <div className="flex w-dvw">
+      <div className="flex w-dvw overflow-hidden">
         <ToolsSidebar
           selectedTool={selectedTool}
           onSelectTool={(tool) => setSelectedTool(tool)}
@@ -61,6 +77,7 @@ export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
           write={write}
           setInput={setInput}
           map={map || initialMap}
+          isBudgeting={isBudgeting}
         />
       </div>
     </>
