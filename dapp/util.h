@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <stdexcept>
 
-std::vector<uint16_t> convertMap(unsigned short* data, int width, int height) {
+std::vector<uint16_t> convertMapToUint16Vector(unsigned short* data, int width, int height) {
     size_t size = width * height;
     std::vector<uint16_t> mapArray(data, data + size);
     return mapArray;

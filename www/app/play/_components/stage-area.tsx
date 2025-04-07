@@ -2,7 +2,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 
 import { Stage } from "@pixi/react";
-import { Hex } from "viem";
+import { Hex, toHex } from "viem";
 import { useAccount } from "wagmi";
 
 import type { Tool } from "~/config/tools";
@@ -13,7 +13,7 @@ import { cn } from "~/lib/utils";
 import { Map } from "./map";
 import { ToolOverlay } from "./tool-overlay";
 import { useEffect, useState } from "react";
-
+import { Query } from "./query";
 // const MIN_ZOOM = 0.5;
 // const MAX_ZOOM = 2;
 // const ZOOM_STEP = 0.1;
@@ -50,11 +50,9 @@ export const StageArea: React.FC<StageAreaProps> = ({
   const [coordinates, setCoordinates] = useState({ x: 0, y: 0 });
   const [startCoordinates, setStartCoordinates] = useState({ x: 0, y: 0})
   const [endCoordinates, setEndCoordinates] = useState({ x: 0, y: 0})
-
+  const [isQuerying, setIsQuerying] = useState(false);
   const width = 120;
   const height = 100;
-
-  
 
   // Center the stage initially
   // useEffect(() => {
@@ -203,6 +201,9 @@ export const StageArea: React.FC<StageAreaProps> = ({
           onMouseDown={(tile) => {
             if(selectedTool){
               setStartCoordinates({ x: tile.x, y: tile.y })
+              if (selectedTool.num == 5){
+                setIsQuerying(true)
+              }
               if(selectedTool.num != 5 && selectedTool.num != 6 && selectedTool.num != 8 && selectedTool.num != 9){
                 write && write();
               }
@@ -243,6 +244,14 @@ export const StageArea: React.FC<StageAreaProps> = ({
           isBudgeting={isBudgeting}
         />
       </Stage>
+      <Query
+          visible={isQuerying}
+          address={address}
+          x={coordinates.x}
+          y={coordinates.y}
+          setVisible={setIsQuerying}
+          
+      />
     </div>
   );
 };

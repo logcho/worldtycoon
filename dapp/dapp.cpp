@@ -65,19 +65,24 @@ void generateVoucher(httplib::Client &cli, const std::string &recipient, std::st
     }
 }
 
+
 void createGameNotices(httplib::Client &cli, const Micropolis *game){
-    createNotice(cli, vectorToHexUint16(convertMap(game->map[0], WORLD_W, WORLD_H))); // Map
+    createNotice(cli, vectorToHexUint16(convertMapToUint16Vector(game->map[0], WORLD_W, WORLD_H))); // Map
     createNotice(cli, uint64ToHex(game->cityPop)); // Population
     createNotice(cli, uint64ToHex(game->totalFunds)); // City funds
     createNotice(cli, uint64ToHex(game->cityTime)); // City time
+
     createNotice(cli, uint64ToHex(game->cityTax)); // City tax
     createNotice(cli, uint64ToHex(game->taxFund)); // Tax Fund
+
     createNotice(cli, uint64ToHex(static_cast<int>(game->firePercent * 100))); // Fire percent
     createNotice(cli, uint64ToHex(static_cast<int>(game->policePercent * 100))); // Police percent
     createNotice(cli, uint64ToHex(static_cast<int>(game->roadPercent * 100))); // Road percent
+
     createNotice(cli, uint64ToHex(game->fireFund));
     createNotice(cli, uint64ToHex(game->policeFund));
     createNotice(cli, uint64ToHex(game->roadFund));
+
     createNotice(cli, stringToHex(std::to_string(game->cashFlow)));
     // std::cout << std::to_string(game->cashFlow) << std::endl;
     // std::cout << static_cast<int>(game->firePercent * 100) << std::endl;
@@ -248,13 +253,40 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
             std::string address = parsed_payload.get("address").to_str();
             std::transform(address.begin(), address.end(), address.begin(), ::tolower);
             if (games.find(address) == games.end()) return "reject";
-            createReport(cli, vectorToHexUint16(convertMap(games[address]->map[0], WORLD_W, WORLD_H)));
+            createReport(cli, vectorToHexUint16(convertMapToUint16Vector(games[address]->map[0], WORLD_W, WORLD_H)));
         }
         else if(method == "getFunds"){
             std::string address = parsed_payload.get("address").to_str();
             std::transform(address.begin(), address.end(), address.begin(), ::tolower);
             if (games.find(address) == games.end()) createReport(cli, uint64ToHex(0)); // Funds is 0 if city does not exist
             else createReport(cli, uint64ToHex(games[address]->totalFunds));
+        }
+        else if(method == "useQuery"){
+            std::string address = parsed_payload.get("address").to_str();
+            int x = std::stoi(parsed_payload.get("x").to_str());
+            int y = std::stoi(parsed_payload.get("y").to_str());
+            std::transform(address.begin(), address.end(), address.begin(), ::tolower);
+            if (games.find(address) == games.end()) return "reject";
+            // 0: population density
+            // 1: land value.
+            // 2: crime rate.
+            // 3: pollution.
+            // 4: growth rate.
+            int populationDensity = games[address]->getDensity(0, x, y);
+            int landValue = games[address]->getDensity(1, x, y);
+            int crimeRate = games[address]->getDensity(2, x, y);
+            int pollution = games[address]->getDensity(3, x, y);
+            int growthRate = games[address]->getDensity(4, x, y);
+            std::string stats = 
+            "{"
+            "\"populationDensity\":" + std::to_string(populationDensity) + "," +
+            "\"landValue\":" + std::to_string(landValue) + "," +
+            "\"crimeRate\":" + std::to_string(crimeRate) + "," +
+            "\"pollution\":" + std::to_string(pollution) + "," +
+            "\"growthRate\":" + std::to_string(growthRate) +
+            "}";
+            std::cout << stats << std::endl;
+            createReport(cli, stringToHex(stats));
         }
     }
     std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;

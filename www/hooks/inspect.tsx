@@ -8,6 +8,7 @@ import {
   Hex,
   hexToBigInt,
   hexToNumber,
+  hexToString,
   parseAbi,
   stringToHex,
   TransactionReceipt,
@@ -57,3 +58,20 @@ export const useInspectFunds = (address: Address) => {
 
   return { funds, isLoading, error };
 };
+
+export const useQueryTool = (address: Address, x: number, y: number, isQuerying: boolean) => {
+  // Generate the hexified key
+  const key = JSON.stringify({ method: "useQuery", address, x, y });
+
+  const { data, isLoading, error } = useInspect(key, {enabled: isQuerying, refetchInterval: 1000});
+
+  // Extract the balance from the response
+  const stats =
+    data?.reports?.[0]?.payload ?
+      hexToString(data.reports[0].payload)
+    : undefined;
+
+  return { stats, isLoading, error };
+};
+
+
