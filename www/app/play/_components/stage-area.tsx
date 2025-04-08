@@ -17,7 +17,7 @@ import { Query } from "./query";
 // const MIN_ZOOM = 0.5;
 // const MAX_ZOOM = 2;
 // const ZOOM_STEP = 0.1;
-export type StageAreaProps = {
+export interface StageAreaProps extends React.HTMLAttributes<HTMLDivElement> {
   selectedTool?: Tool;
   write?: () => void;
   setInput?: (input: Hex) => void;
@@ -31,6 +31,8 @@ export const StageArea: React.FC<StageAreaProps> = ({
   setInput, 
   map, 
   isBudgeting, 
+  className,
+  ...props
 }) => {
   const router = useRouter();
   const { address } = useAccount();

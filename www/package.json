@@ -65,6 +65,7 @@
     "eslint-config-next": "15.0.1",
     "eslint-config-prettier": "10.0.1",
     "eslint-plugin-tailwindcss": "^3.17.5",
+    "pino-pretty": "^13.0.0",
     "postcss": "8.4.47",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.11",

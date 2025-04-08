@@ -48,7 +48,10 @@ const CreatePage: React.FC = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar 
+        setIsOpen={() => {}}
+        isOpen={false}
+      />
       <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center bg-[url('/images/bg.png')] bg-cover bg-center bg-no-repeat">
         <div className="bg-card/40 font-fixedsys w-full max-w-xl space-y-4 rounded-2xl p-6 shadow-lg backdrop-blur-sm">
           <div className="flex items-center justify-between">

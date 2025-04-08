@@ -42,18 +42,22 @@ export const BridgeTabs: React.FC = () => {
     functionName: "symbol",
   });
 
-  const { data: decimals } = useContractRead({
+  const { data: readDecimals } = useContractRead({
     address: tokenAddress,
     abi: erc20Abi,
     functionName: "decimals",
   });
 
+  const decimals = readDecimals ?? 18;
   const router = useRouter();
   const { address } = useAccount();
 
-  if (!address) {
-    router.replace("/");
-  }
+  useEffect(() => {
+    if (!address) {
+      router.replace("/");
+    }
+  }, [address, router]);
+
 
   const [tab, setTab] = useQueryState("tab", { defaultValue: "deposit" });
   const { balance: l2Balance, isLoading: l2BalanceLoading, error: l2BalanceError } = useInspectBalance(address!);

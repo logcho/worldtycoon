@@ -73,11 +73,11 @@ export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
         />
         <StageArea
           selectedTool={selectedTool}
-          className="w-4/5!"
           write={write}
           setInput={setInput}
           map={map || initialMap}
           isBudgeting={isBudgeting}
+          className="w-4/5!"
         />
       </div>
     </>

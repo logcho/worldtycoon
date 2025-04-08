@@ -107,7 +107,7 @@ export const Budget: FC<BudgetProps> = ({
                         <Card className="bg-black text-white col-span-1">
                             <CardContent className="p-2 space-y-2">
                             <p>Roads</p>
-                            <Slider value={[rp]} onValueChange={setRP} max={100} step={1} />
+                            <Slider value={[rp]} onValueChange={(val) => setRP(val[0] || 0)} max={100} step={1} />
                             <p>{rp}% of ${roadFund} = ${(rp / 100) * roadFund}</p>
                             </CardContent>
                         </Card>
@@ -115,7 +115,7 @@ export const Budget: FC<BudgetProps> = ({
                         <Card className="bg-black text-white col-span-1">
                             <CardContent className="p-2 space-y-2">
                             <p>Fire</p>
-                            <Slider value={[fp]} onValueChange={setFP} max={100} step={1} />
+                            <Slider value={[fp]} onValueChange={(val) => setFP(val[0] || 0)} max={100} step={1} />
                             <p>{fp}% of ${fireFund} = ${(fp / 100) * fireFund}</p>
                             </CardContent>
                         </Card>
@@ -123,7 +123,7 @@ export const Budget: FC<BudgetProps> = ({
                         <Card className="bg-black text-white col-span-1">
                             <CardContent className="p-5 space-y-4">
                             <p>Police</p>
-                            <Slider value={[pp]} onValueChange={setPP} max={100} step={1} />
+                            <Slider value={[pp]} onValueChange={(val) => setPP(val[0] || 0)} max={100} step={1} />
                             <p>{pp}% of ${policeFund} = ${(pp / 100) * policeFund}</p>
                             </CardContent>
                         </Card>
@@ -131,7 +131,7 @@ export const Budget: FC<BudgetProps> = ({
                         <Card className="bg-black text-white col-span-1">
                             <CardContent className="p-5 space-y-4">
                             <p>Tax</p>
-                            <Slider value={[tax]} onValueChange={setTax} max={100} step={1} />
+                            <Slider value={[tax]} onValueChange={(val) => setTax(val[0] || 0)} max={100} step={1} />
                             <p>Tax rate: {tax}%</p>
                             </CardContent>
                         </Card>
