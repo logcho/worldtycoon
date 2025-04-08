@@ -8,7 +8,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ArrowDown } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { erc20Abi, formatUnits, numberToHex, parseUnits, stringToHex } from "viem";
-import { useAccount, useContractRead } from "wagmi";
+import { useAccount, useContractRead, useWaitForTransactionReceipt } from "wagmi";
 
 import type { Address } from "viem";
 
@@ -22,9 +22,11 @@ import {
   useReadErc20BalanceOf,
   useWriteErc20Approve,
   useWriteErc20PortalDepositErc20Tokens,
+  useWriteInputBox,
   useWriteInputBoxAddInput,
 } from "~/hooks/wagmi";
 import { cn } from "~/lib/utils";
+import { retrieveVouchers } from "~/hooks/vouchers";
 
 export const BridgeTabs: React.FC = () => {
   // const symbol = "SIM"; // XXX: should actually come from querying token metadata
@@ -129,6 +131,11 @@ export const BridgeTabs: React.FC = () => {
     amount > 0 &&
     parseUnits(amount.toString(), decimals) <= allowance &&
     parseUnits(amount.toString(), decimals) <= l1Balance;
+  
+  const canWithdraw = funds !== undefined && funds > 0
+  const canTransfer = true;
+
+  
 
   return (
     <Tabs
@@ -296,13 +303,42 @@ export const BridgeTabs: React.FC = () => {
               : `${formatUnits(l1Balance ?? 0n, decimals)} ${symbol}`}
           </p>
         </div>
-
-        <Button 
-          className="w-full shadow-md"
-          onClick={() => withdraw(amount.toString())}
-        >
-          Withdraw
-        </Button>
+        <Button
+            variant="outline"
+            className="shadow-md w-full"
+            disabled={!canWithdraw}
+            onClick={() => withdraw(amount.toString())}
+          >
+            Withdraw
+          </Button>
+        {/* <div className="grid grid-cols-2 gap-4">
+          <Button
+            variant="outline"
+            className="shadow-md"
+            disabled={!canWithdraw}
+            onClick={() => withdraw(amount.toString())}
+          >
+            Withdraw
+          </Button>
+          <Button
+            className="shadow-md"
+            disabled={!canTransfer}
+            onClick={() => {
+              // write({
+              //   args: [
+              //     dAppAddress,
+              //     `0xa9059cbb000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb9226600000000000000000000000000000000000000000000043c33c1937564800000`,
+              //   ]
+              // })
+            }}
+          >
+            {isDepositing ? (
+              <Spinner className="text-black" />
+            ) : (
+              "Transfer"
+            )}
+          </Button>
+        </div> */}
       </TabsContent>
     </Tabs>
   );
