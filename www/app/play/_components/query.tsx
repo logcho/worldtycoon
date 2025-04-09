@@ -1,10 +1,13 @@
 "use client";
+
 import { FC, useEffect, useState } from "react";
-import { Address, Hex, fromHex } from "viem";
-import { Card, CardContent } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
-import { useQueryTool } from "~/hooks/inspect";
+
+import { Address, fromHex, Hex } from "viem";
 import { useAccount } from "wagmi";
+
+import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
+import { useQueryTool } from "~/hooks/inspect";
 
 export type QueryProps = {
   setVisible?: (input: boolean) => void;
@@ -22,7 +25,6 @@ type Stats = {
   growthRate: number;
 };
 
-
 export const Query: FC<QueryProps> = ({
   setVisible,
   address,
@@ -30,11 +32,9 @@ export const Query: FC<QueryProps> = ({
   y,
   visible,
 }) => {
+  if (!address) return null;
 
-  if(!address) return null;
-  
   const { stats, isLoading, error } = useQueryTool(address, x, y, visible);
-
 
   const [popDens, setPopDens] = useState("-");
   const [landVal, setLandVal] = useState("-");
@@ -60,10 +60,12 @@ export const Query: FC<QueryProps> = ({
   if (!visible) return null;
 
   return (
-    <div className="fixed top-1/3 left-1/2 transform -translate-x-1/2 bg-background z-50">
-      <Card className="w-[300px] font-fixedsys text-center space-y-4 p-4 shadow-lg">
+    <div className="bg-background fixed top-1/3 left-1/2 z-50 -translate-x-1/2 transform">
+      <Card className="font-fixedsys w-[300px] space-y-4 p-4 text-center shadow-lg">
         <CardContent className="space-y-4">
-          <h2 className="text-lg font-bold bg-cyan-600 text-white py-1">Query</h2>
+          <h2 className="bg-cyan-600 py-1 text-lg font-bold text-white">
+            Query
+          </h2>
           <div className="grid grid-cols-2 gap-y-1 text-left text-sm">
             {/* <span className="font-bold">Zone</span>
             <span className="font-bold">0</span> */}

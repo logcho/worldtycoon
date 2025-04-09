@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { FC, useLayoutEffect, useState } from "react";
 
 import { Container, Sprite } from "@pixi/react";
 import { Spritesheet, Texture } from "pixi.js";
@@ -12,7 +13,6 @@ import type { Tool } from "~/config/tools";
 import { HEIGHT, WIDTH } from "~/config/constants";
 import { TOOLS } from "~/config/tools";
 import { isOverlapping, loadToolsSpritesheet } from "~/lib/sprites";
-import { FC, useLayoutEffect, useState } from "react";
 
 export type Tile = {
   x: number;
@@ -61,7 +61,7 @@ export type MapProps = {
   onMouseDown?: (tile: Tile) => void;
   onMouseUp?: (tile: Tile) => void;
   isBudgeting: boolean;
-}
+};
 
 export const Map: FC<MapProps> = ({
   value,
@@ -74,7 +74,7 @@ export const Map: FC<MapProps> = ({
   onMouseUp,
   isBudgeting,
 }) => {
-  const [spritesheet, setSpritesheet] = useState<Spritesheet | null>(null,);
+  const [spritesheet, setSpritesheet] = useState<Spritesheet | null>(null);
   // const [toolsSpritesheet, setToolsSpritesheet] = useState<Spritesheet | null>(null);
   // const [placedSprites, setPlacedSprites] = useState<PlacedSprite[]>([]);
 

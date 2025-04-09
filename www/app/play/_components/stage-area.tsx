@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Stage } from "@pixi/react";
@@ -11,9 +12,9 @@ import { HEIGHT, WIDTH } from "~/config/constants";
 import { cn } from "~/lib/utils";
 
 import { Map } from "./map";
-import { ToolOverlay } from "./tool-overlay";
-import { useEffect, useState } from "react";
 import { Query } from "./query";
+import { ToolOverlay } from "./tool-overlay";
+
 // const MIN_ZOOM = 0.5;
 // const MAX_ZOOM = 2;
 // const ZOOM_STEP = 0.1;
@@ -23,14 +24,14 @@ export type StageAreaProps = {
   setInput?: (input: Hex) => void;
   map: Hex;
   isBudgeting: boolean;
-}
+};
 
-export const StageArea: React.FC<StageAreaProps> = ({ 
-  selectedTool, 
-  write, 
-  setInput, 
-  map, 
-  isBudgeting, 
+export const StageArea: React.FC<StageAreaProps> = ({
+  selectedTool,
+  write,
+  setInput,
+  map,
+  isBudgeting,
 }) => {
   const router = useRouter();
   const { address } = useAccount();
@@ -48,8 +49,8 @@ export const StageArea: React.FC<StageAreaProps> = ({
   // const [isDragging, setIsDragging] = useState(false);
   // const [position, setPosition] = useState({ x: 0, y: 0 });
   const [coordinates, setCoordinates] = useState({ x: 0, y: 0 });
-  const [startCoordinates, setStartCoordinates] = useState({ x: 0, y: 0})
-  const [endCoordinates, setEndCoordinates] = useState({ x: 0, y: 0})
+  const [startCoordinates, setStartCoordinates] = useState({ x: 0, y: 0 });
+  const [endCoordinates, setEndCoordinates] = useState({ x: 0, y: 0 });
   const [isQuerying, setIsQuerying] = useState(false);
   const width = 120;
   const height = 100;
@@ -199,20 +200,25 @@ export const StageArea: React.FC<StageAreaProps> = ({
           // coordinates={coordinates}
           selectedTool={selectedTool}
           onMouseDown={(tile) => {
-            if(selectedTool){
-              setStartCoordinates({ x: tile.x, y: tile.y })
-              if (selectedTool.num == 5){
-                setIsQuerying(true)
+            if (selectedTool) {
+              setStartCoordinates({ x: tile.x, y: tile.y });
+              if (selectedTool.num == 5) {
+                setIsQuerying(true);
               }
-              if(selectedTool.num != 5 && selectedTool.num != 6 && selectedTool.num != 8 && selectedTool.num != 9){
+              if (
+                selectedTool.num != 5 &&
+                selectedTool.num != 6 &&
+                selectedTool.num != 8 &&
+                selectedTool.num != 9
+              ) {
                 write && write();
               }
             }
           }}
           onMouseMove={(tile) => {
             // setEndCoordinates({ x: tile.x, y: tile.y })
-            setEndCoordinates({ x: tile.x, y: tile.y })
-            setCoordinates({ x: tile.x, y: tile.y })
+            setEndCoordinates({ x: tile.x, y: tile.y });
+            setCoordinates({ x: tile.x, y: tile.y });
 
             // if(mouseDown){
             //   setEndCoordinates({ x: tile.x, y: tile.y })
@@ -221,13 +227,17 @@ export const StageArea: React.FC<StageAreaProps> = ({
             // }
           }}
           onMouseUp={(tile) => {
-            if(selectedTool){
+            if (selectedTool) {
               // setMouseDown(false);
               // setDeltaX(tile.x);
-              // setDeltaY(tile.y);    
-              if(selectedTool.num == 6 || selectedTool.num == 8 || selectedTool.num == 9){
-                  // setEndCoordinates({ x: tile.x, y: tile.y })
-                  write && write();
+              // setDeltaY(tile.y);
+              if (
+                selectedTool.num == 6 ||
+                selectedTool.num == 8 ||
+                selectedTool.num == 9
+              ) {
+                // setEndCoordinates({ x: tile.x, y: tile.y })
+                write && write();
               }
             }
           }}
@@ -245,12 +255,11 @@ export const StageArea: React.FC<StageAreaProps> = ({
         />
       </Stage>
       <Query
-          visible={isQuerying}
-          address={address}
-          x={coordinates.x}
-          y={coordinates.y}
-          setVisible={setIsQuerying}
-          
+        visible={isQuerying}
+        address={address}
+        x={coordinates.x}
+        y={coordinates.y}
+        setVisible={setIsQuerying}
       />
     </div>
   );

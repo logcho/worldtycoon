@@ -1,8 +1,9 @@
 "use client";
 
 import { FC } from "react";
-import { cn } from "~/lib/utils";
+
 import { Badge } from "~/components/ui/badge";
+import { cn } from "~/lib/utils";
 
 type CityStatsProps = {
   population: number;
@@ -40,16 +41,16 @@ export const CityStats: FC<CityStatsProps> = ({
   const date = new Date(Date.UTC(year, month, 1));
 
   return (
-    <div 
-        className={cn(
-            "flex w-auto items-center justify-center gap-4 font-fixedsys md:gap-4",
-            "[&>span]:text-xl"
-        )}
+    <div
+      className={cn(
+        "font-fixedsys flex w-auto items-center justify-center gap-4 md:gap-4",
+        "[&>span]:text-xl",
+      )}
     >
       <Badge variant="secondary">
         <span>👨‍👧‍👦</span>
         <span>{numberFormatter.format(population)}</span>
-      </Badge >
+      </Badge>
 
       <Badge variant="secondary">
         <span>💰</span>

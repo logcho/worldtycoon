@@ -7,8 +7,9 @@ import Link from "next/link";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Hex, hexToNumber, hexToString } from "viem";
 
-import { CityStats } from "./citystats";
 import { Budget } from "./budget";
+import { CityStats } from "./citystats";
+
 interface NavbarProps {
   population?: Hex;
   totalFunds?: Hex;
@@ -46,12 +47,21 @@ export const Navbar: React.FC<NavbarProps> = ({
   setInput,
   write,
   setIsOpen,
-  isOpen
+  isOpen,
 }) => {
-  const loaded = 
-    !!population && !!totalFunds && !!cityTime && 
-    !!cityTax && !!taxFund && !!firePercent && !!policePercent && !!roadPercent &&
-    !!fireFund && !!policeFund && !!roadFund && !!cashFlow;
+  const loaded =
+    !!population &&
+    !!totalFunds &&
+    !!cityTime &&
+    !!cityTax &&
+    !!taxFund &&
+    !!firePercent &&
+    !!policePercent &&
+    !!roadPercent &&
+    !!fireFund &&
+    !!policeFund &&
+    !!roadFund &&
+    !!cashFlow;
 
   // if(roadPercent) console.log(hexToNumber(roadPercent))
   return (
@@ -62,14 +72,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             WORLD TYCOON
           </p>
         </Link>
-        {loaded &&
+        {loaded && (
           <div className="flex gap-4">
-          <CityStats
-            population={hexToNumber(population)}
-            totalFunds={hexToNumber(totalFunds)}
-            cityTime={hexToNumber(cityTime)}
-          />
-          <Budget 
+            <CityStats
+              population={hexToNumber(population)}
+              totalFunds={hexToNumber(totalFunds)}
+              cityTime={hexToNumber(cityTime)}
+            />
+            <Budget
               cityTax={hexToNumber(cityTax)}
               cashFlow={Number(hexToString(cashFlow))}
               funds={hexToNumber(totalFunds)}
@@ -85,12 +95,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               write={write}
               setIsOpen={setIsOpen}
               isOpen={isOpen}
-          />
+            />
           </div>
-        }
-
-
-
+        )}
 
         <div className="flex w-full items-center justify-end">
           <ConnectButton />

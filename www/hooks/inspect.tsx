@@ -59,11 +59,19 @@ export const useInspectFunds = (address: Address) => {
   return { funds, isLoading, error };
 };
 
-export const useQueryTool = (address: Address, x: number, y: number, isQuerying: boolean) => {
+export const useQueryTool = (
+  address: Address,
+  x: number,
+  y: number,
+  isQuerying: boolean,
+) => {
   // Generate the hexified key
   const key = JSON.stringify({ method: "useQuery", address, x, y });
 
-  const { data, isLoading, error } = useInspect(key, {enabled: isQuerying, refetchInterval: 1000});
+  const { data, isLoading, error } = useInspect(key, {
+    enabled: isQuerying,
+    refetchInterval: 1000,
+  });
 
   // Extract the balance from the response
   const stats =
@@ -73,5 +81,3 @@ export const useQueryTool = (address: Address, x: number, y: number, isQuerying:
 
   return { stats, isLoading, error };
 };
-
-

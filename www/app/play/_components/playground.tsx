@@ -30,9 +30,20 @@ export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
     dapp,
     input,
   );
-  const [map, population, totalFunds, 
-    cityTime, cityTax, taxFund, firePercent, policePercent, roadPercent,
-    fireFund, policeFund, roadFund, cashFlow
+  const [
+    map,
+    population,
+    totalFunds,
+    cityTime,
+    cityTax,
+    taxFund,
+    firePercent,
+    policePercent,
+    roadPercent,
+    fireFund,
+    policeFund,
+    roadFund,
+    cashFlow,
   ] = notices;
   // const [map, population, totalFunds, cityTime, cityTax] = notices;
   // if(totalFunds) console.log(fromHex(totalFunds, 'bigint')); verified works
@@ -73,7 +84,7 @@ export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
         />
         <StageArea
           selectedTool={selectedTool}
-          className="w-4/5!"
+          // className="w-4/5!"
           write={write}
           setInput={setInput}
           map={map || initialMap}

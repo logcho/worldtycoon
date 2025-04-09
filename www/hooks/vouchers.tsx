@@ -58,8 +58,10 @@ const useInputIndex = (receipt?: TransactionReceipt): bigint | undefined => {
   return inputIndex;
 };
 
-export const retrieveVouchers = (dapp: Address, reciept?: TransactionReceipt) => {
-
+export const retrieveVouchers = (
+  dapp: Address,
+  reciept?: TransactionReceipt,
+) => {
   const [vouchers, setVouchers] = useState<Hex[]>([]);
 
   const inputIndex = useInputIndex(reciept);

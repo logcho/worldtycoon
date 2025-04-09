@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
 import { Container, Sprite, Text } from "@pixi/react";
 import { TextStyle } from "pixi.js";
@@ -13,9 +14,8 @@ import type { Tool } from "~/config/tools";
 
 import { TOOLS } from "~/config/tools";
 import { loadToolsSpritesheet } from "~/lib/sprites";
-import { FC, useEffect, useRef, useState } from "react";
 
-export type ToolOverProps= {
+export type ToolOverProps = {
   selectedTool?: Tool;
   coordinates: { x: number; y: number };
   endCoordinates: { x: number; y: number };
@@ -24,19 +24,19 @@ export type ToolOverProps= {
   // position: { x: number; y: number };
   setInput?: (input: Hex) => void;
   isBudgeting: boolean;
-}
-export const ToolOverlay: FC<ToolOverProps> = ({ 
-  selectedTool, 
-  coordinates, 
+};
+export const ToolOverlay: FC<ToolOverProps> = ({
+  selectedTool,
+  coordinates,
   endCoordinates,
   startCoordinates,
-  scale, 
-  // position, 
-  setInput, 
+  scale,
+  // position,
+  setInput,
   isBudgeting,
 }) => {
   const spriteRef = useRef<PixiRef<typeof Sprite>>(null);
-  const [spritesheet, setSpritesheet] = useState<Spritesheet | null>(null,);
+  const [spritesheet, setSpritesheet] = useState<Spritesheet | null>(null);
 
   useEffect(() => {
     loadToolsSpritesheet().then(setSpritesheet).catch(console.error);
@@ -48,24 +48,28 @@ export const ToolOverlay: FC<ToolOverProps> = ({
       if (toolIndex !== -1) {
         spriteRef.current.x =
           16 *
-            (coordinates.x - Math.floor((selectedTool.size - 1) / 2)) *
-            scale;
-          // position.x;
+          (coordinates.x - Math.floor((selectedTool.size - 1) / 2)) *
+          scale;
+        // position.x;
         spriteRef.current.y =
           16 *
-            (coordinates.y - Math.floor((selectedTool.size - 1) / 2)) *
-            scale;
-          // position.y;
+          (coordinates.y - Math.floor((selectedTool.size - 1) / 2)) *
+          scale;
+        // position.y;
       }
-      if (setInput && !isBudgeting){
+      if (setInput && !isBudgeting) {
         setInput(
           stringToHex(
             `{"method": "doTool", "x": ${coordinates.x}, "y": ${coordinates.y}, "tool": ${selectedTool.num}}`,
           ),
         );
-        const isDraggable = selectedTool.num == 5 || selectedTool.num == 6 || selectedTool.num == 8 || selectedTool.num == 9
-        if(isDraggable){
-          if(startCoordinates != endCoordinates){
+        const isDraggable =
+          selectedTool.num == 5 ||
+          selectedTool.num == 6 ||
+          selectedTool.num == 8 ||
+          selectedTool.num == 9;
+        if (isDraggable) {
+          if (startCoordinates != endCoordinates) {
             setInput(
               stringToHex(
                 `{"method": "dragTool", "fromX": ${startCoordinates.x}, "fromY": ${startCoordinates.y}, "toX": ${endCoordinates.x}, "toY": ${endCoordinates.y}, "tool": ${selectedTool.num}}`,

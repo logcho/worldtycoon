@@ -1,14 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ArrowDown } from "lucide-react";
 import { useQueryState } from "nuqs";
-import { erc20Abi, formatUnits, numberToHex, parseUnits, stringToHex } from "viem";
-import { useAccount, useContractRead, useWaitForTransactionReceipt } from "wagmi";
+import { erc20Abi, formatUnits, parseUnits, stringToHex } from "viem";
+import { useAccount, useContractRead } from "wagmi";
 
 import type { Address } from "viem";
 
@@ -22,11 +22,9 @@ import {
   useReadErc20BalanceOf,
   useWriteErc20Approve,
   useWriteErc20PortalDepositErc20Tokens,
-  useWriteInputBox,
   useWriteInputBoxAddInput,
 } from "~/hooks/wagmi";
 import { cn } from "~/lib/utils";
-import { retrieveVouchers } from "~/hooks/vouchers";
 
 export const BridgeTabs: React.FC = () => {
   // const symbol = "SIM"; // XXX: should actually come from querying token metadata
@@ -42,7 +40,7 @@ export const BridgeTabs: React.FC = () => {
     functionName: "symbol",
   });
 
-  const { data: decimals } = useContractRead({
+  const { data: decimals = 18 } = useContractRead({
     address: tokenAddress,
     abi: erc20Abi,
     functionName: "decimals",
@@ -56,8 +54,16 @@ export const BridgeTabs: React.FC = () => {
   }
 
   const [tab, setTab] = useQueryState("tab", { defaultValue: "deposit" });
-  const { balance: l2Balance, isLoading: l2BalanceLoading, error: l2BalanceError } = useInspectBalance(address!);
-  const { funds, isLoading: fundsLoading, error: fundsError } = useInspectFunds(address!);
+  const {
+    balance: l2Balance,
+    isLoading: l2BalanceLoading,
+    error: l2BalanceError,
+  } = useInspectBalance(address!);
+  const {
+    funds,
+    isLoading: fundsLoading,
+    error: fundsError,
+  } = useInspectFunds(address!);
   // console.log(balance);
 
   const { data: l1Balance, isLoading: l1BalanceLoading } =
@@ -74,7 +80,8 @@ export const BridgeTabs: React.FC = () => {
   const [amount, setAmount] = useState<bigint>(0n);
 
   const { writeContractAsync: approveToken } = useWriteErc20Approve();
-  const { writeContractAsync: depositToken} = useWriteErc20PortalDepositErc20Tokens();
+  const { writeContractAsync: depositToken } =
+    useWriteErc20PortalDepositErc20Tokens();
   const { writeContractAsync: write } = useWriteInputBoxAddInput();
 
   const approve = async (address: Address, amount: string) => {
@@ -95,28 +102,30 @@ export const BridgeTabs: React.FC = () => {
     try {
       const data = stringToHex(`Deposited (${amount}).`);
       await depositToken({
-        args: [tokenAddress, dAppAddress, parseUnits(amount, decimals || 18), data],
+        args: [
+          tokenAddress,
+          dAppAddress,
+          parseUnits(amount, decimals || 18),
+          data,
+        ],
       });
     } catch (error) {
       console.error("Error in depositing ERC20:", error);
       throw error;
     }
-  };  
-  // TODO: Add loading states to deposit 
+  };
+  // TODO: Add loading states to deposit
 
   const withdraw = async (amount: string) => {
     try {
       const data = await write({
-        args: [
-          dAppAddress,
-          stringToHex(`{"method": "withdraw"}`),
-        ]
+        args: [dAppAddress, stringToHex(`{"method": "withdraw"}`)],
       });
     } catch (error) {
       console.error("Error:", error);
-      throw error
+      throw error;
     }
-  }
+  };
 
   const canApprove =
     l1Balance != undefined &&
@@ -131,11 +140,9 @@ export const BridgeTabs: React.FC = () => {
     amount > 0 &&
     parseUnits(amount.toString(), decimals) <= allowance &&
     parseUnits(amount.toString(), decimals) <= l1Balance;
-  
-  const canWithdraw = funds !== undefined && funds > 0
-  const canTransfer = true;
 
-  
+  const canWithdraw = funds !== undefined && funds > 0;
+  const canTransfer = true;
 
   return (
     <Tabs
@@ -233,11 +240,9 @@ export const BridgeTabs: React.FC = () => {
             disabled={!canDeposit}
             onClick={() => deposit(amount.toString())}
           >
-            {isDepositing ? (
+            {isDepositing ?
               <Spinner className="text-black" />
-            ) : (
-              "Deposit"
-            )}
+            : "Deposit"}
           </Button>
         </div>
       </TabsContent>
@@ -274,11 +279,11 @@ export const BridgeTabs: React.FC = () => {
           /> */}
           <p className="text-muted-foreground text-sm">
             Funds:{" "}
-              {fundsLoading ?
-                "Loading..."
-              : fundsError ?
-                "Error"
-              : `${funds} SIM`}
+            {fundsLoading ?
+              "Loading..."
+            : fundsError ?
+              "Error"
+            : `${funds} SIM`}
           </p>
         </div>
 
@@ -300,17 +305,17 @@ export const BridgeTabs: React.FC = () => {
           <p className="text-muted-foreground text-sm">
             {l1BalanceLoading ?
               "Loading..."
-              : `${formatUnits(l1Balance ?? 0n, decimals)} ${symbol}`}
+            : `${formatUnits(l1Balance ?? 0n, decimals)} ${symbol}`}
           </p>
         </div>
         <Button
-            variant="outline"
-            className="shadow-md w-full"
-            disabled={!canWithdraw}
-            onClick={() => withdraw(amount.toString())}
-          >
-            Withdraw
-          </Button>
+          variant="outline"
+          className="w-full shadow-md"
+          disabled={!canWithdraw}
+          onClick={() => withdraw(amount.toString())}
+        >
+          Withdraw
+        </Button>
         {/* <div className="grid grid-cols-2 gap-4">
           <Button
             variant="outline"

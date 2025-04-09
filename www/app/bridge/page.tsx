@@ -14,9 +14,11 @@ const BridgePage: React.FC = () => {
 
   return (
     <NuqsAdapter>
-      <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center bg-[url('/images/bg.png')] bg-cover bg-center bg-no-repeat">
-        <BridgeTabs />
-      </div>
+      <React.Suspense>
+        <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center bg-[url('/images/bg.png')] bg-cover bg-center bg-no-repeat">
+          <BridgeTabs />
+        </div>
+      </React.Suspense>
     </NuqsAdapter>
   );
 };
