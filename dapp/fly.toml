@@ -1,0 +1,35 @@
+app = "worldtycoon"
+
+[build]
+image = "registry.fly.io/worldtycoon"
+
+[http_service]
+internal_port = 10000
+force_https = true
+
+[http_service.concurrency]
+type = "requests"
+soft_limit = 200
+hard_limit = 250
+
+[[http_service.checks]]
+grace_period = "10s"
+interval = "30s"
+method = "GET"
+timeout = "5s"
+path = "/healthz"
+
+[[vm]]
+size = "shared-cpu-1x"
+memory = "2gb"
+
+[env]
+CARTESI_BLOCKCHAIN_FINALITY_OFFSET = "1"
+CARTESI_BLOCKCHAIN_ID = "84532"
+CARTESI_CONTRACTS_APPLICATION_ADDRESS = "0xb842774c8EC2fEf32d0102dE532c352081e0Bb92"
+CARTESI_CONTRACTS_AUTHORITY_ADDRESS = "0x2973Ec7dcf64f4aE24dAB804Ae9E52e6b3Dd2DaC"
+CARTESI_CONTRACTS_HISTORY_ADDRESS = "0x9C7816E8e4D770F9bCeBdB0A665e7089107c9327"
+CARTESI_CONTRACTS_INPUT_BOX_ADDRESS = "0x59b22D57D4f067708AB0c00552767405926dc768"
+CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER = "8688714"
+CARTESI_EPOCH_LENGTH = "50400"
+

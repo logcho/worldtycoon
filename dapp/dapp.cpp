@@ -12,7 +12,7 @@
 #include "wallet.h"
 
 const std::string ERC20_PORTAL_ADDRESS = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
-const std::string TOKEN = "0x92c6bca388e99d6b304f1af3c3cd749ff0b591e2";
+const std::string TOKEN = "0x6c6B9Ae2704De1B8E223722664ddADdda6d83EC6";
 
 const std::string GAME_WALLET = "0x0000000000000000000000000000000000000001";
 const std::string PEOPLE_WALLET = "0x0000000000000000000000000000000000000002";
