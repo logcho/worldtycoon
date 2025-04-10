@@ -32,7 +32,7 @@ export const BridgeTabs: React.FC = () => {
 
   const tokenAddress = "0x6c6B9Ae2704De1B8E223722664ddADdda6d83EC6"; // Simoleons
   const erc20PortalAddress = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
-  const dAppAddress = `0x8BA284dfC20e5AF86c55Bb47757Da779E6BDDC3D`; // Default address for running locally change upon deployment
+  const dAppAddress = `0xb842774c8EC2fEf32d0102dE532c352081e0Bb92`; // Default address for running locally change upon deployment
 
   const { data: symbol } = useContractRead({
     address: tokenAddress,
