@@ -49,10 +49,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   setIsOpen,
   isOpen,
 }) => {
-  const loaded =
+  const statsLoaded =
     !!population &&
     !!totalFunds &&
-    !!cityTime &&
+    !!cityTime;
+  const budgetLoaded =
     !!cityTax &&
     !!taxFund &&
     !!firePercent &&
@@ -72,31 +73,35 @@ export const Navbar: React.FC<NavbarProps> = ({
             WORLD TYCOON
           </p>
         </Link>
-        {loaded && (
-          <div className="flex gap-4">
+        {statsLoaded && (
+          <div className="flex gap-2">
             <CityStats
               population={hexToNumber(population)}
               totalFunds={hexToNumber(totalFunds)}
               cityTime={hexToNumber(cityTime)}
             />
-            <Budget
-              cityTax={hexToNumber(cityTax)}
-              cashFlow={Number(hexToString(cashFlow))}
-              funds={hexToNumber(totalFunds)}
-              taxFund={hexToNumber(taxFund)}
-              roadPercent={hexToNumber(roadPercent)}
-              roadFund={hexToNumber(roadFund)}
-              firePercent={hexToNumber(firePercent)}
-              fireFund={hexToNumber(fireFund)}
-              policePercent={hexToNumber(policePercent)}
-              policeFund={hexToNumber(policeFund)}
-              loading={loading}
-              setInput={setInput}
-              write={write}
-              setIsOpen={setIsOpen}
-              isOpen={isOpen}
-            />
           </div>
+        )}
+        {budgetLoaded && (
+          <div className="flex gap-2">
+            <Budget
+            cityTax={hexToNumber(cityTax)}
+            cashFlow={Number(hexToString(cashFlow))}
+            funds={hexToNumber(totalFunds)}
+            taxFund={hexToNumber(taxFund)}
+            roadPercent={hexToNumber(roadPercent)}
+            roadFund={hexToNumber(roadFund)}
+            firePercent={hexToNumber(firePercent)}
+            fireFund={hexToNumber(fireFund)}
+            policePercent={hexToNumber(policePercent)}
+            policeFund={hexToNumber(policeFund)}
+            loading={loading}
+            setInput={setInput}
+            write={write}
+            setIsOpen={setIsOpen}
+            isOpen={isOpen}
+          />
+        </div>
         )}
 
         <div className="flex w-full items-center justify-end">
