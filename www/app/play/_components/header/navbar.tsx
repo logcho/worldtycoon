@@ -54,6 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     !!totalFunds &&
     !!cityTime;
   const budgetLoaded =
+    !!totalFunds &&
     !!cityTax &&
     !!taxFund &&
     !!firePercent &&
