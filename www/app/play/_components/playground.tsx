@@ -4,7 +4,7 @@ import { json } from "stream/consumers";
 import * as React from "react";
 import { useEffect, useState } from "react";
 
-import { fromHex, Hex, hexToNumber, stringToHex } from "viem";
+import { fromHex, Hex, hexToNumber, hexToString, stringToHex } from "viem";
 
 import type { Tool } from "~/config/tools";
 
@@ -24,7 +24,7 @@ export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
   const [isBudgeting, setIsBudgeting] = useState(false);
   // TODO: implement rollup server
   // note don't worry about transaction confirmation window for now
-  const dapp = "0xb842774c8EC2fEf32d0102dE532c352081e0Bb92";
+  const dapp = "0x54F460c33B68AB672091A696709C0182FF48BE5D";
   const [input, setInput] = useState<Hex>();
   const { loading, success, error, write, notices } = useRollupsServer(
     dapp,
@@ -32,19 +32,21 @@ export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
   );
   const [
     map,
-    population,
-    totalFunds,
-    cityTime,
-    cityTax,
-    taxFund,
-    firePercent,
-    policePercent,
-    roadPercent,
-    fireFund,
-    policeFund,
-    roadFund,
-    cashFlow,
+    stats,
+    // population,
+    // totalFunds,
+    // cityTime,
+    // cityTax,
+    // taxFund,
+    // firePercent,
+    // policePercent,
+    // roadPercent,
+    // fireFund,
+    // policeFund,
+    // roadFund,
+    // cashFlow,
   ] = notices;
+  if (stats) console.log(hexToString(stats));
   // const [map, population, totalFunds, cityTime, cityTax] = notices;
   // if(totalFunds) console.log(fromHex(totalFunds, 'bigint')); verified works
   useEventListener("keydown", (event) => {
@@ -58,19 +60,7 @@ export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
   return (
     <>
       <Navbar
-        population={population}
-        totalFunds={totalFunds}
-        cityTime={cityTime}
-        cityTax={cityTax}
-        taxFund={taxFund}
-        loading={loading}
-        firePercent={firePercent}
-        policePercent={policePercent}
-        roadPercent={roadPercent}
-        fireFund={fireFund}
-        policeFund={policeFund}
-        roadFund={roadFund}
-        cashFlow={cashFlow}
+        stats={stats}
         setInput={setInput}
         write={write}
         setIsOpen={setIsBudgeting}

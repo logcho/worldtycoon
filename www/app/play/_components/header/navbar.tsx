@@ -5,24 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Hex, hexToNumber, hexToString } from "viem";
+import { Hex, hexToNumber, hexToString } from "viem"; // Ensure proper import of `hexToString`
 
 import { Budget } from "./budget";
 import { CityStats } from "./citystats";
 
 interface NavbarProps {
-  population?: Hex;
-  totalFunds?: Hex;
-  cityTime?: Hex;
-  cityTax?: Hex;
-  taxFund?: Hex;
-  firePercent?: Hex;
-  policePercent?: Hex;
-  roadPercent?: Hex;
-  fireFund?: Hex;
-  policeFund?: Hex;
-  roadFund?: Hex;
-  cashFlow?: Hex;
+  stats?: Hex;
   loading?: boolean;
   setInput?: (input: Hex) => void;
   write?: () => void;
@@ -30,42 +19,81 @@ interface NavbarProps {
   isOpen: boolean;
 }
 
+type CityStatsType = {  // Renamed to avoid conflicts with the component name
+  cashFlow: number;
+  cityTax: number;
+  cityTime: number;
+  fireFund: number;
+  firePercent: number;
+  policeFund: number;
+  policePercent: number;
+  population: number;
+  roadFund: number;
+  roadPercent: number;
+  taxFund: number;
+  totalFunds: number;
+};
+
 export const Navbar: React.FC<NavbarProps> = ({
-  population,
-  totalFunds,
-  cityTime,
-  cityTax,
-  taxFund,
-  firePercent,
-  policePercent,
-  roadPercent,
-  fireFund,
-  policeFund,
-  roadFund,
-  cashFlow,
+  stats,
   loading,
   setInput,
   write,
   setIsOpen,
   isOpen,
 }) => {
-  const statsLoaded =
-    !!population &&
-    !!totalFunds &&
-    !!cityTime;
-  const budgetLoaded =
-    !!totalFunds &&
-    !!cityTax &&
-    !!taxFund &&
-    !!firePercent &&
-    !!policePercent &&
-    !!roadPercent &&
-    !!fireFund &&
-    !!policeFund &&
-    !!roadFund &&
-    !!cashFlow;
 
-  // if(roadPercent) console.log(hexToNumber(roadPercent))
+  const statsJSON = stats ? hexToString(stats) : `{
+    "cashFlow": 0,
+    "cityTax": 0,
+    "cityTime": 0,
+    "fireFund": 0,
+    "firePercent": 0,
+    "policeFund": 0,
+    "policePercent": 0,
+    "population": 0,
+    "roadFund": 0,
+    "roadPercent": 0,
+    "taxFund": 0,
+    "totalFunds": 0
+  }`;
+
+  let parsedStats: CityStatsType = {
+    cashFlow: 0,
+    cityTax: 0,
+    cityTime: 0,
+    fireFund: 0,
+    firePercent: 0,
+    policeFund: 0,
+    policePercent: 0,
+    population: 0,
+    roadFund: 0,
+    roadPercent: 0,
+    taxFund: 0,
+    totalFunds: 0,
+  };
+
+  try {
+    parsedStats = JSON.parse(statsJSON) as CityStatsType;
+  } catch (e) {
+    console.error("Error parsing stats JSON", e);
+  }
+
+  const {
+    cashFlow,
+    cityTax,
+    cityTime,
+    fireFund,
+    firePercent,
+    policeFund,
+    policePercent,
+    population,
+    roadFund,
+    roadPercent,
+    taxFund,
+    totalFunds
+  } = parsedStats;
+
   return (
     <header className="sticky inset-0 z-50 h-20 bg-[#111] p-4">
       <div className="flex h-full items-center justify-between">
@@ -74,35 +102,32 @@ export const Navbar: React.FC<NavbarProps> = ({
             WORLD TYCOON
           </p>
         </Link>
-        {statsLoaded && (
+        
+        {stats && (
           <div className="flex gap-2">
-            <CityStats
-              population={hexToNumber(population)}
-              totalFunds={hexToNumber(totalFunds)}
-              cityTime={hexToNumber(cityTime)}
+            <CityStats 
+              population={population}
+              totalFunds={totalFunds}
+              cityTime={cityTime}
+            />
+            <Budget
+              cityTax={cityTax}
+              cashFlow={cashFlow}
+              funds={totalFunds}
+              taxFund={taxFund}
+              roadPercent={roadPercent*100}
+              roadFund={roadFund}
+              firePercent={firePercent*100}
+              fireFund={fireFund}
+              policePercent={policePercent*100}
+              policeFund={policeFund}
+              loading={loading}
+              setInput={setInput}
+              write={write}
+              setIsOpen={setIsOpen}
+              isOpen={isOpen}
             />
           </div>
-        )}
-        {budgetLoaded && (
-          <div className="flex gap-2">
-            <Budget
-            cityTax={hexToNumber(cityTax)}
-            cashFlow={Number(hexToString(cashFlow))}
-            funds={hexToNumber(totalFunds)}
-            taxFund={hexToNumber(taxFund)}
-            roadPercent={hexToNumber(roadPercent)}
-            roadFund={hexToNumber(roadFund)}
-            firePercent={hexToNumber(firePercent)}
-            fireFund={hexToNumber(fireFund)}
-            policePercent={hexToNumber(policePercent)}
-            policeFund={hexToNumber(policeFund)}
-            loading={loading}
-            setInput={setInput}
-            write={write}
-            setIsOpen={setIsOpen}
-            isOpen={isOpen}
-          />
-        </div>
         )}
 
         <div className="flex w-full items-center justify-end">

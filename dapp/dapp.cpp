@@ -68,22 +68,31 @@ void generateVoucher(httplib::Client &cli, const std::string &recipient, std::st
 
 void createGameNotices(httplib::Client &cli, const Micropolis *game){
     createNotice(cli, vectorToHexUint16(convertMapToUint16Vector(game->map[0], WORLD_W, WORLD_H))); // Map
-    createNotice(cli, uint64ToHex(game->cityPop)); // Population
-    createNotice(cli, uint64ToHex(game->totalFunds)); // City funds
-    createNotice(cli, uint64ToHex(game->cityTime)); // City time
 
-    createNotice(cli, uint64ToHex(game->cityTax)); // City tax
-    createNotice(cli, uint64ToHex(game->taxFund)); // Tax Fund
+    // Create a picojson::object to hold your stats
+    picojson::object statsJson;
 
-    createNotice(cli, uint64ToHex(static_cast<int>(game->firePercent * 100))); // Fire percent
-    createNotice(cli, uint64ToHex(static_cast<int>(game->policePercent * 100))); // Police percent
-    createNotice(cli, uint64ToHex(static_cast<int>(game->roadPercent * 100))); // Road percent
+    statsJson["population"] = picojson::value(static_cast<double>(game->cityPop));
+    statsJson["totalFunds"] = picojson::value(static_cast<double>(game->totalFunds));
+    statsJson["cityTime"] = picojson::value(static_cast<double>(game->cityTime));
+    statsJson["cityTax"] = picojson::value(static_cast<double>(game->cityTax));
+    statsJson["taxFund"] = picojson::value(static_cast<double>(game->taxFund));
+    statsJson["firePercent"] = picojson::value(game->firePercent);     // Assuming float
+    statsJson["policePercent"] = picojson::value(game->policePercent);   // Assuming float
+    statsJson["roadPercent"] = picojson::value(game->roadPercent);     // Assuming float
+    statsJson["fireFund"] = picojson::value(static_cast<double>(game->fireFund));
+    statsJson["policeFund"] = picojson::value(static_cast<double>(game->policeFund));
+    statsJson["roadFund"] = picojson::value(static_cast<double>(game->roadFund));
+    statsJson["cashFlow"] = picojson::value(static_cast<double>(game->cashFlow)); // short → double
 
-    createNotice(cli, uint64ToHex(game->fireFund));
-    createNotice(cli, uint64ToHex(game->policeFund));
-    createNotice(cli, uint64ToHex(game->roadFund));
+    // Serialize the object to a string
+    std::string jsonStr = picojson::value(statsJson).serialize();
 
-    createNotice(cli, stringToHex(std::to_string(game->cashFlow)));
+    // Convert JSON string to hex
+    std::string hexPayload = stringToHex(jsonStr);
+
+    // Send as a single notice
+    createNotice(cli, hexPayload);
     // std::cout << std::to_string(game->cashFlow) << std::endl;
     // std::cout << static_cast<int>(game->firePercent * 100) << std::endl;
     // std::cout << game->cityTax << std::endl;
@@ -219,8 +228,10 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             std::string hexAmount = "0x" + formattedBalance.str(16, 32);
             // std::cout << hexAmount << std::endl;
             generateVoucher(cli, address, hexAmount);
-            delete games[address];     // Deallocate the memory
-            games.erase(address); 
+            if (games.count(address)) {
+                delete games[address];
+                games.erase(address);
+            } 
             return "accept";
         }
     }

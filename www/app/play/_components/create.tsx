@@ -19,7 +19,7 @@ const CreatePage: React.FC = () => {
   const symbol = "SIM"; // XXX: should actually come from querying token metadata
   const decimals = 18; // XXX: should actually come from querying token metadata
 
-  const dAppAddress = `0xb842774c8EC2fEf32d0102dE532c352081e0Bb92`; // Default address for running locally change upon deployment
+  const dAppAddress = `0x54F460c33B68AB672091A696709C0182FF48BE5D`; // Default address for running locally change upon deployment
 
   const amount = "20000";
 

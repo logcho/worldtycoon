@@ -7,8 +7,8 @@ export const nav = [
     name: "Bridge",
     href: "/bridge",
   },
-  {
-    name: "Docs",
-    href: "/docs",
-  },
+  // {
+  //   name: "Docs",
+  //   href: "/docs",
+  // },
 ];

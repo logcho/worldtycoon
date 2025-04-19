@@ -74,6 +74,10 @@ export const Budget: FC<BudgetProps> = ({
     }
   }, [tax, rp, fp, pp]);
 
+  const formatPercentage = (value: number) => {
+    return value.toFixed(0);
+  };
+
   return (
     <div className="font-fixedsys">
       <Dialog
@@ -117,7 +121,7 @@ export const Budget: FC<BudgetProps> = ({
                   step={1}
                 />
                 <p>
-                  {rp}% of ${roadFund} = ${(rp / 100) * roadFund}
+                  {formatPercentage(rp)}% of ${roadFund} = ${(rp / 100) * roadFund}
                 </p>
               </CardContent>
             </Card>
@@ -132,7 +136,7 @@ export const Budget: FC<BudgetProps> = ({
                   step={1}
                 />
                 <p>
-                  {fp}% of ${fireFund} = ${(fp / 100) * fireFund}
+                  {formatPercentage(fp)}% of ${fireFund} = ${(fp / 100) * fireFund}
                 </p>
               </CardContent>
             </Card>
@@ -147,7 +151,7 @@ export const Budget: FC<BudgetProps> = ({
                   step={1}
                 />
                 <p>
-                  {pp}% of ${policeFund} = ${(pp / 100) * policeFund}
+                  {formatPercentage(pp)}% of ${policeFund} = ${(pp / 100) * policeFund}
                 </p>
               </CardContent>
             </Card>

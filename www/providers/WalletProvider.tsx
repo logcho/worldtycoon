@@ -7,14 +7,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import {
   anvil,
-  arbitrum,
-  arbitrumGoerli,
+  // arbitrum,
+  // arbitrumGoerli,
   base,
   baseSepolia,
-  mainnet,
-  optimism,
-  optimismGoerli,
-  sepolia,
+  // mainnet,
+  // optimism,
+  // optimismGoerli,
+  // sepolia,
 } from "wagmi/chains";
 
 const config = getDefaultConfig({
@@ -22,12 +22,12 @@ const config = getDefaultConfig({
   projectId: "YOUR_PROJECT_ID",
   chains: [
     anvil,
-    mainnet,
-    sepolia,
-    arbitrum,
-    arbitrumGoerli,
-    optimismGoerli,
-    optimism,
+    // mainnet,
+    // sepolia,
+    // arbitrum,
+    // arbitrumGoerli,
+    // optimismGoerli,
+    // optimism,
     base,
     baseSepolia,
   ],
