@@ -121,7 +121,7 @@ export const Budget: FC<BudgetProps> = ({
                   step={1}
                 />
                 <p>
-                  {formatPercentage(rp)}% of ${roadFund} = ${(rp / 100) * roadFund}
+                  {formatPercentage(rp)}% of ${roadFund} = ${formatPercentage((rp / 100) * roadFund)}
                 </p>
               </CardContent>
             </Card>
@@ -136,7 +136,7 @@ export const Budget: FC<BudgetProps> = ({
                   step={1}
                 />
                 <p>
-                  {formatPercentage(fp)}% of ${fireFund} = ${(fp / 100) * fireFund}
+                  {formatPercentage(fp)}% of ${fireFund} = ${formatPercentage((fp / 100) * fireFund)}
                 </p>
               </CardContent>
             </Card>
@@ -151,7 +151,7 @@ export const Budget: FC<BudgetProps> = ({
                   step={1}
                 />
                 <p>
-                  {formatPercentage(pp)}% of ${policeFund} = ${(pp / 100) * policeFund}
+                  {formatPercentage(pp)}% of ${policeFund} = ${formatPercentage((pp / 100) * policeFund)}
                 </p>
               </CardContent>
             </Card>
