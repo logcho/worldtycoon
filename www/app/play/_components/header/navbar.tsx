@@ -103,32 +103,32 @@ export const Navbar: React.FC<NavbarProps> = ({
           </p>
         </Link>
         
-        {stats && (
-          <div className="flex gap-2">
-            <CityStats 
-              population={population}
-              totalFunds={totalFunds}
-              cityTime={cityTime}
-            />
-            <Budget
-              cityTax={cityTax}
-              cashFlow={cashFlow}
-              funds={totalFunds}
-              taxFund={taxFund}
-              roadPercent={roadPercent*100}
-              roadFund={roadFund}
-              firePercent={firePercent*100}
-              fireFund={fireFund}
-              policePercent={policePercent*100}
-              policeFund={policeFund}
-              loading={loading}
-              setInput={setInput}
-              write={write}
-              setIsOpen={setIsOpen}
-              isOpen={isOpen}
-            />
-          </div>
-        )}
+
+        <div className="flex gap-2">
+          <CityStats 
+            population={population}
+            totalFunds={totalFunds}
+            cityTime={cityTime}
+          />
+          <Budget
+            cityTax={cityTax}
+            cashFlow={cashFlow}
+            funds={totalFunds}
+            taxFund={taxFund}
+            roadPercent={roadPercent*100}
+            roadFund={roadFund}
+            firePercent={firePercent*100}
+            fireFund={fireFund}
+            policePercent={policePercent*100}
+            policeFund={policeFund}
+            loading={loading}
+            setInput={setInput}
+            write={write}
+            setIsOpen={setIsOpen}
+            isOpen={isOpen}
+          />
+        </div>
+
 
         <div className="flex w-full items-center justify-end">
           <ConnectButton />
