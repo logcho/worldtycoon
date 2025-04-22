@@ -33,22 +33,8 @@ export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
   const [
     map,
     stats,
-    // population,
-    // totalFunds,
-    // cityTime,
-    // cityTax,
-    // taxFund,
-    // firePercent,
-    // policePercent,
-    // roadPercent,
-    // fireFund,
-    // policeFund,
-    // roadFund,
-    // cashFlow,
   ] = notices;
-  if (stats) console.log(hexToString(stats));
-  // const [map, population, totalFunds, cityTime, cityTax] = notices;
-  // if(totalFunds) console.log(fromHex(totalFunds, 'bigint')); verified works
+  
   useEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       setSelectedTool(undefined);

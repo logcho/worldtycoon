@@ -26,6 +26,31 @@ export const NOTICES_QUERY = gql`
   }
 `;
 
+export const GAME_NOTICES = gql`
+  query GameNotices($inputIndex: Int!) {
+    map: notice(noticeIndex: 0, inputIndex: $inputIndex) {
+      index
+      payload
+      input {
+        index
+        timestamp
+        msgSender
+        blockNumber
+      }
+    }
+    stat: notice(noticeIndex: 1, inputIndex: $inputIndex) {
+      index
+      payload
+      input {
+        index
+        timestamp
+        msgSender
+        blockNumber
+      }
+    }
+  }
+`;
+
 const useInputIndex = (receipt?: TransactionReceipt): bigint | undefined => {
   const [inputIndex, setInputIndex] = useState<bigint | undefined>();
   useEffect(() => {
@@ -70,7 +95,7 @@ export const useRollupsServer = (dapp: Address, input?: Hex) => {
     data: writeData,
   } = useWriteInputBoxAddInput();
 
-  const { data: reciept } = useWaitForTransactionReceipt({
+  const { data: receipt } = useWaitForTransactionReceipt({
     hash: writeData,
   });
 
@@ -80,40 +105,64 @@ export const useRollupsServer = (dapp: Address, input?: Hex) => {
     if (simulateData) await writeContractAsync(simulateData.request);
   };
 
-  const inputIndex = useInputIndex(reciept);
+  const inputIndex = useInputIndex(receipt);
+
+  // const {
+  //   loading: queryLoading,
+  //   error: queryError,
+  //   data: queryData,
+  // } = useQuery(NOTICES_QUERY, {
+  //   skip: !inputIndex, // Ensures query runs only when inputIndex is defined
+  //   pollInterval: 1000,
+  // });
 
   const {
-    loading: queryLoading,
-    error: queryError,
-    data: queryData,
-  } = useQuery(NOTICES_QUERY, {
-    skip: !inputIndex, // Ensures query runs only when inputIndex is defined
+    data: gameNoticeData,
+    loading: gameNoticeLoading,
+    error: gameNoticeError,
+  } = useQuery(GAME_NOTICES, {
+    skip: !inputIndex,
+    variables: { inputIndex: Number(inputIndex) },
     pollInterval: 1000,
   });
 
   useEffect(() => {
-    if (inputIndex && queryData) {
-      const queriedNotices = queryData.notices.edges;
-      // console.log(queriedNotices);
-      // Filter notices based on inputIndex
-      const filteredNotices = queriedNotices
-        .filter(({ node }: any) => {
-          // Log the value for debugging
-          if (BigInt(node.input.index) === inputIndex) {
-            console.log("node.input.index:", node.input.index);
-          }
-          return BigInt(node.input.index) === inputIndex; // Ensure both are `bigint`
-        })
-        .map(({ node }: any) => {
-          // Ensure we are mapping to node.payload
-          return node.payload;
-        });
-
-      // Log the filteredNotices to verify its content
-      // console.log("filteredNotices:", filteredNotices);
-      setNotices(filteredNotices);
+    console.log("inputIndex", Number(inputIndex));
+    console.log("Game Notices", gameNoticeData);
+    if (gameNoticeData) {
+      setNotices([
+        gameNoticeData.map?.payload,
+        gameNoticeData.stat?.payload,
+      ].filter(Boolean)); // remove any undefined/null values just in case
     }
-  }, [inputIndex, queryData]);
+  }, [inputIndex, gameNoticeData])
+
+
+  // useEffect(() => {
+  //   console.log("Game Notices", gameNoticeData)
+
+  //   if (inputIndex && queryData) {
+  //     const queriedNotices = queryData.notices.edges;
+  //     // console.log(queriedNotices);
+  //     // Filter notices based on inputIndex
+  //     const filteredNotices = queriedNotices
+  //       .filter(({ node }: any) => {
+  //         // Log the value for debugging
+  //         if (BigInt(node.input.index) === inputIndex) {
+  //           console.log("node.input.index:", node.input.index);
+  //         }
+  //         return BigInt(node.input.index) === inputIndex; // Ensure both are `bigint`
+  //       })
+  //       .map(({ node }: any) => {
+  //         // Ensure we are mapping to node.payload
+  //         return node.payload;
+  //       });
+
+  //     // Log the filteredNotices to verify its content
+  //     // console.log("filteredNotices:", filteredNotices);
+  //     setNotices(filteredNotices);
+  //   }
+  // }, [inputIndex, queryData]);
 
   // Console log data
   // Set true if debugging
@@ -130,10 +179,10 @@ export const useRollupsServer = (dapp: Address, input?: Hex) => {
       console.log(writeData);
       console.log("----------------");
     }
-    if (reciept) {
+    if (receipt) {
       console.log("----------------");
-      console.log("reciept");
-      console.log(reciept);
+      console.log("receipt");
+      console.log(receipt);
       console.log("----------------");
     }
     if (inputIndex) {
@@ -142,10 +191,16 @@ export const useRollupsServer = (dapp: Address, input?: Hex) => {
       console.log(inputIndex);
       console.log("----------------");
     }
+    if (notices) {
+      console.log("----------------");
+      console.log("notices");
+      console.log(notices);
+      console.log("----------------");
+    }
   }
 
   return {
-    loading: writePending || queryLoading,
+    loading: writePending || gameNoticeLoading,
     success: writeSuccess,
     error: writeError,
     write,
