@@ -49,5 +49,20 @@ bun i
 bun dev
 ```
 
+### To test NFT feature prototype
+Run the GameHasHNFT contract (dapp/contracts/GameHasHNFT.sol) on Foundry using [Remix](https://remix.ethereum.org) or Anvil.
+
+
+### NOTE
+Enviornment variabless are not yet connected and will have to changed manually for now.
+
+In this branch the variables are already set to the default test address values.
+
+To check addresses when running locally use cartesi address-book
+```shell
+cartesi address-book
+```
+
+
 
 

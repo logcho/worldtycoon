@@ -119,10 +119,20 @@ export const BridgeTabs: React.FC = () => {
   };
   // TODO: Add loading states to deposit
 
-  const withdraw = async (amount: string) => {
+  const withdraw = async () => {
     try {
       const data = await write({
         args: [dAppAddress, stringToHex(`{"method": "withdraw"}`)],
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+  const mintNFT = async () => {
+    try {
+      const data = await write({
+        args: [dAppAddress, stringToHex(`{"method": "save"}`)],
       });
     } catch (error) {
       console.error("Error:", error);
@@ -301,6 +311,9 @@ export const BridgeTabs: React.FC = () => {
                 }}
                 chainStatus="none"
               />
+              <span className="font-bitmap text-muted-foreground">
+                NFT Token ID
+              </span>
             </div>
           </div>
 
@@ -421,42 +434,32 @@ export const BridgeTabs: React.FC = () => {
             : `${formatUnits(l1Balance ?? 0n, decimals)} ${symbol}`}
           </p>
         </div>
-        <Button
+        {/* <Button
           variant="outline"
           className="w-full shadow-md"
           disabled={!canWithdraw}
           onClick={() => withdraw(amount.toString())}
         >
           Withdraw
-        </Button>
-        {/* <div className="grid grid-cols-2 gap-4">
+        </Button> */}
+        <div className="grid grid-cols-2 gap-4">
           <Button
             variant="outline"
             className="shadow-md"
             disabled={!canWithdraw}
-            onClick={() => withdraw(amount.toString())}
+            onClick={() => mintNFT()}
           >
-            Withdraw
+            Mint NFT
           </Button>
           <Button
-            className="shadow-md"
-            disabled={!canTransfer}
-            onClick={() => {
-              // write({
-              //   args: [
-              //     dAppAddress,
-              //     `0xa9059cbb000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb9226600000000000000000000000000000000000000000000043c33c1937564800000`,
-              //   ]
-              // })
-            }}
+            variant="outline"
+            className="w-full shadow-md"
+            disabled={!canWithdraw}
+            onClick={() => withdraw()}
           >
-            {isDepositing ? (
-              <Spinner className="text-black" />
-            ) : (
-              "Transfer"
-            )}
+            Withdraw funds
           </Button>
-        </div> */}
+        </div>
       </TabsContent>
     </Tabs>
   );
