@@ -22,6 +22,7 @@ import {
   useReadErc20BalanceOf,
   useWriteErc20Approve,
   useWriteErc20PortalDepositErc20Tokens,
+  useWriteErc721PortalDepositErc721Token,
   useWriteInputBoxAddInput,
 } from "~/hooks/wagmi";
 import { cn } from "~/lib/utils";
@@ -32,7 +33,9 @@ export const BridgeTabs: React.FC = () => {
 
   const tokenAddress = "0x92C6bcA388E99d6B304f1Af3c3Cd749Ff0b591e2"; // Simoleons
   const erc20PortalAddress = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
+  const erc721PortalAddress = "0x237F8DD094C0e47f4236f12b4Fa01d6Dae89fb87";
   const dAppAddress = `0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e`; // Default address for running locally change upon deployment
+  const nftContract = `0x36C02dA8a0983159322a80FFE9F24b1acfF8B570`;
 
   const { data: symbol } = useContractRead({
     address: tokenAddress,
@@ -144,7 +147,43 @@ export const BridgeTabs: React.FC = () => {
   const canWithdraw = funds !== undefined && funds > 0;
   const canTransfer = true;
 
-  const [gameHash, setGameHash] = useState("");
+  const [gameHash, setGameHash] = useState<bigint>(0n);
+
+  const approveNFT = async (address: Address, tokenId: bigint) => {
+    try {
+      await approveToken({
+        address,
+        args: [erc721PortalAddress, tokenId], // ERC721: approve(spender, tokenId)
+      });
+      console.log("ERC721 Approval successful for token ID:", tokenId);
+    } catch (error) {
+      console.error("Error in approving ERC721:", error);
+      throw error;
+    }
+  };
+  
+  const { writeContractAsync: depositNFTToken } =
+    useWriteErc721PortalDepositErc721Token();
+
+  const depositNFT = async (tokenId: bigint) => {
+    try {
+      const data = stringToHex(`Deposited NFT (${tokenId}).`);
+      await depositNFTToken({
+        args: [
+          nftContract,   // ERC721 token contract address
+          dAppAddress,    // Cartesi dApp address
+          tokenId,        // Specific NFT token ID to deposit
+          data,           // Optional data payload
+          data,
+        ],
+      });
+      console.log("ERC721 deposit successful for token ID:", tokenId);
+    } catch (error) {
+      console.error("Error in depositing ERC721:", error);
+      throw error;
+    }
+  };
+  
 
   return (
     <Tabs
@@ -266,10 +305,10 @@ export const BridgeTabs: React.FC = () => {
           </div>
 
           <Input
-            type="string"
-            value={gameHash}
-            onChange={(e) => setGameHash(e.target.value)}
-            placeholder="0x"
+            type="number"
+            value={gameHash.toString()}
+            onChange={(e) => setGameHash(BigInt(e.target.value))}
+            placeholder="0"
             className={cn(
               "bg-foreground/10 w-full text-2xl outline-hidden",
               // hide number arrows
@@ -304,15 +343,15 @@ export const BridgeTabs: React.FC = () => {
           <Button
             variant="outline"
             className="shadow-md"
-            disabled={!canApprove}
-            onClick={() => approve(tokenAddress, amount.toString())}
+            // disabled={!canApprove}
+            onClick={() => approveNFT(nftContract, gameHash)}
           >
             Approve
           </Button>
           <Button
             className="shadow-md"
-            disabled={!canDeposit}
-            onClick={() => deposit(amount.toString())}
+            // disabled={!canDeposit}
+            onClick={() => depositNFT(gameHash)}
           >
             {isDepositing ?
               <Spinner className="text-black" />

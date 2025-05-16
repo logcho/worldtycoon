@@ -13,10 +13,10 @@
 #include "sha256.h"
 
 const std::string ERC20_PORTAL_ADDRESS = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
-const std::string ERC721_PORTAL_ADDRESS = "0x237F8DD094C0e47f4236f12b4Fa01d6Dae89fb87";
+const std::string ERC721_PORTAL_ADDRESS = "0x237f8dd094c0e47f4236f12b4fa01d6dae89fb87";
 const std::string TOKEN = "0x92C6bcA388E99d6B304f1Af3c3Cd749Ff0b591e2";
 
-std::string contract = "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570";
+const std::string NFT_CONTRACT = "0x36c02da8a0983159322a80ffe9f24b1acff8b570";
 
 const std::string GAME_WALLET = "0x0000000000000000000000000000000000000001";
 const std::string PEOPLE_WALLET = "0x0000000000000000000000000000000000000002";
@@ -24,6 +24,8 @@ const std::string PEOPLE_WALLET = "0x0000000000000000000000000000000000000002";
 Wallet* walletHandler = new Wallet();
 std::unordered_map<std::string, Micropolis*> games;
 std::unordered_map<std::string, Micropolis*> storage;
+
+uint256_t tokenId = 1;
 
 std::string saveGameState(const Micropolis* game) {
     picojson::object gameState;
@@ -96,7 +98,7 @@ std::string encodeTransferCall(const std::string &recipient, const std::string &
     return "0x" + methodId + paddedRecipient + paddedAmount;
 }
 
-std::string encodeMintNFTCall(const std::string &recipient, const std::string &gameHash) {
+std::string encodeMintNFTCall(const std::string &recipient, const std::string &tokenId) {
     std::string methodId = "3c168eab"; // keccak256("mintNFT(address,uint256)") first 4 bytes
     
     // recipient is a hex string like "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
@@ -106,8 +108,7 @@ std::string encodeMintNFTCall(const std::string &recipient, const std::string &g
     
     // gameHash is a uint256 hex string, e.g. "0x123abc..."
     // remove "0x" and pad left to 64 chars (32 bytes)
-    std::string cleanGameHash = gameHash.substr(2);
-    std::string paddedGameHash = padTo32Bytes(cleanGameHash);
+    std::string paddedGameHash = padTo32Bytes(tokenId);
     
     // Combine all parts: methodId + recipient + gameHash
     std::string data = methodId + paddedRecipient + paddedGameHash;
@@ -144,9 +145,9 @@ void generateVoucher(httplib::Client &cli, const std::string &recipient, std::st
 }
 
 void generateNFTVoucher(httplib::Client &cli, const std::string& NFTCall) {
-    std::cout << "Contract: " << contract << std::endl;
+    std::cout << "Contract: " << NFT_CONTRACT << std::endl;
     // Format the payload expected by Cartesi
-    std::string payload = "{\"destination\":\"" + contract + "\",\"payload\":\"" + NFTCall + "\"}";
+    std::string payload = "{\"destination\":\"" + NFT_CONTRACT + "\",\"payload\":\"" + NFTCall + "\"}";
     // Payload should be abi transfer to erc20 address
     auto r = cli.Post("/voucher", payload, "application/json");
     if (r) {
@@ -216,6 +217,42 @@ std::string handleERC20Deposit(httplib::Client &cli, const std::string& address,
     return "accept";
 }
 
+bool isERC721Deposit(const std::string& address) {
+    return address == ERC721_PORTAL_ADDRESS;
+}
+
+picojson::object parseERC721Deposit(const std::string& payload) {
+    picojson::object obj;
+    obj["token"] = picojson::value(slice(payload, 0, 20));      // 0 - 20 bytes
+    obj["sender"] = picojson::value(slice(payload, 20, 40));    // 20 - 40 bytes
+    obj["tokenId"] = picojson::value(slice(payload, 40, 72));   // 40 - 72 bytes (32 bytes)
+    return obj;
+}
+
+
+std::string handleERC721Deposit(httplib::Client &cli, const std::string& address, const std::string& payload) {
+    picojson::object deposit = parseERC721Deposit(payload);
+    std::string user = deposit["sender"].to_str();
+    std::string token = deposit["token"].to_str();
+    std::string tokenId = deposit["tokenId"].to_str();
+
+    std::cout << "Token: " << token << std::endl;
+    std::cout << "Sender: " << user << std::endl;
+    std::cout << "Token ID: " << tokenId << std::endl;
+    if(token == NFT_CONTRACT){
+        uint256_t num(tokenId.substr(2), 16);
+        std::string id = num.str();
+        std::cout << "ID: " << id << std::endl;
+        if(storage.count(id)){
+            games[user] = storage[id];
+            storage.erase(id);
+            std::cout << "Game Loaded" << std::endl;
+        }
+    }   
+    return "accept";
+}
+
+
 std::string handle_advance(httplib::Client &cli, picojson::value data)
 {
     std::string address = data.get("metadata").get("msg_sender").to_str();
@@ -227,6 +264,9 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
     if(isERC20Deposit(address)){
         return handleERC20Deposit(cli, address, payload);
     }   
+    else if(isERC721Deposit(address)){
+        return handleERC721Deposit(cli, address, payload);
+    }
     else{
         picojson::value parsed_payload;
         std::string decoded_payload = hexToString(payload);
@@ -328,30 +368,19 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
         }
         else if(method == "save"){
             if (games.find(address) == games.end()) return "reject";
-            std::string gameState = saveGameState(games[address]);
-            std::string gameStateHash = sha256(gameState);
-            std::cout << "Game State Hash: " << gameStateHash << std::endl;
-            storage[gameStateHash] = games[address];
+            // std::string gameState = saveGameState(games[address]);
+            // std::string gameStateHash = sha256(gameState);
+            // std::cout << "Game State Hash: " << gameStateHash << std::endl;
+            std::string stringTokenId = tokenId.str();
+            std::cout << "String Token Id: " << stringTokenId << std::endl;
+            storage[stringTokenId] = games[address];
             games.erase(address);
-            std::string NFTCall = encodeMintNFTCall(address, gameStateHash);
+            std::string NFTCall = encodeMintNFTCall(address, stringTokenId);
             std::cout << "Encoded NFT Call: " << NFTCall << std::endl;
             generateNFTVoucher(cli, NFTCall);
+            tokenId++;
             return "accept";
-        }   
-        else if(method == "load"){
-            std::string gameStateHash = parsed_payload.get("hash").to_str();
-            if(storage.count(gameStateHash)){
-                std::cout << "Game found in storage" << std::endl;
-            }
-            else{
-                std::cout << "Game not found in storage" << std::endl;
-            }
-
-        }
-        else if(method == "setContract"){
-            contract = parsed_payload.get("contract").to_str();
-            std::cout << "Contract is now set to " << contract << std::endl;
-        }
+        }  
     }
     return "reject";
 }
