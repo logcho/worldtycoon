@@ -52,6 +52,7 @@ bun dev
 ### To test NFT feature prototype
 Run the GameHasHNFT contract (dapp/contracts/GameHasHNFT.sol) on Foundry using [Remix](https://remix.ethereum.org) or Anvil.
 
+If the address of the deployed contract is different than the value already set, change it manually in both the dapp.cpp and bridge-taps.tsx
 
 ### NOTE
 Enviornment variabless are not yet connected and will have to changed manually for now.
