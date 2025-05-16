@@ -137,8 +137,9 @@ export const Map: FC<MapProps> = ({
   //     );
 
   //     if (!isBudgeting && !wouldOverlap) {
-  //       // setPlacedSprites((prev) => [...prev, { x, y, tool: selectedTool }]);
-  //       write && write();
+  //       setPlacedSprites((prev) => [...prev, { x, y, tool: selectedTool }]);
+  //       console.log("Place sprite")
+  //       // write && write();
   //     }
   //   }
   // };

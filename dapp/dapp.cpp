@@ -10,15 +10,74 @@
 
 #include "util.h"
 #include "wallet.h"
+#include "sha256.h"
 
 const std::string ERC20_PORTAL_ADDRESS = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
-const std::string TOKEN = "0x6c6B9Ae2704De1B8E223722664ddADdda6d83EC6";
+const std::string ERC721_PORTAL_ADDRESS = "0x237F8DD094C0e47f4236f12b4Fa01d6Dae89fb87";
+const std::string TOKEN = "0x92C6bcA388E99d6B304f1Af3c3Cd749Ff0b591e2";
+
+std::string contract = "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570";
 
 const std::string GAME_WALLET = "0x0000000000000000000000000000000000000001";
 const std::string PEOPLE_WALLET = "0x0000000000000000000000000000000000000002";
 
 Wallet* walletHandler = new Wallet();
 std::unordered_map<std::string, Micropolis*> games;
+std::unordered_map<std::string, Micropolis*> storage;
+
+std::string saveGameState(const Micropolis* game) {
+    picojson::object gameState;
+
+    // Basic fields
+    gameState["funds"] = picojson::value((double)game->totalFunds);
+    gameState["cityTime"] = picojson::value((double)game->cityTime);
+    gameState["autoBulldoze"] = picojson::value((bool)game->autoBulldoze);
+    gameState["autoBudget"] = picojson::value((bool)game->autoBudget);
+    gameState["autoGoto"] = picojson::value((bool)game->autoGoto);
+    gameState["enableSound"] = picojson::value((bool)game->enableSound);
+    gameState["cityTax"] = picojson::value((double)game->cityTax);
+    gameState["simSpeed"] = picojson::value((double)game->simSpeed);
+
+    // Funding percentages
+    picojson::object funding;
+    funding["police"] = picojson::value((double)game->policePercent);
+    funding["fire"] = picojson::value((double)game->firePercent);
+    funding["road"] = picojson::value((double)game->roadPercent);
+    gameState["fundingPercentages"] = picojson::value(funding);
+
+    // Map data
+    picojson::array mapArray;
+    for (int y = 0; y < WORLD_H; ++y) {
+        picojson::array row;
+        for (int x = 0; x < WORLD_W; ++x) {
+            row.push_back(picojson::value((double)game->map[x][y]));
+        }
+        mapArray.push_back(picojson::value(row));
+    }
+    gameState["map"] = picojson::value(mapArray);
+
+    // History arrays
+    auto dumpHist = [](const short* hist, int length) -> picojson::array {
+        picojson::array arr;
+        for (int i = 0; i < length; ++i) {
+            arr.push_back(picojson::value((double)hist[i]));
+        }
+        return arr;
+    };
+
+    picojson::object histories;
+    histories["residential"] = picojson::value(dumpHist(game->resHist, HISTORY_LENGTH));
+    histories["commercial"]  = picojson::value(dumpHist(game->comHist, HISTORY_LENGTH));
+    histories["industrial"]  = picojson::value(dumpHist(game->indHist, HISTORY_LENGTH));
+    histories["crime"]       = picojson::value(dumpHist(game->crimeHist, HISTORY_LENGTH));
+    histories["pollution"]   = picojson::value(dumpHist(game->pollutionHist, HISTORY_LENGTH));
+    histories["money"]       = picojson::value(dumpHist(game->moneyHist, HISTORY_LENGTH));
+    histories["misc"]        = picojson::value(dumpHist(game->miscHist, MISC_HISTORY_LENGTH));
+    gameState["histories"]   = picojson::value(histories);
+
+    picojson::value jsonValue(gameState);
+    return jsonValue.serialize(true);  // pretty-printed JSON string
+}
 
 // Left-pads a hex string to 64 characters (32 bytes)
 std::string padTo32Bytes(const std::string &hex) {
@@ -35,6 +94,25 @@ std::string encodeTransferCall(const std::string &recipient, const std::string &
     std::string paddedAmount = padTo32Bytes(amountHex);
 
     return "0x" + methodId + paddedRecipient + paddedAmount;
+}
+
+std::string encodeMintNFTCall(const std::string &recipient, const std::string &gameHash) {
+    std::string methodId = "3c168eab"; // keccak256("mintNFT(address,uint256)") first 4 bytes
+    
+    // recipient is a hex string like "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+    // remove "0x" and pad left to 64 chars (32 bytes)
+    std::string cleanRecipient = recipient.substr(2);
+    std::string paddedRecipient = padTo32Bytes(cleanRecipient);
+    
+    // gameHash is a uint256 hex string, e.g. "0x123abc..."
+    // remove "0x" and pad left to 64 chars (32 bytes)
+    std::string cleanGameHash = gameHash.substr(2);
+    std::string paddedGameHash = padTo32Bytes(cleanGameHash);
+    
+    // Combine all parts: methodId + recipient + gameHash
+    std::string data = methodId + paddedRecipient + paddedGameHash;
+    
+    return "0x" + data;
 }
 
 void createReport(httplib::Client &cli, const std::string &payload) {
@@ -55,6 +133,20 @@ void generateVoucher(httplib::Client &cli, const std::string &recipient, std::st
     std::string transferCall = encodeTransferCall(recipient, amount);
     // Format the payload expected by Cartesi
     std::string payload = "{\"destination\":\"" + TOKEN + "\",\"payload\":\"" + transferCall + "\"}";
+    // Payload should be abi transfer to erc20 address
+    auto r = cli.Post("/voucher", payload, "application/json");
+    if (r) {
+        std::cout << "[VOUCHER] Sent: " << payload << std::endl;
+        std::cout << "Received status: " << r->status << std::endl;
+    } else {
+        std::cerr << "[ERROR] Failed to send voucher" << std::endl;
+    }
+}
+
+void generateNFTVoucher(httplib::Client &cli, const std::string& NFTCall) {
+    std::cout << "Contract: " << contract << std::endl;
+    // Format the payload expected by Cartesi
+    std::string payload = "{\"destination\":\"" + contract + "\",\"payload\":\"" + NFTCall + "\"}";
     // Payload should be abi transfer to erc20 address
     auto r = cli.Post("/voucher", payload, "application/json");
     if (r) {
@@ -233,6 +325,32 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
                 games.erase(address);
             } 
             return "accept";
+        }
+        else if(method == "save"){
+            if (games.find(address) == games.end()) return "reject";
+            std::string gameState = saveGameState(games[address]);
+            std::string gameStateHash = sha256(gameState);
+            std::cout << "Game State Hash: " << gameStateHash << std::endl;
+            storage[gameStateHash] = games[address];
+            games.erase(address);
+            std::string NFTCall = encodeMintNFTCall(address, gameStateHash);
+            std::cout << "Encoded NFT Call: " << NFTCall << std::endl;
+            generateNFTVoucher(cli, NFTCall);
+            return "accept";
+        }   
+        else if(method == "load"){
+            std::string gameStateHash = parsed_payload.get("hash").to_str();
+            if(storage.count(gameStateHash)){
+                std::cout << "Game found in storage" << std::endl;
+            }
+            else{
+                std::cout << "Game not found in storage" << std::endl;
+            }
+
+        }
+        else if(method == "setContract"){
+            contract = parsed_payload.get("contract").to_str();
+            std::cout << "Contract is now set to " << contract << std::endl;
         }
     }
     return "reject";

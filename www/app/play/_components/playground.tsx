@@ -24,7 +24,7 @@ export const Playground: React.FC<PlaygroundProps> = ({ initialMap }) => {
   const [isBudgeting, setIsBudgeting] = useState(false);
   // TODO: implement rollup server
   // note don't worry about transaction confirmation window for now
-  const dapp = "0x54F460c33B68AB672091A696709C0182FF48BE5D";
+  const dapp = "0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e";
   const [input, setInput] = useState<Hex>();
   const { loading, success, error, write, notices } = useRollupsServer(
     dapp,

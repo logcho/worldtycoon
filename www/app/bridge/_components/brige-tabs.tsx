@@ -30,9 +30,9 @@ export const BridgeTabs: React.FC = () => {
   // const symbol = "SIM"; // XXX: should actually come from querying token metadata
   // const decimals = 18; // XXX: should actually come from querying token metadata
 
-  const tokenAddress = "0x6c6B9Ae2704De1B8E223722664ddADdda6d83EC6"; // Simoleons
+  const tokenAddress = "0x92C6bcA388E99d6B304f1Af3c3Cd749Ff0b591e2"; // Simoleons
   const erc20PortalAddress = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
-  const dAppAddress = `0x54F460c33B68AB672091A696709C0182FF48BE5D`; // Default address for running locally change upon deployment
+  const dAppAddress = `0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e`; // Default address for running locally change upon deployment
 
   const { data: symbol } = useContractRead({
     address: tokenAddress,
@@ -144,14 +144,17 @@ export const BridgeTabs: React.FC = () => {
   const canWithdraw = funds !== undefined && funds > 0;
   const canTransfer = true;
 
+  const [gameHash, setGameHash] = useState("");
+
   return (
     <Tabs
       value={tab}
       onValueChange={setTab}
       className="bg-card/40 font-fixedsys w-full max-w-xl space-y-4 rounded-2xl p-6 shadow-lg backdrop-blur-sm"
     >
-      <TabsList className="bg-card/50 grid w-full grid-cols-2 rounded-xl shadow-md *:rounded-lg *:data-[state=active]:shadow-md">
+      <TabsList className="bg-card/50 grid w-full grid-cols-3 rounded-xl shadow-md *:rounded-lg *:data-[state=active]:shadow-md">
         <TabsTrigger value="deposit">Deposit</TabsTrigger>
+        <TabsTrigger value="nft">NFT</TabsTrigger>
         <TabsTrigger value="withdraw">Withdraw</TabsTrigger>
       </TabsList>
 
@@ -243,6 +246,77 @@ export const BridgeTabs: React.FC = () => {
             {isDepositing ?
               <Spinner className="text-black" />
             : "Deposit"}
+          </Button>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="nft" className="space-y-4">
+        <div className="bg-card/50 space-y-2 rounded-xl p-4 shadow-md">
+          <div className="flex items-center justify-start">
+            <p className="text-muted-foreground text-sm">From:</p>
+            <div className="flex items-center gap-2">
+              <ConnectButton
+                showBalance={{
+                  smallScreen: false,
+                  largeScreen: false,
+                }}
+                chainStatus="none"
+              />
+            </div>
+          </div>
+
+          <Input
+            type="string"
+            value={gameHash}
+            onChange={(e) => setGameHash(e.target.value)}
+            placeholder="0x"
+            className={cn(
+              "bg-foreground/10 w-full text-2xl outline-hidden",
+              // hide number arrows
+              "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+            )}
+          />
+
+          
+        </div>
+
+        <ArrowDownIcon />
+
+        <div className="bg-card/50 space-y-2 rounded-xl p-4 shadow-md">
+          <div className="flex items-center justify-start">
+            <p className="text-muted-foreground text-sm">To:</p>
+            <div className="flex items-center gap-1">
+              <ConnectButton
+                showBalance={{
+                  smallScreen: false,
+                  largeScreen: false,
+                }}
+                chainStatus="none"
+              />
+              <span className="font-bitmap text-muted-foreground">
+                @Cryptopolis
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Button
+            variant="outline"
+            className="shadow-md"
+            disabled={!canApprove}
+            onClick={() => approve(tokenAddress, amount.toString())}
+          >
+            Approve
+          </Button>
+          <Button
+            className="shadow-md"
+            disabled={!canDeposit}
+            onClick={() => deposit(amount.toString())}
+          >
+            {isDepositing ?
+              <Spinner className="text-black" />
+            : "Load"}
           </Button>
         </div>
       </TabsContent>
