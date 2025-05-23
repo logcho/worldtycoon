@@ -5,9 +5,14 @@
  * @date 2025-05-21
  */
 
+#ifndef CARTESI_H
+#define CARTESI_H
+
+#include <iostream>
 #include "3rdparty/cpp-httplib/httplib.h"
 #include "3rdparty/picojson/picojson.h"
 #include "helper.h"
+#include "eth-util.h"
 
 /**
  * @brief Address of the standard ERC-20 portal contract.
@@ -32,8 +37,9 @@ const std::string ERC721_PORTAL_ADDRESS = "0x237F8DD094C0e47f4236f12b4Fa01d6Dae8
  * @param cli The httplib::Client object configured to communicate with the target server.
  * @param payload A hex-encoded string representing the payload to be sent.
  */
-void createNotice(const httplib::Client& cli, const std::string& payload){
+void createNotice(httplib::Client& cli, const std::string& payload){
     std::string notice = "{\"payload\":\"" + payload + "\"}";
+    std::cout << "Creating notice..." << std::endl;
     auto r = cli.Post("/notice", notice, "application/json");    
     std::cout << "Received notice status " << r.value().status << std::endl;
 }
@@ -47,8 +53,9 @@ void createNotice(const httplib::Client& cli, const std::string& payload){
  * @param cli The httplib::Client object configured to communicate with the target server.
  * @param payload A hex-encoded string representing the payload to be sent.
  */
-void createReport(const httplib::Client& cli, const std::string& payload){
+void createReport(httplib::Client& cli, const std::string& payload){
     std::string report = "{\"payload\":\"" + payload + "\"}";
+    std::cout << "Creating report..." << std::endl;
     auto r = cli.Post("/report", report, "application/json");    
     std::cout << "Received report status " << r.value().status << std::endl;
 }
@@ -63,8 +70,9 @@ void createReport(const httplib::Client& cli, const std::string& payload){
  * @param payload A hex-encoded string representing the payload to be sent.
  * @param destination A string representing the address of the payload.
  */
-void createVoucher(const httplib::Client& cli, const std::string& payload, const std::string& destination){
+void createVoucher(httplib::Client& cli, const std::string& payload, const std::string& destination){
     std::string voucher = "{\"destination\": " + destination + "\", \"payload\": \"" + payload + "\"}";
+    std::cout << "Creating voucher..." << std::endl;
     auto r = cli.Post("/voucher", voucher, "application/json");    
     std::cout << "Received voucher status " << r.value().status << std::endl;
 }
@@ -99,20 +107,34 @@ bool isERC721Deposit(const std::string address){
  * @brief Parses an ERC-20 deposit payload into a JSON object.
  *
  * This function extracts and decodes key fields from a hex-encoded ERC-20 deposit payload:
- * - `success`: a boolean flag indicating whether the deposit succeeded.
- * - `token`: the address of the ERC-20 token contract.
- * - `sender`: the address of the sender who initiated the deposit.
- * - `amount`: the amount of tokens deposited.
+ * - `success`: A boolean flag indicating whether the deposit succeeded.
+ * - `token`: The address of the ERC-20 token contract.
+ * - `sender`: The address of the sender who initiated the deposit.
+ * - `amount`: The amount of tokens deposited.
+ * - `execLayerData` (optional): Any additional execution layer data appended to the payload.
+ *
+ * The function assumes the first 73 bytes (146 hex characters) are fixed-format.
+ * If extra data remains, it will be included under the `execLayerData` key.
  *
  * @param payload A hex-encoded string representing the deposit payload.
- * @return A picojson::object containing parsed fields: success, token, sender, and amount.
+ * @return A picojson::object containing parsed fields: success, token, sender, amount, and optionally execLayerData.
  */
 picojson::object parseERC20Deposit(const std::string& payload) {    
     picojson::object obj;
-    obj["success"] = picojson::value(hexToBool(slice(payload, 0, 1)));
-    obj["token"] = picojson::value(slice(payload, 1, 21));
-    obj["sender"] = picojson::value(slice(payload, 21, 41));
-    obj["amount"] = picojson::value(slice(payload, 41, 73));
+
+    // Parse known fixed segments
+    obj["success"] = picojson::value(eth::hexToBool(eth::slice(payload, 0, 1)));
+    obj["token"] = picojson::value(eth::slice(payload, 1, 21));
+    obj["sender"] = picojson::value(eth::slice(payload, 21, 41));
+    obj["amount"] = picojson::value(eth::slice(payload, 41, 73));
+
+    // Optional: extract execution layer data if present
+    const size_t execStart = 73;
+    size_t totalBytes = (payload.length() - 2) / 2; // minus 2 for "0x", divide by 2 for bytes
+    if (totalBytes > execStart) {
+        obj["execLayerData"] = picojson::value(eth::slice(payload, execStart, totalBytes));
+    }
+
     return obj;
 }
 
@@ -129,9 +151,23 @@ picojson::object parseERC20Deposit(const std::string& payload) {
  */
 picojson::object parseERC721Deposit(const std::string& payload) {
     picojson::object obj;
-    obj["token"] = picojson::value(slice(payload, 0, 20));     
-    obj["sender"] = picojson::value(slice(payload, 20, 40));    
-    obj["tokenId"] = picojson::value(slice(payload, 40, 72));   
+    obj["token"] = picojson::value(eth::slice(payload, 0, 20));     
+    obj["sender"] = picojson::value(eth::slice(payload, 20, 40));    
+    obj["tokenId"] = picojson::value(eth::slice(payload, 40, 72));   
     return obj;
 }
 
+/**
+ * @brief Converts mapVector into hex then sends as a notice to /notice endpoint
+ * 
+ * This function takes the map data converted into a vector and encodes it into a hex string
+ * and sends it as a POST request to the `/notice` endpoint of the given HTTP client.
+ * 
+ * @param cli The httplib::Client object configured to communicate with the target server.
+ * @param mapVector A uint16 vector representing map data
+ */
+void createMapNotice(httplib::Client& cli, const std::vector<uint16_t>& mapVector){
+    createNotice(cli, eth::uint16VectorToHex(mapVector)); // Map
+}
+
+#endif // CARTESI_H
