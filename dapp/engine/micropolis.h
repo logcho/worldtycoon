@@ -64,9 +64,6 @@
  * Micropolis include file
  */
 
-#ifndef H_MICROPOLIS
-#define H_MICROPOLIS
-
 ////////////////////////////////////////////////////////////////////////
 // Includes
 
@@ -2704,9 +2701,6 @@ public:
 
     void didTool(const char *name, short x, short y);
 
-    int getDensity(short catNo, short mapH, short mapV);
-
-
 private:
 
     ToolResult queryTool(short x, short y);
@@ -2763,6 +2757,7 @@ private:
                                   const BuildingProperties *bprops,
                                   ToolEffects *effects);
 
+    int getDensity(short catNo, short mapH, short mapV);
 
     bool tally(short tileValue);
 
@@ -3014,5 +3009,3 @@ private:
 
 
 ////////////////////////////////////////////////////////////////////////
-
-#endif

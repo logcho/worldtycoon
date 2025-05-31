@@ -76,13 +76,13 @@
              drawActualBox updateFunds updateCurrentCost */
 void Micropolis::makeDollarDecimalStr(char *numStr, char *dollarStr)
 {
-    short leftMostSet;
+    register short leftMostSet;
     short numOfDigits;
     short numOfChars;
-    short numOfCommas;
-    short dollarIndex = 0;
-    short numIndex = 0;
-    short x;
+    register short numOfCommas;
+    register short dollarIndex = 0;
+    register short numIndex = 0;
+    register short x;
 
     numOfDigits = (short)strlen(numStr);
 

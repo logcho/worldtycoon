@@ -62,9 +62,6 @@
 
 /** @file generate.h */
 
-#ifndef H_GENERATE
-#define H_GENERATE
-
 ////////////////////////////////////////////////////////////////////////
 
 /**
@@ -72,4 +69,3 @@
  */
 static const int ISLAND_RADIUS = 18;
 
-#endif

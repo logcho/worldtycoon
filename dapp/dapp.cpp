@@ -1,306 +1,215 @@
 #include <stdio.h>
 #include <iostream>
-#include <iomanip>
 #include <unordered_map>
-
 #include "3rdparty/cpp-httplib/httplib.h"
 #include "3rdparty/picojson/picojson.h"
-
 #include "engine/micropolis.h"
+#include "uint256_t/uint256_t.h"
+#include "cartesi.h"
+#include "eth-util.h"
+#include "game-util.h"
 
-#include "util.h"
-#include "wallet.h"
+std::unordered_map <std::string, Micropolis> cities;
+std::unordered_map <std::string, Micropolis> cityStorage;
 
-const std::string ERC20_PORTAL_ADDRESS = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ada1db";
-const std::string TOKEN = "0x6c6B9Ae2704De1B8E223722664ddADdda6d83EC6";
+std::string TOKEN_CONTRACT_ADDRESS = "0x92c6bca388e99d6b304f1af3c3cd749ff0b591e2"; // Test Token: 0x92c6bca388e99d6b304f1af3c3cd749ff0b591e2
+std::string NFT_CONTRACT_ADDRESS = "";
+std::string BUY_IN_AMOUNT = "0x00000000000000000000000000000000000000000000043c33c1937564800000"; // 20,000 18n decimals
 
-const std::string GAME_WALLET = "0x0000000000000000000000000000000000000001";
-const std::string PEOPLE_WALLET = "0x0000000000000000000000000000000000000002";
-
-Wallet* walletHandler = new Wallet();
-std::unordered_map<std::string, Micropolis*> games;
-
-// Left-pads a hex string to 64 characters (32 bytes)
-std::string padTo32Bytes(const std::string &hex) {
-    std::string clean = (hex.substr(0, 2) == "0x") ? hex.substr(2) : hex;
-    return std::string(64 - clean.length(), '0') + clean;
-}
-
-// Prepares the calldata for ERC-20 transfer(address,uint256)
-std::string encodeTransferCall(const std::string &recipient, const std::string &amountHex) {
-    std::string methodId = "a9059cbb"; // Precomputed for transfer(address,uint256)
-
-    // Pad recipient address and amount
-    std::string paddedRecipient = padTo32Bytes(recipient);
-    std::string paddedAmount = padTo32Bytes(amountHex);
-
-    return "0x" + methodId + paddedRecipient + paddedAmount;
-}
-
-void createReport(httplib::Client &cli, const std::string &payload) {
-    std::string report = std::string("{\"payload\":\"") + payload + std::string("\"}");
-    auto r = cli.Post("/report", report, "application/json");    
-    // Expect status 202
-    std::cout << "Received report status " << r.value().status << std::endl;
-}
-
-void createNotice(httplib::Client &cli, const std::string &payload) {
-    std::string notice = std::string("{\"payload\":\"") + payload + std::string("\"}");
-    auto r = cli.Post("/notice", notice, "application/json");    
-    // Expect status 201
-    std::cout << "Received notice status " << r.value().status << std::endl;
-}
-
-void generateVoucher(httplib::Client &cli, const std::string &recipient, std::string amount) {
-    std::string transferCall = encodeTransferCall(recipient, amount);
-    // Format the payload expected by Cartesi
-    std::string payload = "{\"destination\":\"" + TOKEN + "\",\"payload\":\"" + transferCall + "\"}";
-    // Payload should be abi transfer to erc20 address
-    auto r = cli.Post("/voucher", payload, "application/json");
-    if (r) {
-        std::cout << "[VOUCHER] Sent: " << payload << std::endl;
-        std::cout << "Received status: " << r->status << std::endl;
-    } else {
-        std::cerr << "[ERROR] Failed to send voucher" << std::endl;
-    }
-}
-
-
-void createGameNotices(httplib::Client &cli, const Micropolis *game){
-    createNotice(cli, vectorToHexUint16(convertMapToUint16Vector(game->map[0], WORLD_W, WORLD_H))); // Map
-
-    // Create a picojson::object to hold your stats
+std::string getCityStats(Micropolis city){
     picojson::object statsJson;
-
-    statsJson["population"] = picojson::value(static_cast<double>(game->cityPop));
-    statsJson["totalFunds"] = picojson::value(static_cast<double>(game->totalFunds));
-    statsJson["cityTime"] = picojson::value(static_cast<double>(game->cityTime));
-    statsJson["cityTax"] = picojson::value(static_cast<double>(game->cityTax));
-    statsJson["taxFund"] = picojson::value(static_cast<double>(game->taxFund));
-    statsJson["firePercent"] = picojson::value(game->firePercent);     // Assuming float
-    statsJson["policePercent"] = picojson::value(game->policePercent);   // Assuming float
-    statsJson["roadPercent"] = picojson::value(game->roadPercent);     // Assuming float
-    statsJson["fireFund"] = picojson::value(static_cast<double>(game->fireFund));
-    statsJson["policeFund"] = picojson::value(static_cast<double>(game->policeFund));
-    statsJson["roadFund"] = picojson::value(static_cast<double>(game->roadFund));
-    statsJson["cashFlow"] = picojson::value(static_cast<double>(game->cashFlow)); // short → double
-
-    // Serialize the object to a string
-    std::string jsonStr = picojson::value(statsJson).serialize();
-
-    // Convert JSON string to hex
-    std::string hexPayload = stringToHex(jsonStr);
-
-    // Send as a single notice
-    createNotice(cli, hexPayload);
-    // std::cout << std::to_string(game->cashFlow) << std::endl;
-    // std::cout << static_cast<int>(game->firePercent * 100) << std::endl;
-    // std::cout << game->cityTax << std::endl;
+    statsJson["population"] = picojson::value(static_cast<double>(city.cityPop));
+    statsJson["totalFunds"] = picojson::value(static_cast<double>(city.totalFunds));
+    statsJson["cityTime"] = picojson::value(static_cast<double>(city.cityTime));
+    std::string stats = picojson::value(statsJson).serialize();
+    return stats;
 }
 
-bool isERC20Deposit(const std::string& address) {
-    return address == ERC20_PORTAL_ADDRESS;
-}
-
-picojson::object parseERC20Deposit(const std::string& payload) {    
-    picojson::object obj;
-    obj["success"] = picojson::value(hexToBool(slice(payload, 0, 1)));
-    obj["token"] = picojson::value(slice(payload, 1, 21));
-    obj["sender"] = picojson::value(slice(payload, 21, 41));
-    obj["amount"] = picojson::value(slice(payload, 41, 73));
-    return obj;
-}
-
-std::string handleERC20Deposit(httplib::Client &cli, const std::string& address, const std::string& payload){
-    picojson::object deposit = parseERC20Deposit(payload);
-    std::string user = deposit["sender"].to_str();
-    std::cout << "Success: " << deposit["success"].to_str() << std::endl;
-    std::cout << "Token: " << deposit["token"].to_str() << std::endl;
-    std::cout << "Sender: " << deposit["sender"].to_str() << std::endl;
-    std::cout << "Amount: " << deposit["amount"].to_str() << std::endl;
-    
-    walletHandler->depositToken(user, deposit["amount"].to_str());
-    std::cout << "User " << user << " balance after deposit: " << walletHandler->getTokenBalance(user) << std::endl;     
-    return "accept";
+void createGameNotices(httplib::Client &cli, Micropolis city){
+    createMapNotice(cli, convertMapToUint16Vector(city.map[0], WORLD_W, WORLD_H));
+    std::string stats = getCityStats(city);
+    createNotice(cli, eth::stringToHex(stats));
 }
 
 std::string handle_advance(httplib::Client &cli, picojson::value data)
 {
-    std::string address = data.get("metadata").get("msg_sender").to_str();
+    std::string msgSender = data.get("metadata").get("msg_sender").to_str();
     std::string payload = data.get("payload").to_str();
-    std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
-    std::cout << "Address: " << address << std::endl;
+    std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+    std::cout << "Message Sender: " << msgSender << std::endl;
     std::cout << "Payload: " << payload << std::endl;
-    std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
-    if(isERC20Deposit(address)){
-        return handleERC20Deposit(cli, address, payload);
-    }   
-    else{
-        picojson::value parsed_payload;
-        std::string decoded_payload = hexToString(payload);
-        std::string err = picojson::parse(parsed_payload, decoded_payload);
-        if (!err.empty()) return "reject";
-        std::string method = parsed_payload.get("method").to_str();
-        std::cout << "method: " << method << std::endl;
-        if(method == "start"){
-            if (games.find(address) != games.end()) return "reject";
-            games[address] = new Micropolis();
-            games[address]->setSpeed(3);
-            // games[address]->setPasses(100);
-            games[address]->setPasses(50);            
-            games[address]->generateMap();
-            std::cout << "City generated for" << address << std::endl;
-            std::string hexAmount = "0x00000000000000000000000000000000000000000000043c33c1937564800000"; // 20000 18n
-            if (walletHandler->transferToken(address, GAME_WALLET, hexAmount)) {
-                std::cout << "Transfer successful!" << std::endl;
-                std::cout << "Balance of " << address << " is " << walletHandler->getTokenBalance(address) << std::endl;
-            } else {
-                std::cout << "Transfer failed: Insufficient funds!" << std::endl;
-                std::cout << "Balance of " << address << " is " << walletHandler->getTokenBalance(address) << std::endl;
-                return "reject";
-            }
-            createGameNotices(cli, games[address]);
-            return "accept";
+    if(isERC20Deposit(msgSender)){
+        picojson::object deposit = parseERC20Deposit(payload);
+        std::string success = deposit["success"].to_str();
+        std::string token = deposit["token"].to_str();
+        std::string sender = deposit["sender"].to_str();
+        std::string amount = deposit["amount"].to_str();
+        std::cout << "Success: " << success << std::endl;
+        std::cout << "Token: " << token << std::endl;
+        std::cout << "Sender: " << sender << std::endl;
+        std::cout << "Amount: " << amount << std::endl;
+        if(toLower(token) == TOKEN_CONTRACT_ADDRESS){
+            if(amount >= BUY_IN_AMOUNT){ // Check if amount if greater than 20,000 18n decimals
+                if(deposit.count("execLayerData")){ // Check if there is execLayerData
+                    std::string execLayerData = deposit["execLayerData"].to_str();
+                    std::string decodedData = eth::hexToString(execLayerData);
+                    picojson::value parsedData;
+                    std::cout << "Exec Layer Data: " << execLayerData << std::endl;
+                    std::string err = picojson::parse(parsedData, decodedData); // Attempt to parse decoded execLayerData into picojson::value
+                    if (!err.empty()){ // If not JSON string handle accordingly
+                        std::cout << "decodedData is not a valid JSON string" << std::endl;
+                        std::cout << "Decoded Data: " << decodedData << std::endl;
+                        std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
+                        return "reject";
+                    }
+                    std::string method = parsedData.get("method").to_str();
+                    std::cout << "Method: " << method << std::endl;
+                    if(method == "create"){ 
+                        if(cities.count(sender)){ // If city already exists at address, reject
+                            std::cout << "City already exists at address: " << sender << std::endl;
+                            std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+                            return "reject";
+                        }
+                        else{
+                            std::cout << "City does not yet exist at address: " << sender << std::endl;
+                            std::cout << "Generating city..." << std::endl;
+                            cities[sender] = Micropolis();
+                            cities[sender].generateMap();
+                            cities[sender].setSpeed(3);
+                            cities[sender].setPasses(50);            
+                            std::cout << "City generated for: " << sender << std::endl;
+                            createGameNotices(cli, cities[sender]);
+                            std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+                            return "accept";
+                        }
+                    }
+                }
+            }   
         }
-        // else if(method == "start"){
-        //     if (games.find(address) == games.end()) return "reject";
-        //     createGameNotices(cli, games[address]);
-        //     return "accept";
-        // }
-        else if(method == "doTool"){
-            if (games.find(address) == games.end()) return "reject";
-            EditingTool tool = static_cast<EditingTool>(std::stoi(parsed_payload.get("tool").to_str()));
-            int x = std::stoi(parsed_payload.get("x").to_str());
-            int y = std::stoi(parsed_payload.get("y").to_str());
-            games[address]->doTool(tool, x, y);
-            // for(int i = 0; i < 100; i++){
-            //     games[address]->simTick();
-            // }
-            games[address]->simTick();
-            std::cout << "Using tool " << parsed_payload.get("tool").to_str() << " at (" << x << ", " << y << ") to game " << address << std::endl;
-            createGameNotices(cli, games[address]);
-            return "accept";
-        }
-        else if(method == "dragTool"){
-            if (games.find(address) == games.end()) return "reject";
-            EditingTool tool = static_cast<EditingTool>(std::stoi(parsed_payload.get("tool").to_str()));
-            int fromX = std::stoi(parsed_payload.get("fromX").to_str());
-            int fromY = std::stoi(parsed_payload.get("fromY").to_str());
-            int toX = std::stoi(parsed_payload.get("toX").to_str());
-            int toY = std::stoi(parsed_payload.get("toY").to_str());
-            games[address]->toolDrag(tool, fromX, fromY, toX, toY);
-            // for(int i = 0; i < 100; i++){
-            //     games[address]->simTick();
-            // }
-            // games[address]->simTick();
-            std::cout << "Dragging tool " << parsed_payload.get("tool").to_str() << " from (" << fromX << ", " << fromY << ") to (" << toX << ", " << toY << ") for game at" << address << std::endl;
-            createGameNotices(cli, games[address]);
-            return "accept";
-        }
-        else if(method == "doBudget"){
-            if (games.find(address) == games.end()) return "reject";
-            double roads = std::stod(parsed_payload.get("roads").to_str());
-            double fire = std::stod(parsed_payload.get("fire").to_str());
-            double police = std::stod(parsed_payload.get("police").to_str());
-            int tax = std::stoi(parsed_payload.get("tax").to_str());
-
-            games[address]->firePercent = fire;
-            games[address]->policePercent = police;
-            games[address]->roadPercent = roads;
-            games[address]->setCityTax(tax);
-            
-            // for(int i = 0; i < 100; i++){
-            //     games[address]->simTick();
-            // }
-            std::cout << "Setting budget " << "roads: " << games[address]->roadPercent << " fire: " << games[address]->firePercent << " police: " << games[address]->policePercent << " tax: " << tax << " for game " << address << std::endl;
-            createGameNotices(cli, games[address]);
-            return "accept";
-        }
-        else if(method == "withdraw"){
-            if (games.find(address) == games.end()) return "reject";
-            // std::cout << parsed_payload.get("amount").to_str() << std::endl;
-            // uint256_t amount(parsed_payload.get("amount").to_str(), 10);
-            uint256_t decimals("1000000000000000000", 10); // 18 decimals
-            uint256_t formattedBalance = games[address]->totalFunds * decimals;
-            // std::cout << decimals << std::endl;
-            // std::cout << formattedBalance << std::endl;
-            // std::cout << amount << std::endl;
-            std::string hexAmount = "0x" + formattedBalance.str(16, 32);
-            // std::cout << hexAmount << std::endl;
-            generateVoucher(cli, address, hexAmount);
-            if (games.count(address)) {
-                delete games[address];
-                games.erase(address);
-            } 
+    }
+    else if(isERC721Deposit(msgSender)){
+        picojson::object deposit = parseERC721Deposit(payload);
+        std::string sender = deposit["sender"].to_str();
+        std::string token = deposit["token"].to_str();
+        std::string tokenId = deposit["tokenId"].to_str();
+        std::cout << "Token: " << token << std::endl;
+        std::cout << "Sender: " << sender << std::endl;
+        std::cout << "Token ID: " << tokenId << std::endl;
+        if(toLower(token) == NFT_CONTRACT_ADDRESS){
+            // TODO: Handle NFT deposit
+            std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
             return "accept";
         }
     }
-    return "reject";
+    else{
+        picojson::value parsedPayload;
+        std::string decodedPayload = eth::hexToString(payload); // Decode payload from hex
+        std::string err = picojson::parse(parsedPayload, decodedPayload); // Parse payload as pisojson::value
+        if(!err.empty()){
+            std::cout << "decodedPayload is not a valid JSON string" << std::endl;
+            std::cout << "Decoded Payload: " << decodedPayload << std::endl;
+                std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+            return "reject";
+        }
+        std::string method = parsedPayload.get("method").to_str();
+        std::cout << "Method: " << method << std::endl;
+        if(method == "doTool"){ // Method: doTool
+            if(!cities.count(msgSender)){
+                std::cout << "City does not yet exist at address: " << msgSender << std::endl;
+                std::cout << "Unable to doTool" << std::endl;
+                std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+                return "reject";
+            }
+            std::cout << "City exists at address: " << msgSender << std::endl;
+            int tool = std::stoi(parsedPayload.get("tool").to_str());
+            int x = std::stoi(parsedPayload.get("x").to_str());
+            int y = std::stoi(parsedPayload.get("y").to_str());
+            EditingTool editingTool = static_cast<EditingTool>(tool);
+            std::cout << "Doing tool " << tool << " at (" << x << "," << y << ")..." << std::endl; // Output before attempting doTool
+            cities[msgSender].doTool(editingTool, x, y);
+            cities[msgSender].simTick(); // Simulate tick after doTool
+            std::cout << "Success!" << std::endl; // Output after attempting doTool
+            std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+            createGameNotices(cli, cities[msgSender]);
+            return "accept";
+        }
+        else if(method == "simTick"){ // Method: simTick
+            if(!cities.count(msgSender)){
+                std::cout << "City does not yet exist at address: " << msgSender << std::endl;
+                std::cout << "Unable to simTick" << std::endl;
+                std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+                return "reject";
+            }
+            int ticks = std::stoi(parsedPayload.get("ticks").to_str()); // Output before attempting simTick
+            std::cout << "Simulating " << ticks << " ticks" << std:: endl;
+            for(uint i = 0; i < ticks; i++){ // Loop through number of ticks
+                cities[msgSender].simTick();
+            }
+            std::cout << "Finished simulating!" << std:: endl; // Output after attempting simTick
+            std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+            createGameNotices(cli, cities[msgSender]);
+            return "accept";
+        }
+        else if(method == "doBudget"){ // Method: doBudget
+            if(!cities.count(msgSender)){
+                std::cout << "City does not yet exist at address: " << msgSender << std::endl;
+                std::cout << "Unable to doBudget" << std::endl;
+                std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+                return "reject";
+            }
+            // TODO: Handle doBudget logic
+        }
+    }
+
+    std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+    return "accept";
 }
 
 std::string handle_inspect(httplib::Client &cli, picojson::value data)
 {
     std::string payload = data.get("payload").to_str();
-    std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
+    std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
     std::cout << "Payload: " << payload << std::endl;
-    std::cout << "Converted Payload: " << hexToString(payload) << std::endl;
-    picojson::value parsed_payload;
-    std::string decoded_payload = hexToString(payload);
-    std::string err = picojson::parse(parsed_payload, decoded_payload);
-    if (!err.empty()) return "reject";
-    else{
-        std::string method = parsed_payload.get("method").to_str();
-        if(method == "balanceOf"){
-            std::string address = parsed_payload.get("address").to_str();
-            std::transform(address.begin(), address.end(), address.begin(), ::tolower);
-            uint256_t balance = walletHandler->getTokenBalance(address);
-            std::cout << "Balance of " << address << " is " << balance << std::endl;
-
-            std::ostringstream hexStream;
-            hexStream << "0x" << std::setw(64) << std::setfill('0') << std::hex << balance;
-            createReport(cli, hexStream.str());
-        }
-        else if(method == "getMap"){
-            std::string address = parsed_payload.get("address").to_str();
-            std::transform(address.begin(), address.end(), address.begin(), ::tolower);
-            if (games.find(address) == games.end()) return "reject";
-            createReport(cli, vectorToHexUint16(convertMapToUint16Vector(games[address]->map[0], WORLD_W, WORLD_H)));
-        }
-        else if(method == "getFunds"){
-            std::string address = parsed_payload.get("address").to_str();
-            std::transform(address.begin(), address.end(), address.begin(), ::tolower);
-            if (games.find(address) == games.end()) createReport(cli, uint64ToHex(0)); // Funds is 0 if city does not exist
-            else createReport(cli, uint64ToHex(games[address]->totalFunds));
-        }
-        else if(method == "useQuery"){
-            std::string address = parsed_payload.get("address").to_str();
-            int x = std::stoi(parsed_payload.get("x").to_str());
-            int y = std::stoi(parsed_payload.get("y").to_str());
-            std::transform(address.begin(), address.end(), address.begin(), ::tolower);
-            if (games.find(address) == games.end()) return "reject";
-            // 0: population density
-            // 1: land value.
-            // 2: crime rate.
-            // 3: pollution.
-            // 4: growth rate.
-            int populationDensity = games[address]->getDensity(0, x, y);
-            int landValue = games[address]->getDensity(1, x, y);
-            int crimeRate = games[address]->getDensity(2, x, y);
-            int pollution = games[address]->getDensity(3, x, y);
-            int growthRate = games[address]->getDensity(4, x, y);
-            std::string stats = 
-            "{"
-            "\"populationDensity\":" + std::to_string(populationDensity) + "," +
-            "\"landValue\":" + std::to_string(landValue) + "," +
-            "\"crimeRate\":" + std::to_string(crimeRate) + "," +
-            "\"pollution\":" + std::to_string(pollution) + "," +
-            "\"growthRate\":" + std::to_string(growthRate) +
-            "}";
-            std::cout << stats << std::endl;
-            createReport(cli, stringToHex(stats));
-        }
+    picojson::value parsedPayload;
+    std::string decodedPayload = eth::hexToString(payload); // Decode payload from hex
+    std::string err = picojson::parse(parsedPayload, decodedPayload); // Parse payload as pisojson::value
+    if(!err.empty()){
+        std::cout << "decodedPayload is not a valid JSON string" << std::endl;
+        std::cout << "Decoded Payload: " << decodedPayload << std::endl;
     }
-    std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
+    std::string method = parsedPayload.get("method").to_str();
+    std::cout << "Method: " << method << std::endl;
+
+    if(method == "hasCity"){ // Method: inspect
+        std::string address = parsedPayload.get("address").to_str();
+        // TODO: Handle hasCity logic
+        std::cout << "Checking if user has city...";
+        std::string hasCity = eth::boolToHex(cities.count(address));
+        std::cout << "Finished checking!" << std::endl;
+        createReport(cli, hasCity);
+        std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+        return "accept";
+    }
+    else if(method == "inspect"){ // Method: inspect
+        std::string address = parsedPayload.get("address").to_str();
+        if(!cities.count(address)){
+            std::cout << "City does not yet exist at address: " << address << std::endl;
+            std::cout << "Unable to inspect" << std::endl;
+            std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+            return "reject";
+        }
+        // TODO: Handle inspect logic
+    }
+    else if(method == "getEvaluation"){
+        std::string address = parsedPayload.get("address").to_str();
+        if(!cities.count(address)){
+            std::cout << "City does not yet exist at address: " << address << std::endl;
+            std::cout << "Unable to getEvaluation" << std::endl;
+            std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+            return "reject";
+        }
+        // TODO: Handle getEvaluation logic
+    }
     return "accept";
 }
 
@@ -337,5 +246,3 @@ int main(int argc, char **argv)
     }
     return 0;
 }
-
-

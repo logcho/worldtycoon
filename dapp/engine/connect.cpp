@@ -122,11 +122,11 @@ static inline MapTile neutralizeRoad(MapTile tile)
 ToolResult Micropolis::connectTile(short x, short y,
                                    ConnectTileCommand cmd, ToolEffects *effects)
 {
-    ToolResult result = ToolResult::TOOLRESULT_OK;
+    ToolResult result = TOOLRESULT_OK;
 
     // Make sure the array subscripts are in bounds.
     if (!testBounds(x, y)) {
-        return ToolResult::TOOLRESULT_FAILED;
+        return TOOLRESULT_FAILED;
     }
 
     // Perform auto-doze if appropriate.
@@ -213,7 +213,7 @@ ToolResult Micropolis::layDoze(int x, int y, ToolEffects *effects)
     MapValue tile = effects->getMapValue(x, y);
 
     if (!(tile & BULLBIT)) {
-        return ToolResult::TOOLRESULT_FAILED;         /* Check dozeable bit. */
+        return TOOLRESULT_FAILED;         /* Check dozeable bit. */
     }
 
     tile &= LOMASK;
@@ -246,7 +246,7 @@ ToolResult Micropolis::layDoze(int x, int y, ToolEffects *effects)
 
     effects->addCost(1);                     /* Costs $1.00.... */
 
-    return ToolResult::TOOLRESULT_OK;
+    return TOOLRESULT_OK;
 }
 
 
@@ -315,7 +315,7 @@ ToolResult Micropolis::layRoad(int x, int y, ToolEffects *effects)
         }
 
         /* Can't do road... */
-        return ToolResult::TOOLRESULT_FAILED;
+        return TOOLRESULT_FAILED;
 
     case LHPOWER:         /* Road on power */
         effects->setMapValue(x, y, VROADPOWER | CONDBIT | BURNBIT | BULLBIT);
@@ -334,12 +334,12 @@ ToolResult Micropolis::layRoad(int x, int y, ToolEffects *effects)
         break;
 
     default:              /* Can't do road */
-        return ToolResult::TOOLRESULT_FAILED;
-        
+        return TOOLRESULT_FAILED;
+
     }
 
     effects->addCost(cost);
-    return ToolResult::TOOLRESULT_OK;
+    return TOOLRESULT_OK;
 }
 
 
@@ -412,7 +412,7 @@ ToolResult Micropolis::layRail(int x, int y, ToolEffects *effects)
         }
 
         /* Can't do rail... */
-        return ToolResult::TOOLRESULT_FAILED;
+        return TOOLRESULT_FAILED;
 
     case LHPOWER:             /* Rail on power */
         effects->setMapValue(x, y, RAILVPOWERH | CONDBIT | BURNBIT | BULLBIT);
@@ -431,11 +431,11 @@ ToolResult Micropolis::layRail(int x, int y, ToolEffects *effects)
         break;
 
     default:              /* Can't do rail */
-        return ToolResult::TOOLRESULT_FAILED;
+        return TOOLRESULT_FAILED;
     }
 
     effects->addCost(cost);
-    return ToolResult::TOOLRESULT_OK;
+    return TOOLRESULT_OK;
 }
 
 
@@ -517,7 +517,7 @@ ToolResult Micropolis::layWire(int x, int y, ToolEffects *effects)
         }
 
         /* Can't do wire... */
-        return ToolResult::TOOLRESULT_FAILED;
+        return TOOLRESULT_FAILED;
 
     case ROADS:              /* Wire on Road */
         effects->setMapValue(x, y, HROADPOWER | CONDBIT | BURNBIT | BULLBIT);
@@ -536,12 +536,12 @@ ToolResult Micropolis::layWire(int x, int y, ToolEffects *effects)
         break;
 
     default:              /* Can't do wire */
-        return ToolResult::TOOLRESULT_FAILED;
+        return TOOLRESULT_FAILED;
 
     }
 
     effects->addCost(cost);
-    return ToolResult::TOOLRESULT_OK;
+    return TOOLRESULT_OK;
 }
 
 

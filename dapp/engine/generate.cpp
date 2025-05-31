@@ -94,7 +94,7 @@ void Micropolis::generateSomeCity(int seed)
     cityFileName = "";
 
     generateMap(seed);
-    scenario = Scenario::SC_NONE;
+    scenario = SC_NONE;
     cityTime = 0;
     initSimLoad = 2;
     doInitialEval = false;

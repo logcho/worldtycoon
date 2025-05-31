@@ -1235,7 +1235,7 @@ void Micropolis::doTornadoSprite(SimSprite *sprite)
 {
     static const short CDx[9] = {  2,  3,  2,  0, -2, -3 };
     static const short CDy[9] = { -2,  0,  2,  3,  2,  0 };
-    short z;
+    register short z;
 
     z = sprite->frame;
 

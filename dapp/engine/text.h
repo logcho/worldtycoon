@@ -62,9 +62,6 @@
 
 /** @file text.h Identification numbers for texts. */
 
-#ifndef H_TEXT
-#define H_TEXT
-
 ////////////////////////////////////////////////////////////////////////
 
 /** String numbers of score card. */
@@ -157,5 +154,3 @@ enum MessageNumber {
 
     MESSAGE_LAST = 57, ///< Last valid message
 };
-
-#endif
