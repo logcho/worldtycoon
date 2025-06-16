@@ -9,24 +9,24 @@
 #include "eth-util.h"
 #include "game-util.h"
 
-std::unordered_map <std::string, Micropolis> cities;
-std::unordered_map <std::string, Micropolis> cityStorage;
+std::unordered_map <std::string, Micropolis*> cities;
+std::unordered_map <std::string, Micropolis*> cityStorage;
 
 std::string TOKEN_CONTRACT_ADDRESS = "0x92c6bca388e99d6b304f1af3c3cd749ff0b591e2"; // Test Token: 0x92c6bca388e99d6b304f1af3c3cd749ff0b591e2
 std::string NFT_CONTRACT_ADDRESS = "";
 std::string BUY_IN_AMOUNT = "0x00000000000000000000000000000000000000000000043c33c1937564800000"; // 20,000 18n decimals
 
-std::string getCityStats(Micropolis city){
+std::string getCityStats(Micropolis* city){
     picojson::object statsJson;
-    statsJson["population"] = picojson::value(static_cast<double>(city.cityPop));
-    statsJson["totalFunds"] = picojson::value(static_cast<double>(city.totalFunds));
-    statsJson["cityTime"] = picojson::value(static_cast<double>(city.cityTime));
+    statsJson["population"] = picojson::value(static_cast<double>(city->cityPop));
+    statsJson["totalFunds"] = picojson::value(static_cast<double>(city->totalFunds));
+    statsJson["cityTime"] = picojson::value(static_cast<double>(city->cityTime));
     std::string stats = picojson::value(statsJson).serialize();
     return stats;
 }
 
-void createGameNotices(httplib::Client &cli, Micropolis city){
-    createMapNotice(cli, convertMapToUint16Vector(city.map[0], WORLD_W, WORLD_H));
+void createGameNotices(httplib::Client &cli, Micropolis* city){
+    createMapNotice(cli, convertMapToUint16Vector(city->map[0], WORLD_W, WORLD_H));
     std::string stats = getCityStats(city);
     createNotice(cli, eth::stringToHex(stats));
 }
@@ -71,14 +71,31 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
                             return "reject";
                         }
                         else{
+
                             std::cout << "City does not yet exist at address: " << sender << std::endl;
+
                             std::cout << "Generating city..." << std::endl;
-                            cities[sender] = Micropolis();
-                            cities[sender].generateMap();
-                            cities[sender].setSpeed(3);
-                            cities[sender].setPasses(50);            
-                            std::cout << "City generated for: " << sender << std::endl;
+
+                            std::cout << "Assigning city..." << std::endl;                            
+                            cities[sender] = new Micropolis();
+                            std::cout << "City assigned!" << std::endl;
+
+                            std::cout << "Generating map..." << std::endl;
+                            cities[sender]->generateMap();
+                            std::cout << "Map generated!" << std::endl;      
+
+                            std::cout << "Setting speed..." << std::endl;
+                            cities[sender]->setSpeed(3);
+                            std::cout << "Speed set!" << std::endl;      
+
+                            std::cout << "Setting passes..." << std::endl;
+                            cities[sender]->setPasses(50);      
+                            std::cout << "Passes set!" << std::endl;  
+
+                            std::cout << "City successfully created for: " << sender << "!" << std::endl;
+
                             createGameNotices(cli, cities[sender]);
+
                             std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
                             return "accept";
                         }
@@ -126,8 +143,8 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             int y = std::stoi(parsedPayload.get("y").to_str());
             EditingTool editingTool = static_cast<EditingTool>(tool);
             std::cout << "Doing tool " << tool << " at (" << x << "," << y << ")..." << std::endl; // Output before attempting doTool
-            cities[msgSender].doTool(editingTool, x, y);
-            cities[msgSender].simTick(); // Simulate tick after doTool
+            cities[msgSender]->doTool(editingTool, x, y);
+            cities[msgSender]->simTick(); // Simulate tick after doTool
             std::cout << "Success!" << std::endl; // Output after attempting doTool
             std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
             createGameNotices(cli, cities[msgSender]);
@@ -143,7 +160,7 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             int ticks = std::stoi(parsedPayload.get("ticks").to_str()); // Output before attempting simTick
             std::cout << "Simulating " << ticks << " ticks" << std:: endl;
             for(uint i = 0; i < ticks; i++){ // Loop through number of ticks
-                cities[msgSender].simTick();
+                cities[msgSender]->simTick();
             }
             std::cout << "Finished simulating!" << std:: endl; // Output after attempting simTick
             std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console

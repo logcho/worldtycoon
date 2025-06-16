@@ -41,6 +41,7 @@ void createNotice(httplib::Client& cli, const std::string& payload){
     std::string notice = "{\"payload\":\"" + payload + "\"}";
     std::cout << "Creating notice..." << std::endl;
     auto r = cli.Post("/notice", notice, "application/json");    
+    std::cout << "Notice Created!" << std::endl;
     std::cout << "Received notice status " << r.value().status << std::endl;
 }
 
@@ -56,7 +57,8 @@ void createNotice(httplib::Client& cli, const std::string& payload){
 void createReport(httplib::Client& cli, const std::string& payload){
     std::string report = "{\"payload\":\"" + payload + "\"}";
     std::cout << "Creating report..." << std::endl;
-    auto r = cli.Post("/report", report, "application/json");    
+    auto r = cli.Post("/report", report, "application/json");  
+    std::cout << "Report Created!" << std::endl;  
     std::cout << "Received report status " << r.value().status << std::endl;
 }
 
