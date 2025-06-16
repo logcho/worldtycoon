@@ -60,7 +60,7 @@ export default function CreatePage() {
 
     const deposit = async () => {
         try {
-            const data = stringToHex(`{"method": "create"}`);
+            const data = stringToHex(`{"method":"create"}`);
             await depositToken({
                 args: [
                     TOKEN_ADDRESS,

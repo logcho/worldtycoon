@@ -193,22 +193,23 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
     if(!err.empty()){
         std::cout << "decodedPayload is not a valid JSON string" << std::endl;
         std::cout << "Decoded Payload: " << decodedPayload << std::endl;
+        return "accept";
     }
     std::string method = parsedPayload.get("method").to_str();
     std::cout << "Method: " << method << std::endl;
 
-    if(method == "hasCity"){ // Method: inspect
-        std::string address = parsedPayload.get("address").to_str();
+    if(method == "hasCity"){ // Method: hasCity
+        std::string address = toLower(parsedPayload.get("address").to_str());
         // TODO: Handle hasCity logic
-        std::cout << "Checking if user has city...";
+        std::cout << "Checking if " << address << " has a city..." << std::endl;
         std::string hasCity = eth::boolToHex(cities.count(address));
-        std::cout << "Finished checking!" << std::endl;
+        std::cout << "Finished checking " << hasCity << "!" << std::endl;
         createReport(cli, hasCity);
         std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
         return "accept";
     }
     else if(method == "inspect"){ // Method: inspect
-        std::string address = parsedPayload.get("address").to_str();
+        std::string address = toLower(parsedPayload.get("address").to_str());
         if(!cities.count(address)){
             std::cout << "City does not yet exist at address: " << address << std::endl;
             std::cout << "Unable to inspect" << std::endl;
@@ -217,8 +218,8 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
         }
         // TODO: Handle inspect logic
     }
-    else if(method == "getEvaluation"){
-        std::string address = parsedPayload.get("address").to_str();
+    else if(method == "getEvaluation"){ // Method: getEvaluation
+        std::string address = toLower(parsedPayload.get("address").to_str());
         if(!cities.count(address)){
             std::cout << "City does not yet exist at address: " << address << std::endl;
             std::cout << "Unable to getEvaluation" << std::endl;
