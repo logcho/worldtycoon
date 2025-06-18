@@ -1,5 +1,4 @@
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
 import { fixedsys, bitmap } from "@/lib/fonts"
 import ActionButtons from "./action-buttons"
 export default function HeroSection() {

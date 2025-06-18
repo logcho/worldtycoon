@@ -39,7 +39,6 @@ export default function CreatePage({ trigger }: CreatePageProps) {
   const {
     data: allowance = 0,
     refetch: refetchAllowance,
-    isLoading: allowanceLoading,
   } = useReadErc20Allowance({
     address: TOKEN_ADDRESS,
     args: [address!, ERC20_PORTAL],
@@ -190,7 +189,7 @@ export default function CreatePage({ trigger }: CreatePageProps) {
           className="w-full shadow-md"
           size="lg"
           onClick={approve}
-          disabled={!canApprove || approveStatus === "pending" || isApproving}
+          disabled={!canApprove || approveStatus === "pending" || isApproving || isDepositing}
         >
           {(approveStatus === "pending" || isApproving) ? (
             <Spinner className="text-black" />

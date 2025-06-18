@@ -1,18 +1,18 @@
 "use client";
 import { useRouter } from "next/navigation";
 import CreatePage from "./_components/create";
-import PlayPage from "./_components/play";
+import Playground from "./_components/playground";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { useEffect } from "react";
 import { Address } from "viem";
-import { useHasCity } from "@/hooks/inspect"; // ✅ updated hook name
+import { useHasCity } from "@/hooks/inspect";
 
 export default function Play() {
   const router = useRouter();
   const { primaryWallet } = useDynamicContext();
   const address = primaryWallet?.address as Address | undefined;
 
-  const { trigger, hasCity, isLoading, error } = useHasCity(address);
+  const { trigger, hasCity } = useHasCity(address);
 
   // Redirect to homepage if not logged in
   useEffect(() => {
@@ -30,5 +30,5 @@ export default function Play() {
 
 
   // Render based on whether the user has a city
-  return hasCity ? <PlayPage /> : <CreatePage trigger={trigger} />;
+  return hasCity ? <Playground /> : <CreatePage trigger={trigger} />;
 }
