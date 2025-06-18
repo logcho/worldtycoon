@@ -3,44 +3,32 @@ import { useRouter } from "next/navigation";
 import CreatePage from "./_components/create";
 import PlayPage from "./_components/play";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
-import { useEffect, useState } from "react";
-import { Address, hexToBool } from "viem";
-import { fetchHasCity } from "@/hooks/inspect";
-export default function Play(){
+import { useEffect } from "react";
+import { Address } from "viem";
+import { useHasCity } from "@/hooks/inspect"; // ✅ updated hook name
 
-    const router = useRouter();
+export default function Play() {
+  const router = useRouter();
+  const { primaryWallet } = useDynamicContext();
+  const address = primaryWallet?.address as Address | undefined;
 
-    const { trigger } = fetchHasCity();
-    const [hasCity, setHasCity] = useState(false);
+  const { trigger, hasCity, isLoading, error } = useHasCity(address);
 
-    
-    const { primaryWallet } = useDynamicContext();
-    const address = primaryWallet?.address as Address | undefined;
+  // Redirect to homepage if not logged in
+  useEffect(() => {
+    if (primaryWallet === null) {
+      router.replace("/");
+    }
+  }, [primaryWallet, router]);
 
-    useEffect(() => {
-        if(!primaryWallet){
-            router.replace("/");
-        }
-    }, [primaryWallet])
+  // Trigger check for city on address load
+  useEffect(() => {
+    if (address) {
+      trigger();
+    }
+  }, [address, trigger]);
 
 
-    useEffect(() => {
-        if (address) {
-            trigger(address)
-                .then((res) => {
-                console.log("Report:", res?.reports?.[0]?.payload);
-                const payload = res?.reports?.[0]?.payload;
-                if (payload) {
-                    const hasCityBool = hexToBool(payload);
-                    setHasCity(hasCityBool);
-                    console.log("Has city:", hasCityBool);
-                }
-                })
-                .catch((err) => {
-                    console.error("Error checking hasCity:", err);
-                });
-        }
-    }, [address, trigger]);
-    
-    return hasCity ? <PlayPage /> : <CreatePage />;
+  // Render based on whether the user has a city
+  return hasCity ? <PlayPage /> : <CreatePage trigger={trigger} />;
 }
