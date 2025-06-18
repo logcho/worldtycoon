@@ -1,34 +1,27 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useRollupsServer } from "@/hooks/rollupts";
-import { useEffect, useState } from "react";
-import { Address, Hex, stringToHex } from "viem";
-import ToolBox from "./game/tool-box";
-import GameBar from "./game/game-bar";
-import Stage from "./game/stage";
+// import { useRollupsServer } from "@/hooks/rollupts";
+// import { useEffect, useState } from "react";
+// import { Address, Hex, stringToHex } from "viem";
+import ToolBox from "./tool-box";
+import Map from "./map";
 export default function Playground(){
 
-    const DAPP_ADDRESS = process.env.NEXT_PUBLIC_DAPP_ADDRESS as Address;
 
-    const [input, setInput] = useState<Hex>();
+    // TODO: Finish connecting backend 
+    // const DAPP_ADDRESS = process.env.NEXT_PUBLIC_DAPP_ADDRESS as Address;
 
-    const { loading, success, error, write, notices } = useRollupsServer(
-        DAPP_ADDRESS,
-        input,
-    );
+    // // const [input, setInput] = useState<Hex>();
 
-    useEffect(() => {
-        setInput(stringToHex(`{"method":"doTool","tool":0,"x":0,"y":0}`))    
-    }, []);
+    // // const { loading, success, error, write, notices } = useRollupsServer(
+    // //     DAPP_ADDRESS,
+    // //     input,
+    // // );
     
     return (
-        <main className="flex flex-col items-center justify-center h-screen">
-            <GameBar />
-            <div className="flex flex-col md:flex-row w-full h-full bg-red-400">
-                <ToolBox />
-                <Stage />
-            </div>
+        <main className="flex flex-col md:flex-row items-center justify-center h-screen w-full pt-20">
+            <ToolBox />
+            <Map />
         </main>
     );
 }

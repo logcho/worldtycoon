@@ -1,5 +1,6 @@
 import { fixedsys } from "@/lib/fonts";
-export default function AboutSection(){
+
+export default function AboutSection() {
     return (
         <section className="bg-[url('/images/backgrounds/bg2.png')] bg-cover bg-center bg-no-repeat flex flex-col items-center justify-center w-full h-screen">
             <div className="container flex w-full grow flex-col gap-6 px-10 pt-24">
@@ -16,21 +17,21 @@ export default function AboutSection(){
                     <div className={`${fixedsys.className} text-sm text-gray-300 md:text-lg`}>
                         World Tycoon represents a revolutionary fusion of traditional
                         city-building gameplay with blockchain technology, creating an
-                        ecosystem where your strategic decisions have real-world value.{" "}
+                        ecosystem where your strategic decisions have real-world value.
                         <p className="py-2" />
                         Our mission is to empower players by providing a platform where
                         gaming expertise translates into tangible rewards. Through
-                        Cartesi's advanced blockchain infrastructure, we've
+                        Cartesi&apos;s advanced blockchain infrastructure, we&apos;ve
                         created a decentralized gaming experience that maintains the depth
                         and engagement of classic city simulators while introducing
-                        innovative economic mechanics. 
+                        innovative economic mechanics.
                         <p className="py-2" />
                         We believe in a future where gaming transcends entertainment,
                         becoming a legitimate avenue for wealth creation and economic
                         participation. By combining immersive gameplay with cryptocurrency
-                        integration, we're building more than just a game - we're
+                        integration, we&apos;re building more than just a game - we&apos;re
                         creating an ecosystem where players can truly own their achievements
-                        and trade their success. 
+                        and trade their success.
                         <p className="py-2" />
                         Join us in revolutionizing the gaming industry by being part of a
                         community where strategic thinking, resource management, and city

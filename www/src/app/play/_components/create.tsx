@@ -180,7 +180,7 @@ export default function CreatePage({ trigger }: CreatePageProps) {
             20000 {symbol ?? "TOKEN"} will be debited from your account and
             deposited into the city safe.{" "}
             <span className="text-yellow-600">
-              You'll first need to approve the deposit to create your city!
+              You&apos;ll first need to approve the deposit to create your city!
             </span>
           </p>
         </div>
