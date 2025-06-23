@@ -11,6 +11,8 @@ export default function Navbar() {
   // Determine flex direction class based on pathname
   const flexDirectionClass = pathname === "/play" ? "flex-row-reverse" : "flex-row";
 
+  if (pathname === "/play") return null;
+
   return (
     <header
       className={`bg-black flex fixed ${flexDirectionClass} items-center justify-between w-full h-20 p-4 z-50`}
