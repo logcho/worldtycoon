@@ -31,6 +31,12 @@ void createGameNotices(httplib::Client &cli, Micropolis* city){
     createNotice(cli, eth::stringToHex(stats));
 }
 
+void createGameReport(httplib::Client &cli, Micropolis* city){
+    createMapReport(cli, convertMapToUint16Vector(city->map[0], WORLD_W, WORLD_H));
+    std::string stats = getCityStats(city);
+    createReport(cli, eth::stringToHex(stats));
+}
+
 std::string handle_advance(httplib::Client &cli, picojson::value data)
 {
     std::string msgSender = data.get("metadata").get("msg_sender").to_str();
@@ -138,6 +144,7 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
                 return "reject";
             }
             std::cout << "City exists at address: " << msgSender << std::endl;
+            std::cout << "Decoded Payload: " << decodedPayload << std::endl;
             int tool = std::stoi(parsedPayload.get("tool").to_str());
             int x = std::stoi(parsedPayload.get("x").to_str());
             int y = std::stoi(parsedPayload.get("y").to_str());
@@ -227,6 +234,17 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
             return "reject";
         }
         // TODO: Handle getEvaluation logic
+    }
+    else if(method == "getGame"){ // Method: getGame
+        std::string address = toLower(parsedPayload.get("address").to_str());
+        if(!cities.count(address)){
+            std::cout << "City does not yet exist at address: " << address << std::endl;
+            std::cout << "Unable to getGame" << std::endl;
+            std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+            return "reject";
+        }
+        // TODO: Handle getEvaluation logic
+        createGameReport(cli, cities[address]);
     }
     return "accept";
 }

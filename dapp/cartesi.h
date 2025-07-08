@@ -172,4 +172,17 @@ void createMapNotice(httplib::Client& cli, const std::vector<uint16_t>& mapVecto
     createNotice(cli, eth::uint16VectorToHex(mapVector)); // Map
 }
 
+/**
+ * @brief Converts mapVector into hex then sends as a report to /report endpoint
+ * 
+ * This function takes the map data converted into a vector and encodes it into a hex string
+ * and sends it as a POST request to the `/notice` endpoint of the given HTTP client.
+ * 
+ * @param cli The httplib::Client object configured to communicate with the target server.
+ * @param mapVector A uint16 vector representing map data
+ */
+void createMapReport(httplib::Client& cli, const std::vector<uint16_t>& mapVector){
+    createReport(cli, eth::uint16VectorToHex(mapVector)); // Map
+}
+
 #endif // CARTESI_H

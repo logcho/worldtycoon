@@ -1,19 +1,19 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import CreatePage from "./_components/create";
 import Playground from "./_components/playground";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { useEffect } from "react";
 import { Address } from "viem";
-import { useHasCity } from "@/hooks/inspect";
+import { useGetGame } from "@/hooks/inspect";
 
 export default function Play() {
   const router = useRouter();
   const { primaryWallet } = useDynamicContext();
   const address = primaryWallet?.address as Address | undefined;
 
-  const { trigger, hasCity } = useHasCity(address);
-
+  const { trigger, game } = useGetGame(address);
   // Redirect to homepage if not logged in
   useEffect(() => {
     if (primaryWallet === null) {
@@ -28,7 +28,8 @@ export default function Play() {
     }
   }, [address, trigger]);
 
+  console.log("Game: ", game);
 
   // Render based on whether the user has a city
-  return hasCity ? <Playground /> : <CreatePage trigger={trigger} />;
+  return game ? <Playground game={game} /> : <CreatePage trigger={trigger} />;
 }

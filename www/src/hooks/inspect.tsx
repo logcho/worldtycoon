@@ -5,6 +5,50 @@ import { Address } from "viem";
 
 const INSPECT_URL = process.env.NEXT_PUBLIC_INSPECT_URL!;
 
+async function useGameRequest(url: string, { arg }: { arg: Address }) {
+  const response = await fetch(`${url}/{"method":"getGame","address":"${arg}"}`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch");
+  }
+
+  // Modify this line depending on your expected response format:
+  const json = await response.json(); // or await response.json();
+  
+  const map = json?.reports?.[0]?.payload;
+  const stats = json?.reports?.[1]?.payload;
+
+  if (!map || !stats) {
+    return undefined;
+  }
+
+  return {
+    map,
+    stats,
+  };
+}
+
+export const useGetGame = (address?: Address) => {
+  const {
+    trigger: _trigger,
+    data,
+    error,
+    isMutating,
+  } = useSWRMutation(INSPECT_URL, useGameRequest);
+
+  const trigger = useCallback(() => {
+    if (!address) return;
+    _trigger(address); // no arguments needed here
+  }, [_trigger, address]);
+
+  return {
+    trigger,
+    game: data,
+    error,
+    isLoading: isMutating,
+  };
+};
+
 async function hasCityRequest(url: string, { arg }: { arg: Address }) {
   const response = await fetch(
     `${url}/{"method":"hasCity","address":"${arg}"}`
@@ -27,7 +71,7 @@ export const useHasCity = (address?: Address) => {
     isMutating,
   } = useSWRMutation(INSPECT_URL, hasCityRequest);
 
-  // ✅ Memoize to prevent re-creating the function every render
+  // Memoize to prevent re-creating the function every render
   const trigger = useCallback(() => {
     if (!address) return;
     _trigger(address);

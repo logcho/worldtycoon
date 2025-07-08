@@ -1,14 +1,20 @@
 "use client";
 
-import ToolBox from "./tool-box";
 import StageArea from "./stage-area";
-import GameBar from "./game-bar";
-export default function Playground(){
-    
+import { Hex } from "viem";
+
+type Game = {
+    map: Hex;
+    stats: Hex;
+};
+
+export default function Playground({game}: {game : Game}) {
+
+    console.log(game);
+
     return (
-        <main className="flex flex-col items-center justify-center h-screen w-full">
-            <GameBar />
-            <StageArea />
+        <main className="flex flex-col h-screen w-full">
+            <StageArea defaultMap={game.map} defaultStats={game.stats} />
         </main>
     );
 }
