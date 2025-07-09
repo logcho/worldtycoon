@@ -33,6 +33,9 @@ If the people wallet runs out of funds, the global economy is in trouble. The ga
  npm i -g @cartesi/cli
 ```
 
+### Enviornmental Variables and Constants
+The constants and enviornmental variables can be used for running locally simply copy the content from .env.example to and .env file
+
 ### Run backend
 ```shell
 cd dapp
@@ -49,5 +52,4 @@ bun i
 bun dev
 ```
 
-
-
+Note: Using the foundry test token will require you to switch to that chain manually
