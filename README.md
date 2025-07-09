@@ -1,6 +1,6 @@
 # World Tycoon
 ---
-<img src="./www/public/images/logo.png" alt="My Logo" width="200" />
+<img src="./www/public/images/logos/logo.png" alt="My Logo" width="200" />
 
 SimCity was launched back in 1989 developed by the legendary game designer Will Write. In 2008, the engine C code was ported to C++ and released as free software under the GPL-3.0-or-later license, renamed to Micropolis for trademark reasons.
 
