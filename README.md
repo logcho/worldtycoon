@@ -28,13 +28,15 @@ If the people wallet runs out of funds, the global economy is in trouble. The ga
 
 ![Preview](./www/public/images/preview.png)
 
+
+### Enviornmental Variables and Constants
+The constants and enviornmental variables can be used for running locally simply copy the content from .env.example to and .env file
+
+
 ### Pre-requisite
 ```shell
  npm i -g @cartesi/cli
 ```
-
-### Enviornmental Variables and Constants
-The constants and enviornmental variables can be used for running locally simply copy the content from .env.example to and .env file
 
 ### Run backend
 ```shell
