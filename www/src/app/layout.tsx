@@ -18,11 +18,6 @@ export const metadata: Metadata = {
   title: "World Tycoon",
   description: "City building on blockchain",
   authors: [{ name: "Logan Choi", url: "https://github.com/logcho" }, { name: "Logan Choi", url: "https://www.linkedin.com/in/logcho04/" }],
-  icons: {
-    icon: "/logo.ico", // adjust path if needed
-    shortcut: "/logo.ico",
-    apple: "/logo.ico",
-  },
 };
 
 export default function RootLayout({

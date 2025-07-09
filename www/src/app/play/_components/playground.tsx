@@ -9,9 +9,6 @@ type Game = {
 };
 
 export default function Playground({game}: {game : Game}) {
-
-    console.log(game);
-
     return (
         <main className="flex flex-col h-screen w-full">
             <StageArea defaultMap={game.map} defaultStats={game.stats} />

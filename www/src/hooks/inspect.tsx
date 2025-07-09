@@ -6,7 +6,7 @@ import { Address } from "viem";
 const INSPECT_URL = process.env.NEXT_PUBLIC_INSPECT_URL!;
 
 async function useGameRequest(url: string, { arg }: { arg: Address }) {
-  const response = await fetch(`${url}/{"method":"getGame","address":"${arg}"}`);
+  const response = await fetch(`${url}/{"method":"getCity","address":"${arg}"}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch");
@@ -36,9 +36,10 @@ export const useGetGame = (address?: Address) => {
     isMutating,
   } = useSWRMutation(INSPECT_URL, useGameRequest);
 
+  // Memoize to prevent re-creating the function every render
   const trigger = useCallback(() => {
     if (!address) return;
-    _trigger(address); // no arguments needed here
+    _trigger(address);
   }, [_trigger, address]);
 
   return {

@@ -21,6 +21,15 @@ std::string getCityStats(Micropolis* city){
     statsJson["population"] = picojson::value(static_cast<double>(city->cityPop));
     statsJson["totalFunds"] = picojson::value(static_cast<double>(city->totalFunds));
     statsJson["cityTime"] = picojson::value(static_cast<double>(city->cityTime));
+    statsJson["cityTax"] = picojson::value(static_cast<double>(city->cityTax));
+    statsJson["taxFund"] = picojson::value(static_cast<double>(city->taxFund));
+    statsJson["firePercent"] = picojson::value(city->firePercent);  
+    statsJson["policePercent"] = picojson::value(city->policePercent);   
+    statsJson["roadPercent"] = picojson::value(city->roadPercent);     
+    statsJson["fireFund"] = picojson::value(static_cast<double>(city->fireFund));
+    statsJson["policeFund"] = picojson::value(static_cast<double>(city->policeFund));
+    statsJson["roadFund"] = picojson::value(static_cast<double>(city->roadFund));
+    statsJson["cashFlow"] = picojson::value(static_cast<double>(city->cashFlow)); 
     std::string stats = picojson::value(statsJson).serialize();
     return stats;
 }
@@ -91,11 +100,11 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
                             std::cout << "Map generated!" << std::endl;      
 
                             std::cout << "Setting speed..." << std::endl;
-                            cities[sender]->setSpeed(3);
+                            cities[sender]->setSpeed(1);
                             std::cout << "Speed set!" << std::endl;      
 
                             std::cout << "Setting passes..." << std::endl;
-                            cities[sender]->setPasses(50);      
+                            cities[sender]->setPasses(300);      
                             std::cout << "Passes set!" << std::endl;  
 
                             std::cout << "City successfully created for: " << sender << "!" << std::endl;
@@ -157,6 +166,41 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             createGameNotices(cli, cities[msgSender]);
             return "accept";
         }
+        else if(method == "batchTool"){ // Method: batchTool
+            if(!cities.count(msgSender)){
+                std::cout << "City does not yet exist at address: " << msgSender << std::endl;
+                std::cout << "Unable to batchTool" << std::endl;
+                std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+                return "reject";
+            }
+            std::cout << "City exists at address: " << msgSender << std::endl;
+            std::cout << "Decoded Payload: " << decodedPayload << std::endl;
+            picojson::array toolsArray = parsedPayload.get("tools").get<picojson::array>();
+            picojson::array xsArray = parsedPayload.get("xs").get<picojson::array>();
+            picojson::array ysArray = parsedPayload.get("ys").get<picojson::array>();
+
+            if (toolsArray.size() != xsArray.size() || xsArray.size() != ysArray.size()) {
+                std::cout << "Array sizes do not match!" << std::endl;
+                return "reject";
+            }
+
+            for (size_t i = 0; i < toolsArray.size(); ++i) {
+                int tool = static_cast<int>(toolsArray[i].get<double>());
+                int x = static_cast<int>(xsArray[i].get<double>());
+                int y = static_cast<int>(ysArray[i].get<double>());
+
+                EditingTool editingTool = static_cast<EditingTool>(tool);
+                std::cout << "Doing tool " << tool << " at (" << x << "," << y << ")..." << std::endl;
+                cities[msgSender]->doTool(editingTool, x, y);
+            }
+
+            cities[msgSender]->simTick(); // Apply tick after batch processing
+            std::cout << "Batch tool actions complete." << std::endl;
+            std::cout << std::setw(20) << std::setfill('-') << "" << std::endl;
+
+            createGameNotices(cli, cities[msgSender]);
+            return "accept";
+        }
         else if(method == "simTick"){ // Method: simTick
             if(!cities.count(msgSender)){
                 std::cout << "City does not yet exist at address: " << msgSender << std::endl;
@@ -181,7 +225,18 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
                 std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
                 return "reject";
             }
-            // TODO: Handle doBudget logic
+            double roads = std::stod(parsedPayload.get("roads").to_str());
+            double fire = std::stod(parsedPayload.get("fire").to_str());
+            double police = std::stod(parsedPayload.get("police").to_str());
+            int tax = std::stoi(parsedPayload.get("tax").to_str());
+
+            cities[msgSender]->firePercent = fire;
+            cities[msgSender]->policePercent = police;
+            cities[msgSender]->roadPercent = roads;
+            cities[msgSender]->setCityTax(tax);
+
+            std::cout << "Setting budget " << "roads: " << cities[msgSender]->roadPercent << " fire: " << cities[msgSender]->firePercent << " police: " << cities[msgSender]->policePercent << " tax: " << cities[msgSender]->cityTax << " for city " << msgSender << std::endl;
+            createGameNotices(cli, cities[msgSender]);
         }
     }
 
@@ -235,11 +290,11 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
         }
         // TODO: Handle getEvaluation logic
     }
-    else if(method == "getGame"){ // Method: getGame
+    else if(method == "getCity"){ // Method: getCity
         std::string address = toLower(parsedPayload.get("address").to_str());
         if(!cities.count(address)){
             std::cout << "City does not yet exist at address: " << address << std::endl;
-            std::cout << "Unable to getGame" << std::endl;
+            std::cout << "Unable to getCity" << std::endl;
             std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
             return "reject";
         }

@@ -28,8 +28,6 @@ export default function Play() {
     }
   }, [address, trigger]);
 
-  console.log("Game: ", game);
-
   // Render based on whether the user has a city
   return game ? <Playground game={game} /> : <CreatePage trigger={trigger} />;
 }
