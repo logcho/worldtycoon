@@ -28,7 +28,10 @@ export default function StageArea({defaultMap, defaultStats}: {defaultMap: Hex, 
   const building = !budgeting && !simulating && !batching;
 
   return (
-    <div className="flex flex-col md:flex-row w-full h-[calc(100vh_-_5rem)] mt-20">
+    <div 
+      className="flex flex-col md:flex-row w-full h-[calc(100vh_-_5rem)] mt-20"     
+      style={{ cursor: loading ? "wait" : "default" }}
+    >
       <GameBar 
         defaultStats={defaultStats} 
         statsValue={stats} 

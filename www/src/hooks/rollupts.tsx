@@ -95,20 +95,20 @@ export const useRollupsServer = (dapp: Address, input?: Hex) => {
 
   const inputIndex = useInputIndex(receipt);
   const [notices, setNotices] = useState<Hex[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  /**
-   * Submits the input payload to the InputBox contract.
-   * Must be used after ensuring both `dapp` and `input` are defined.
-   */
+  // Trigger write and mark as loading manually
   const write = async () => {
     if (!dapp || !input) return;
 
     try {
+      setIsLoading(true);
       await writeContractAsync({
         args: [dapp, input],
       });
     } catch (err) {
       console.error("Error writing input:", err);
+      setIsLoading(false); // Fail-safe
     }
   };
 
@@ -122,22 +122,28 @@ export const useRollupsServer = (dapp: Address, input?: Hex) => {
     pollInterval: 1000,
   });
 
-  // When GraphQL returns data, extract and store notice payloads
+  // Detect when notices have been fully updated
   useEffect(() => {
     if (gameNoticeData) {
-      setNotices(
-        [gameNoticeData.map?.payload, gameNoticeData.stat?.payload].filter(
-          Boolean
-        ) as Hex[]
-      );
+      const newNotices = [
+        gameNoticeData.map?.payload,
+        gameNoticeData.stat?.payload,
+      ].filter(Boolean) as Hex[];
+
+      setNotices(newNotices);
+
+      if (newNotices.length === 2) {
+        setIsLoading(false);
+      }
     }
-  }, [inputIndex, gameNoticeData]);
+  }, [gameNoticeData]);
 
   return {
-    loading: writePending || gameNoticeLoading,
+    loading: isLoading,
     success: writeSuccess,
     error: writeError || gameNoticeError,
     write,
     notices,
   };
 };
+

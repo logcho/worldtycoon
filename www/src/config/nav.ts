@@ -3,12 +3,13 @@ export const nav = [
       name: "Home",
       href: "/",
     },
-    // {
-    //   name: "Bridge",
-    //   href: "/bridge",
-    // },
-    // {
-    //   name: "Docs",
-    //   href: "/docs",
-    // },
+    {
+      name: "Learn",
+      href: "/learn",
+    },
+    {
+      name: "Bridge",
+      href: "/bridge",
+    },
+    
   ];

@@ -19,15 +19,11 @@ export default function Batching({batching, setBatching, loading, write}: {batch
                 <DialogTrigger asChild>
                     <Button
                         variant="secondary"
-                        className="bg-blue-400 text-xl text-white"
-                    >   
+                        className={`bg-blue-400 text-xl text-white relative ${
+                        batching ? "ring-4 ring-yellow-300 ring-offset-2" : ""
+                        }`}
+                    >
                         Blueprint
-                        <Switch 
-                            id="batching" 
-                            checked={batching}
-                            tabIndex={-1}
-                            className="pointer-events-none"              
-                        />
                     </Button>
                 </DialogTrigger>
                 <DialogContent className={`${fixedsys.className} bg-blue-400`}>
@@ -39,7 +35,7 @@ export default function Batching({batching, setBatching, loading, write}: {batch
                     </DialogDescription>
 
                     <div className="flex items-center gap-2 text-white">
-                        Start Blueprinting
+                        Start Blueprint
                         <Switch
                         id="batching-toggle"
                         checked={batching}

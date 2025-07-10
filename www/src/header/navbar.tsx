@@ -54,7 +54,7 @@ export default function Navbar() {
 
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="rounded-none bg-[#111] p-1 text-white hover:bg-[#222] md:hidden"
+          className="rounded-none p-1 text-white hover:bg-[#222] md:hidden"
         >
           {isOpen ? <X className="size-8" /> : <Menu className="size-8" />}
         </button>
@@ -75,7 +75,7 @@ export default function Navbar() {
         </nav>
 
         <nav
-          className={`bg-foreground/75 fixed inset-x-0 top-20 w-full overflow-hidden backdrop-blur-xs transition-[height] duration-300 md:hidden
+          className={`bg-black/80 fixed inset-x-0 top-20 w-full overflow-hidden backdrop-blur-xs transition-[height] duration-300 md:hidden
             ${isOpen ? "h-52" : "h-0"}`}
         >
           <div className="flex flex-col items-center gap-6 p-4 text-2xl text-[#babec7] uppercase">

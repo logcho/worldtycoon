@@ -6,7 +6,7 @@ export default function HeroSection() {
         <section className="flex flex-col items-center justify-center h-screen w-full">
             <div className="flex flex-col items-center justify-center">
                 <Image
-                    src={"/images/logo/logo.png"}
+                    src={"/images/logos/logo.png"}
                     alt="logo"
                     width={200}
                     height={200}

@@ -139,7 +139,7 @@ export default function CreatePage({ trigger }: CreatePageProps) {
       const timeout = setTimeout(() => {
         refetchBalance();
         trigger();
-      }, 4000);
+      }, 5000);
       return () => clearTimeout(timeout);
     }
   }, [depositStatus, refetchBalance, trigger]);
