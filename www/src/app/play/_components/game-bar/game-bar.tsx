@@ -4,6 +4,7 @@ import { fixedsys } from "@/lib/fonts";
 import { Budget } from "./budget";
 import SimTicks from "./sim-ticks";
 import Batching from "./batching";
+import type { PlacedSprite } from "../stage-area";
 
 function parseStats(statsHex: Hex) {
     const statsStr = hexToString(statsHex);
@@ -55,6 +56,7 @@ export default function GameBar({
     write,
     setInput,
     loading,
+    setPlacedSprites
 }: {
     defaultStats: Hex;
     statsValue?: Hex;
@@ -67,6 +69,7 @@ export default function GameBar({
     write: () => void;
     setInput: (input: Hex) => void;
     loading: boolean;
+    setPlacedSprites: React.Dispatch<React.SetStateAction<PlacedSprite[]>>;
 }) {
     const { cityTime, 
             population, 
@@ -146,6 +149,7 @@ export default function GameBar({
                     setBatching={setBatching}
                     loading={loading}
                     write={write}
+                    setPlacedSprites={setPlacedSprites}
                 />
             </div>
 

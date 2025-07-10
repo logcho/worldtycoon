@@ -8,11 +8,21 @@ import MapCanvas from "./map-canvas";
 import { useRollupsServer } from "@/hooks/rollupts";
 import GameBar from "./game-bar/game-bar";
 
+
+// Placed tool sprite
+export type PlacedSprite = {
+  x: number;
+  y: number;
+  tool: Tool;
+};
+
+
 export default function StageArea({defaultMap, defaultStats}: {defaultMap: Hex, defaultStats: Hex}) {
   const [selectedTool, setSelectedTool] = useState<Tool | undefined>();
   const [budgeting, setBudgeting] = useState<boolean>(false);
   const [simulating, setSimulating] = useState<boolean>(false);
   const [batching, setBatching] = useState<boolean>(false);
+  const [placedSprites, setPlacedSprites] = useState<PlacedSprite[]>([]);
 
   const DAPP_ADDRESS = process.env.NEXT_PUBLIC_DAPP_ADDRESS as Address;
   const [input, setInput] = useState<Hex | undefined>();
@@ -41,6 +51,7 @@ export default function StageArea({defaultMap, defaultStats}: {defaultMap: Hex, 
         setInput={setInput}
         write={write}
         loading={loading}
+        setPlacedSprites={setPlacedSprites}
       />
       <ToolBox 
         selectedTool={selectedTool} 
@@ -54,6 +65,8 @@ export default function StageArea({defaultMap, defaultStats}: {defaultMap: Hex, 
         write={write} 
         building={building}
         batching={batching} 
+        placedSprites={placedSprites}
+        setPlacedSprites={setPlacedSprites}
       />
     </div>
   );

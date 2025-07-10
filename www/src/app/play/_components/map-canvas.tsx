@@ -13,7 +13,7 @@ import { Hex, stringToHex } from "viem";
 import { HEIGHT, WIDTH, TILE_SIZE } from "@/config/constants";
 import { tileAnimations, animationFrameToKey } from "@/config/animation-tiles";
 import { fixedsys } from "@/lib/fonts";
-
+import type { PlacedSprite } from "./stage-area";
 // Image paths
 const TILESET_URL = "/images/tilesets/micropolis_tiles.png";
 const TOOLSET_URL = "/images/tools/tools.png";
@@ -29,13 +29,6 @@ export type Tile = {
   animated: boolean;
   center: boolean;
   type: number;
-};
-
-// Placed tool sprite
-export type PlacedSprite = {
-  x: number;
-  y: number;
-  tool: Tool;
 };
 
 // Decode raw tile data into tile metadata
@@ -59,6 +52,8 @@ export default function MapCanvas({
   write,
   building,
   batching,
+  placedSprites,
+  setPlacedSprites,
 }: {
   tool?: Tool;
   defaultMap: Hex;
@@ -67,6 +62,8 @@ export default function MapCanvas({
   write: () => void;
   building: boolean;
   batching: boolean;
+  placedSprites: PlacedSprite[];
+  setPlacedSprites: React.Dispatch<React.SetStateAction<PlacedSprite[]>>;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const tilesetRef = useRef<HTMLImageElement | null>(null);
@@ -75,7 +72,6 @@ export default function MapCanvas({
   const coordRef = useRef<{ x: number; y: number } | null>(null);
 
   const [coord, setCoord] = useState<{ x: number; y: number } | null>(null);
-  const [placedSprites, setPlacedSprites] = useState<PlacedSprite[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
   const hexMap = mapValue ?? defaultMap;
