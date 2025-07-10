@@ -265,10 +265,10 @@ export default function MapCanvas({
 
   const handleMouseDown = () => {
     if (!coord || !tool) return;
-    if (tool.w === 1 && tool.h === 1) {
+    if (tool.size === 1) {
       setIsDragging(true);
       const alreadyPlaced = placedSprites.some(s => s.x === coord.x && s.y === coord.y);
-      if (!alreadyPlaced) setPlacedSprites(prev => [...prev, { x: coord.x, y: coord.y, tool }]);
+      if (!alreadyPlaced && batching) setPlacedSprites(prev => [...prev, { x: coord.x, y: coord.y, tool }]);
     }
   };
 
@@ -282,8 +282,8 @@ export default function MapCanvas({
   const handleClick = () => {
     if (!coord || !tool) return;
     if (!isOverlapping(coord.x, coord.y, tool)) {
-      setPlacedSprites(prev => [...prev, { x: coord.x, y: coord.y, tool }]);
       if (building) write();
+      if(batching) setPlacedSprites(prev => [...prev, { x: coord.x, y: coord.y, tool }]);
     }
   };
 
@@ -306,7 +306,7 @@ export default function MapCanvas({
   };
 
   return (
-    <div className="relative md:w-5/6 w-full h-full overflow-auto">
+    <div className="relative md:w-5/6 w-full h-full overflow-auto custom-scroll">
       <canvas
         ref={canvasRef}
         onMouseMove={handleMouseMove}

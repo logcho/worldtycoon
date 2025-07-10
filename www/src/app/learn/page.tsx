@@ -3,21 +3,23 @@
 import Link from "next/link";
 import Image from "next/image";
 import { fixedsys } from "@/lib/fonts";
-import FooterSection from "./_components/footer"
+import FooterSection from "./_components/footer";
 import Border from "./_components/border";
+
 export default function Learn() {
   return (
     <main
+      className="custom-scroll overflow-y-auto max-h-screen"
       style={{
         backgroundImage: "url(/images/tilesets/micropolis_tiles.png)",
         backgroundRepeat: "repeat",
       }}
     >
       <div className={`${fixedsys.className} pt-24 p-12 text-[#babec7] bg-[#151515]/90 mx-auto max-w-7xl`}>
-        <h1 className="text-4xl md:text-5xl mb-10 uppercase text-yellow-400">How to Play</h1>
+        <h1 className="text-2xl md:text-3xl mb-8 uppercase text-yellow-400">How to Play</h1>
 
         {/* Intro Section */}
-        <section className="mb-16 text-xl leading-relaxed space-y-4">
+        <section className="mb-12 text-base leading-relaxed space-y-3">
           <p>
             Welcome to <strong>World Tycoon</strong> — a decentralized city simulator where every decision shapes your blockchain-based metropolis.
           </p>
@@ -30,12 +32,12 @@ export default function Learn() {
         </section>
 
         {/* ⚡ Power Requirement Section */}
-        <section className="mb-16">
-          <div className="flex items-center gap-4 mb-4">
-            <span className="text-3xl">⚡</span>
-            <h2 className="text-3xl text-white uppercase">Power Grid</h2>
+        <section className="mb-12">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-2xl">⚡</span>
+            <h2 className="text-2xl text-white uppercase">Power Grid</h2>
           </div>
-          <ul className="list-disc list-inside space-y-2 text-lg">
+          <ul className="list-disc list-inside space-y-1 text-sm">
             <li>All buildings require power to function.</li>
             <li>Be sure to connect power sources using wires.</li>
             <li>If a zone loses electricity, it may stop working entirely.</li>
@@ -43,12 +45,12 @@ export default function Learn() {
         </section>
 
         {/* ⏳ Time & Simulation Section */}
-        <section className="mb-16">
-          <div className="flex items-center gap-4 mb-4">
-            <span className="text-3xl">⏳</span>
-            <h2 className="text-3xl text-white uppercase">Time & Simulation</h2>
+        <section className="mb-12">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-2xl">⏳</span>
+            <h2 className="text-2xl text-white uppercase">Time & Simulation</h2>
           </div>
-          <ul className="list-disc list-inside space-y-2 text-lg">
+          <ul className="list-disc list-inside space-y-1 text-sm">
             <li>Use <strong>Sim Tick</strong> in the Game Bar to manually advance time.</li>
             <li>Each tick updates population, tax collection, and public service funding.</li>
             <li>Every new <strong>game year</strong>, taxes are collected and funds are paid to fire, police, and roads.</li>
@@ -56,15 +58,15 @@ export default function Learn() {
         </section>
 
         {/* 🧱 Tools & Buildings Section */}
-        <section className="mb-16">
-          <div className="flex items-center gap-4 mb-4">
-            <Image src="/images/tools/power_tool.png" alt="Tools icon" width={32} height={32} />
-            <h2 className="text-3xl text-white uppercase">Buildings & Tools</h2>
+        <section className="mb-12">
+          <div className="flex items-center gap-3 mb-3">
+            <Image src="/images/tools/power_tool.png" alt="Tools icon" width={24} height={24} />
+            <h2 className="text-2xl text-white uppercase">Buildings & Tools</h2>
           </div>
 
-          <p className="text-lg mb-6">Each tool shapes your city in different ways. Here&apos;s what each one does:</p>
+          <p className="text-sm mb-4">Each tool shapes your city in different ways. Here&apos;s what each one does:</p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {[
               { name: "Residential", img: "/images/tools/r_tool.png", desc: "Build homes for citizens." },
               { name: "Commercial", img: "/images/tools/commercial.png", desc: "Create retail and business zones." },
@@ -73,34 +75,34 @@ export default function Learn() {
               { name: "Fire", img: "/images/tools/fire.png", desc: "Protect your city from disasters." },
               { name: "Roads", img: "/images/tools/road.png", desc: "Connect zones and enable traffic flow." },
             ].map((tool) => (
-              <div key={tool.name} className="bg-[#1f1f1f] p-4 rounded-lg shadow-md text-center">
-                <Image src={tool.img} alt={tool.name} width={64} height={64} className="mx-auto mb-2" />
-                <h3 className="text-xl font-bold text-yellow-300 uppercase">{tool.name}</h3>
-                <p className="text-sm text-[#aaa]">{tool.desc}</p>
+              <div key={tool.name} className="bg-[#1f1f1f] p-3 rounded-lg shadow-md text-center">
+                <Image src={tool.img} alt={tool.name} width={48} height={48} className="mx-auto mb-1" />
+                <h3 className="text-base text-yellow-300 uppercase">{tool.name}</h3>
+                <p className="text-xs text-[#aaa]">{tool.desc}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* 🔗 On-Chain Gameplay Section */}
-        <section className="mb-16">
-          <div className="flex items-center gap-4 mb-4">
-            <span className="text-3xl">🔗</span>
-            <h2 className="text-3xl text-white uppercase">On-Chain Gameplay</h2>
+        <section className="mb-12">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-2xl">🔗</span>
+            <h2 className="text-2xl text-white uppercase">On-Chain Gameplay</h2>
           </div>
-          <ul className="list-disc list-inside space-y-2 text-lg">
+          <ul className="list-disc list-inside space-y-1 text-sm">
             <li>Each tool placement is a transaction. You’ll sign it with your wallet.</li>
             <li>Your city is recorded entirely on-chain — transparent, persistent, and verifiable.</li>
           </ul>
         </section>
 
         {/* 📐 Blueprint Section */}
-        <section className="mb-16">
-          <div className="flex items-center gap-4 mb-4">
-            <span className="text-3xl">📐</span>
-            <h2 className="text-3xl text-white uppercase">Blueprints</h2>
+        <section className="mb-12">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-2xl">📐</span>
+            <h2 className="text-2xl text-white uppercase">Blueprints</h2>
           </div>
-          <ul className="list-disc list-inside space-y-2 text-lg">
+          <ul className="list-disc list-inside space-y-1 text-sm">
             <li>Blueprint mode lets you plan your entire build layout ahead of time.</li>
             <li>Submit all changes in one batch — reducing friction and signature fatigue.</li>
             <li>Ideal for rapid expansion or high-efficiency city planning.</li>
@@ -108,8 +110,8 @@ export default function Learn() {
         </section>
 
         {/* 🚧 Closing Section */}
-        <section className="text-lg">
-          <p className="mb-4">
+        <section className="text-sm">
+          <p className="mb-3">
             Ready to break ground? Head to the{" "}
             <Link href="/" className="text-yellow-400 underline">
               Home page
@@ -121,6 +123,7 @@ export default function Learn() {
           </p>
         </section>
       </div>
+
       <Border />
       <FooterSection />
     </main>

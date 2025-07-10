@@ -22,7 +22,7 @@ export default function ToolBox({ selectedTool, setSelectedTool }: ToolBoxProps)
     <div className="hidden md:flex flex-col items-center justify-center md:w-1/6 md:h-full bg-muted">
       <div
         className={`
-          bg-neutral-900 flex h-full w-full flex-col gap-2 overflow-y-scroll p-3
+          bg-neutral-900 flex h-full w-full flex-col gap-2 overflow-y-scroll p-3 custom-scroll
         `}
         style={{ scrollbarWidth: "none" }}
       >
