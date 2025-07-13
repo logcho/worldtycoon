@@ -58,6 +58,7 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "algorithm": "cpp",
-        "*.include": "cpp"
+        "*.include": "cpp",
+        "unordered_set": "cpp"
     }
 }

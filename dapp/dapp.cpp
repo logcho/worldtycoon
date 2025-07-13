@@ -236,7 +236,31 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             cities[msgSender]->setCityTax(tax);
 
             std::cout << "Setting budget " << "roads: " << cities[msgSender]->roadPercent << " fire: " << cities[msgSender]->firePercent << " police: " << cities[msgSender]->policePercent << " tax: " << cities[msgSender]->cityTax << " for city " << msgSender << std::endl;
+            std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
             createGameNotices(cli, cities[msgSender]);
+        }
+        else if(method == "withdraw"){ // Method: doBudget
+            if(!cities.count(msgSender)){
+                std::cout << "City does not yet exist at address: " << msgSender << std::endl;
+                std::cout << "Unable to withdraw" << std::endl;
+                std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+                return "reject";
+            }
+            uint256_t decimals("1000000000000000000", 10); // 18 decimals
+            uint256_t formattedBalance = cities[msgSender]->totalFunds * decimals;
+            std::string hexAmount = "0x" + formattedBalance.str(16, 32);
+
+            std::cout << "Generating voucher for withdrawal..." << std::endl;
+            std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+
+            createTransferVoucher(cli, msgSender, hexAmount, TOKEN_CONTRACT_ADDRESS);
+
+            // Delete city after withdrawing
+            delete cities[msgSender];
+            cities.erase(msgSender);
+            std::cout << "City deleted!" << std::endl;
+    
+            return "accept";
         }
     }
 
@@ -300,6 +324,17 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
         }
         // TODO: Handle getEvaluation logic
         createGameReport(cli, cities[address]);
+    }
+    else if(method == "getCityBalance"){ // Method: getCity
+        std::string address = toLower(parsedPayload.get("address").to_str());
+        if(!cities.count(address)){
+            std::cout << "City does not yet exist at address: " << address << std::endl;
+            std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+            createReport(cli, "0x00");
+            return "accept";
+        }
+        // TODO: Handle getEvaluation logic
+        createReport(cli, eth::numberToHex(cities[address]->totalFunds));
     }
     return "accept";
 }

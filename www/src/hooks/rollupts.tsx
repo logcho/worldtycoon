@@ -84,7 +84,7 @@ export const useRollupsServer = (dapp: Address, input?: Hex) => {
   const {
     writeContractAsync,
     data: writeHash,
-    isPending: writePending,
+    // isPending: writePending,
     isSuccess: writeSuccess,
     error: writeError,
   } = useWriteInputBoxAddInput();
@@ -114,7 +114,7 @@ export const useRollupsServer = (dapp: Address, input?: Hex) => {
 
   const {
     data: gameNoticeData,
-    loading: gameNoticeLoading,
+    // loading: gameNoticeLoading,
     error: gameNoticeError,
   } = useQuery(GAME_NOTICES, {
     skip: !inputIndex,

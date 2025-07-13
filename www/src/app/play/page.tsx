@@ -6,14 +6,14 @@ import Playground from "./_components/playground";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { useEffect } from "react";
 import { Address } from "viem";
-import { useGetGame } from "@/hooks/inspect";
+import { useGetCity } from "@/hooks/inspect";
 
 export default function Play() {
   const router = useRouter();
   const { primaryWallet } = useDynamicContext();
   const address = primaryWallet?.address as Address | undefined;
 
-  const { trigger, game } = useGetGame(address);
+  const { trigger, game } = useGetCity(address);
   // Redirect to homepage if not logged in
   useEffect(() => {
     if (primaryWallet === null) {

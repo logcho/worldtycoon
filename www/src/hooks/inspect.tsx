@@ -1,11 +1,11 @@
 import { useCallback } from "react";
 import useSWRMutation from "swr/mutation";
-import { hexToBool } from "viem";
+import { hexToBigInt, hexToBool, hexToNumber } from "viem";
 import { Address } from "viem";
 
 const INSPECT_URL = process.env.NEXT_PUBLIC_INSPECT_URL!;
 
-async function useGameRequest(url: string, { arg }: { arg: Address }) {
+async function getCityRequest(url: string, { arg }: { arg: Address }) {
   const response = await fetch(`${url}/{"method":"getCity","address":"${arg}"}`);
 
   if (!response.ok) {
@@ -28,13 +28,13 @@ async function useGameRequest(url: string, { arg }: { arg: Address }) {
   };
 }
 
-export const useGetGame = (address?: Address) => {
+export const useGetCity = (address?: Address) => {
   const {
     trigger: _trigger,
     data,
     error,
     isMutating,
-  } = useSWRMutation(INSPECT_URL, useGameRequest);
+  } = useSWRMutation(INSPECT_URL, getCityRequest);
 
   // Memoize to prevent re-creating the function every render
   const trigger = useCallback(() => {
@@ -81,6 +81,48 @@ export const useHasCity = (address?: Address) => {
   return {
     trigger,
     hasCity: data,
+    error,
+    isLoading: isMutating,
+  };
+};
+
+async function getCityBalanceRequest(url: string, { arg }: { arg: Address }) {
+  const response = await fetch(
+    `${url}/{"method":"getCityBalance","address":"${arg}"}`
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch city balance");
+  }
+
+  const json = await response.json();
+  const payload = json?.reports?.[0]?.payload;
+
+  if (!payload) {
+    throw new Error("No payload returned for city balance");
+    return 0;
+  }
+
+  // Assuming the balance is a hex string representing a BigInt
+  return hexToNumber(payload);
+}
+
+export const useGetCityBalance = (address?: Address) => {
+  const {
+    trigger: _trigger,
+    data,
+    error,
+    isMutating,
+  } = useSWRMutation(INSPECT_URL, getCityBalanceRequest);
+
+  const trigger = useCallback(() => {
+    if (!address) return;
+    _trigger(address);
+  }, [_trigger, address]);
+
+  return {
+    trigger,
+    cityBalance: data,
     error,
     isLoading: isMutating,
   };

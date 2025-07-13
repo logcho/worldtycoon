@@ -141,5 +141,20 @@ namespace eth {
         return "0x" + hexInput.substr(start * 2 + 2, (end - start) * 2);
     }
 
+    /**
+     * @brief Converts an unsigned integer to a hex-encoded string.
+     * 
+     * This function converts the input number to its hexadecimal string representation,
+     * prefixed with "0x". The output uses lowercase letters and no padding.
+     * 
+     * @param value The unsigned integer to convert.
+     * @return A hex string representation of the integer, prefixed with "0x".
+     */
+    std::string numberToHex(uint64_t value) {
+        std::ostringstream hexStream;
+        hexStream << "0x" << std::hex << value;
+        return hexStream.str();
+    }
+
 }
 #endif // ETH_UTIL_H
