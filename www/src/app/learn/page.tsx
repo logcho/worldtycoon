@@ -57,6 +57,35 @@ export default function Learn() {
           </ul>
         </section>
 
+        {/* 🚗 Traffic Congestion Section */}
+        <section className="mb-12">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-2xl">🚗</span>
+            <h2 className="text-2xl text-white uppercase">Traffic Congestion</h2>
+          </div>
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>As your city grows, <strong>clusters of cars</strong> will appear, indicating areas overwhelmed by traffic.</li>
+            <li>To alleviate congestion, build additional <strong>roads</strong> around traffic clusters and ensure neighborhoods are properly connected.</li>
+            <li>Unresolved traffic may impact zone efficiency and citizen happiness.</li>
+          </ul>
+        </section>
+
+        {/* 🔥 Mysterious Disasters Section */}
+        <section className="mb-12">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-2xl">🔥</span>
+            <h2 className="text-2xl text-white uppercase">Mysterious Disasters</h2>
+          </div>
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>Fires and explosions can suddenly appear on the map, with causes marked as <em>unknown</em>.</li>
+            <li>These disasters can damage buildings, halt services, and block development in affected areas.</li>
+            <li>Use the <strong>bulldozer tool</strong> to remove wreckage and restore buildable space.</li>
+            <li>Ignoring disaster zones may lead to further consequences for your city.</li>
+          </ul>
+        </section>
+
+
+
         {/* 🧱 Tools & Buildings Section */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-3">
