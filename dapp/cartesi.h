@@ -102,6 +102,41 @@ void createTransferVoucher(httplib::Client& cli, const std::string& recipient, c
     std::cout << "Received voucher status " << r.value().status << std::endl;
 }
 
+/**
+ * @brief Encodes a mintNFT(address,uint256) function call.
+ * Generates the full ABI-encoded payload for minting an ERC-721 token.
+ * @param recipient The recipient address as a hex string (with or without "0x").
+ * @param tokenId The token ID as a hex string (with or without "0x").
+ * @return A hex-encoded string including the function selector and arguments.
+ */
+std::string encodeMintNFTCall(const std::string &recipient, const std::string &tokenId) {
+    std::string methodId = "3c168eab"; // keccak256("mintNFT(address,uint256)") first 4 bytes
+    return "0x" + methodId + padTo32Bytes(recipient) + padTo32Bytes(tokenId);
+}
+
+/**
+ * @brief Sends a voucher with an encoded mintNFT call to the /voucher endpoint.
+ * This function formats and sends a payload to the Cartesi node to trigger
+ * the minting of an NFT by calling the mintNFT function on the NFT contract.
+ * @param cli The configured httplib::Client object used for HTTP requests.
+ * @param recipient Address to send tokens to (hex string).
+ * @param tokenId The token ID as a hex string (with or without "0x").
+ * @param destination The token address.
+ */
+void createMintNFTVoucher(httplib::Client &cli, const std::string &recipient, const std::string &tokenId, const std::string& destination) {
+    std::string mintNFT = encodeMintNFTCall(recipient, tokenId);
+    // Format the payload expected by Cartesi
+    std::string payload = "{\"destination\":\"" + destination + "\",\"payload\":\"" + mintNFT + "\"}";
+    // Payload should be ABI encoded call to the NFT contract
+    auto r = cli.Post("/voucher", payload, "application/json");
+    if (r) {
+        std::cout << "[VOUCHER] Sent: " << payload << std::endl;
+        std::cout << "Received status: " << r->status << std::endl;
+    } else {
+        std::cerr << "[ERROR] Failed to send voucher" << std::endl;
+    }
+}
+
 // -----------------------------------------------------------------------------
 // Portal Address Checks
 // -----------------------------------------------------------------------------

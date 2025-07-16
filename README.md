@@ -54,4 +54,47 @@ bun i
 bun dev
 ```
 
+### To test asset handling features
+
+### Run backend
+```shell
+cd dapp
+cartesi build
+cartesi run --epoch-length 1
+```
+
+Run the GameHasHNFT contract (dapp/contracts/GameHasHNFT.sol) on Foundry using [Remix](https://remix.ethereum.org) or Anvil.
+
+If the address of the deployed contract is different than the value already set, change it manually in .env file
+    
+You can use the cli to send an input to change the NFT_CONTRACT_ADDRESS to the deployed contract 
+
+```shell
+dapp % cartesi send
+? Select send sub-command Send generic input to the application.
+? Chain Foundry
+? RPC URL http://127.0.0.1:8545
+? Wallet Mnemonic
+? Mnemonic test test test test test test test test test test test junk
+? Account 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 9993.473773245826256067 ETH
+? Application address 0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e
+? Input String encoding
+? Input (as string) {"method":"setContract","contract":"0xhelloWorld"}
+```
+
+You can confirm that the contract was updated by using this
+
+```shell
+dapp % cartesi send
+? Select send sub-command Send generic input to the application.
+? Chain Foundry
+? RPC URL http://127.0.0.1:8545
+? Wallet Mnemonic
+? Mnemonic test test test test test test test test test test test junk
+? Account 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 9993.476291596530017783 ETH
+? Application address 0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e
+? Input String encoding
+? Input (as string) {"method":"checkContract"}
+```
+
 Note: Using the foundry test token will require you to switch to that chain manually

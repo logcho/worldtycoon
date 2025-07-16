@@ -6,16 +6,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DynamicButton from "@/components/dynamic-button";
 import { fixedsys } from "@/lib/fonts";
 import { Address, formatUnits, stringToHex } from "viem";
-import { useReadErc20BalanceOf, useReadErc20Decimals, useReadErc20Symbol } from "@/hooks/contracts";
+import { useReadErc20BalanceOf, useReadErc20Decimals, useReadErc20Symbol, useReadErc721GetApproved } from "@/hooks/contracts";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { useWriteInputBoxAddInput } from "@/hooks/inputbox";
 import { useState, useEffect, useRef } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
+import { useWriteErc721PortalDepositErc721Tokens } from "@/hooks/erc721portal";
+import { useWriteErc721Approve } from "@/hooks/contracts";
 
 type BridgeTabsProps = {
-  cityBalance: number;
-  trigger: () => void; // ⬅ Add this
+  cityBalance?: number;
+  trigger: () => void;
 };
 
 export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
@@ -24,6 +26,8 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
 
   const TOKEN_ADDRESS = process.env.NEXT_PUBLIC_TOKEN_ADDRESS as Address;
   const DAPP_ADDRESS = process.env.NEXT_PUBLIC_DAPP_ADDRESS as Address;
+  const ERC721_PORTAL = process.env.NEXT_PUBLIC_ERC721_PORTAL as Address;
+  const NTF_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_NTF_CONTRACT_ADDRESS as Address;
 
   const { data: symbol } = useReadErc20Symbol({ address: TOKEN_ADDRESS });
   const { data: decimals = 18 } = useReadErc20Decimals({ address: TOKEN_ADDRESS });
@@ -37,102 +41,261 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
   });
 
   const formattedBalance = balance ? formatUnits(balance, decimals) : "0";
-  const canWithdraw = cityBalance > 0;
+  const canWithdraw = cityBalance && cityBalance > 0;
 
   const { writeContractAsync, status: withdrawStatus } = useWriteInputBoxAddInput();
 
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isDepositing, setIsDepositing] = useState(false);
+  const [tokenIdToLoad, setTokenIdToLoad] = useState<bigint | undefined>(undefined);
+
   const lastCityBalanceRef = useRef(cityBalance);
 
   const withdrawPayload = stringToHex(`{"method":"withdraw"}`);
+  const mintPayload = stringToHex(`{"method":"mint"}`);
 
   const withdraw = async () => {
     try {
       setIsWithdrawing(true);
-      await writeContractAsync({
-        args: [DAPP_ADDRESS, withdrawPayload],
-      });
-
-      // Refetch city balance after a delay (e.g. indexer lag)
-      setTimeout(() => {
-        trigger();
-      }, 5000); // Adjust delay if needed
+      await writeContractAsync({ args: [DAPP_ADDRESS, withdrawPayload] });
+      setTimeout(() => trigger(), 5000);
     } catch (error) {
-      console.error("Error in withdrawing:", error);
+      console.error("Withdraw error:", error);
       setIsWithdrawing(false);
     }
   };
 
+  const mint = async () => {
+    try {
+      setIsWithdrawing(true);
+      await writeContractAsync({ args: [DAPP_ADDRESS, mintPayload] });
+      setTimeout(() => trigger(), 5000);
+    } catch (error) {
+      console.error("Mint error:", error);
+      setIsWithdrawing(false);
+    }
+  };
+
+  const {
+    writeContractAsync: approveToken,
+    status: approveStatus,
+  } = useWriteErc721Approve();
+
+  const {
+    writeContractAsync: depositToken,
+    status: depositStatus,
+  } = useWriteErc721PortalDepositErc721Tokens();
+
+  const {
+    // data: approvedAddress,
+    refetch: refetchApprovedAddress,
+  } = useReadErc721GetApproved({
+    address: NTF_CONTRACT_ADDRESS,
+    args: tokenIdToLoad !== undefined ? [tokenIdToLoad] : undefined,
+  });
+  
+  
+  const approve = async () => {
+    if (tokenIdToLoad === undefined) return;
+    try {
+      setIsApproving(true);
+      await approveToken({
+        address: NTF_CONTRACT_ADDRESS,
+        args: [ERC721_PORTAL, tokenIdToLoad],
+      });
+    } catch (error) {
+      console.error("ERC721 Approve error:", error);
+      setIsApproving(false);
+    }
+  };
+
+  const load = async () => {
+    if (tokenIdToLoad === undefined) return;
+    try {
+      setIsDepositing(true);
+      const data = stringToHex(`Deposited NFT (${tokenIdToLoad})`);
+      await depositToken({
+        args: [NTF_CONTRACT_ADDRESS, DAPP_ADDRESS, tokenIdToLoad, data, data],
+      });
+    } catch (error) {
+      console.error("ERC721 Deposit error:", error);
+      setIsDepositing(false);
+    }
+  };
+  
+
   useEffect(() => {
-    if (isWithdrawing && cityBalance < lastCityBalanceRef.current) {
+    if (approveStatus === "success") {
+      const timeout = setTimeout(() => {        
+        refetchApprovedAddress();
+      }, 4000);
+      return () => clearTimeout(timeout);
+    }
+  }, [approveStatus]);
+
+  useEffect(() => {
+    if (depositStatus === "success") {
+      const timeout = setTimeout(() => {
+        trigger();
+        setIsDepositing(false);
+      }, 4000);
+      return () => clearTimeout(timeout);
+    }
+  }, [depositStatus]);
+
+  useEffect(() => {
+    if (isWithdrawing && cityBalance !== undefined && cityBalance < lastCityBalanceRef.current!) {
       setIsWithdrawing(false);
       lastCityBalanceRef.current = cityBalance;
     }
   }, [cityBalance, isWithdrawing]);
 
+  const [tab, setTab] = useState<"withdraw" | "mint" | "load">(
+    cityBalance === undefined ? "load" : "withdraw"
+  );
+
   return (
     <section className="flex items-center justify-center w-full h-screen">
       <Tabs
-        value="withdraw"
+        value={tab}
+        onValueChange={(val) => setTab(val as "withdraw" | "mint" | "load")}
         className={`${fixedsys.className} w-full max-w-xl rounded-2xl bg-card/30 p-6 shadow-xl backdrop-blur-md`}
       >
-        <TabsList className="grid w-full grid-cols-1 rounded-xl bg-card/50 p-1 shadow-inner">
-          <TabsTrigger
-            value="withdraw"
-            className="text-sm data-[state=active]:bg-card/80 data-[state=active]:shadow-md rounded-lg px-4 py-2 transition"
-          >
-            Withdraw
-          </TabsTrigger>
+        <TabsList className="bg-card/50 grid w-full grid-cols-3 rounded-xl shadow-md *:rounded-lg *:data-[state=active]:shadow-md">
+          <TabsTrigger value="withdraw">Withdraw</TabsTrigger>
+          <TabsTrigger value="mint">Mint</TabsTrigger>
+          <TabsTrigger value="load">Load</TabsTrigger>
         </TabsList>
 
+        {/* Withdraw Tab */}
         <TabsContent value="withdraw" className="space-y-6 pt-4">
-          {/* From Section */}
-          <div className="space-y-2 rounded-xl bg-card/40 p-5 shadow-md">
-            <div className="text-xs text-muted-foreground">From</div>
-            <div className="flex items-center gap-3">
-              <DynamicButton />
-              <span className="truncate text-xs text-muted-foreground font-bitmap">
-                @Cryptopolis
-              </span>
+          {canWithdraw ? (
+            <>
+              <div className="space-y-2 rounded-xl bg-card/40 p-5 shadow-md">
+                <div className="text-xs text-muted-foreground">Withdraw</div>
+                <div className="flex items-center gap-3">
+                  <DynamicButton />
+                  <span className="truncate text-xs text-muted-foreground font-bitmap">@Cryptopolis</span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  City Balance: <span className="font-bold text-primary">{cityBalance} {symbol ?? ""}</span>
+                </div>
+              </div>
+              <ArrowDownIcon />
+              <div className="space-y-2 rounded-xl bg-card/40 p-5 shadow-md">
+                <div className="text-xs text-muted-foreground">To Wallet</div>
+                <DynamicButton />
+                <div className="text-xs text-muted-foreground">
+                  Wallet Balance: <span className="font-bold text-primary">{balanceLoading ? "Loading..." : `${formattedBalance} ${symbol ?? ""}`}</span>
+                </div>
+              </div>
+              <Button
+                className="w-full py-4 font-bold"
+                disabled={!canWithdraw || withdrawStatus === "pending" || isWithdrawing}
+                onClick={withdraw}
+              >
+                {(withdrawStatus === "pending" || isWithdrawing) ? <Spinner className="text-black" /> : "Withdraw SIM"}
+              </Button>
+            </>
+          ) : (
+            <div className="rounded-xl bg-card/40 p-5 shadow-md text-center text-sm text-muted-foreground">
+              No city found. Load or create a city to withdraw funds.
             </div>
-            <div className="text-xs text-muted-foreground">
-              Funds: <span className="font-bold text-primary">{cityBalance} SIM</span>
-            </div>
-          </div>
-
-          <ArrowDownIcon />
-
-          {/* To Section */}
-          <div className="space-y-2 rounded-xl bg-card/40 p-5 shadow-md">
-            <div className="text-xs text-muted-foreground">To</div>
-            <div className="flex items-center gap-3">
-              <DynamicButton />
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Balance:{" "}
-              <span className="font-bold text-primary">
-                {balanceLoading ? "Loading..." : `${formattedBalance} ${symbol ?? ""}`}
-              </span>
-            </div>
-          </div>
-          <Button
-            className="w-full py-4 text-sm font-bold shadow-lg hover:shadow-xl transition-all"
-            disabled={!canWithdraw || withdrawStatus === "pending" || isWithdrawing}
-            onClick={withdraw}
-          >
-            {(withdrawStatus === "pending" || isWithdrawing) ? (
-              <Spinner className="text-black" />
-            ) : (
-              "Create Voucher"
-            )}
-          </Button>
+          )}
         </TabsContent>
+
+        {/* Mint Tab */}
+        <TabsContent value="mint" className="space-y-6 pt-4">
+          {canWithdraw ? (
+            <>
+              <div className="space-y-2 rounded-xl bg-card/40 p-5 shadow-md">
+                <div className="text-xs text-muted-foreground">Your City</div>
+                <div className="flex items-center gap-3">
+                  <DynamicButton />
+                  <span className="truncate text-xs text-muted-foreground font-bitmap">@Cryptopolis</span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  City Value: <span className="font-bold text-primary">{cityBalance} {symbol ?? ""}</span>
+                </div>
+              </div>
+              <ArrowDownIcon />
+              <div className="space-y-2 rounded-xl bg-card/40 p-5 shadow-md">
+                <div className="text-xs text-muted-foreground">To Wallet</div>
+                <DynamicButton />
+                <div className="text-xs text-muted-foreground">
+                  Wallet Balance: <span className="font-bold text-primary">{balanceLoading ? "Loading..." : `${formattedBalance} ${symbol ?? ""}`}</span>
+                </div>
+              </div>
+              <Button
+                className="w-full py-4 font-bold"
+                disabled={!canWithdraw || withdrawStatus === "pending" || isWithdrawing}
+                onClick={mint}
+              >
+                {(withdrawStatus === "pending" || isWithdrawing) ? <Spinner className="text-black" /> : "Mint City NFT"}
+              </Button>
+            </>
+          ) : (
+            <div className="rounded-xl bg-card/40 p-5 shadow-md text-center text-sm text-muted-foreground">
+              No city found. Load or create a city to mint it as an asset.
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Load Tab */}
+        <TabsContent value="load" className="space-y-6 pt-4">
+          <div className="rounded-xl bg-card/40 p-5 shadow-md space-y-4">
+            {cityBalance ? (
+              <div className="text-center text-sm text-muted-foreground">
+                You already have a city loaded. You can only have one city at a time.
+              </div>
+            ) : (
+              <>
+                <Label className="text-xs text-muted-foreground">Enter Token ID to Load City</Label>
+                <input
+                  type="number"
+                  className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm text-foreground shadow-inner"
+                  placeholder="e.g. 42"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setTokenIdToLoad(val ? BigInt(val) : undefined);
+                  }}
+                />
+
+                <Button
+                  className="w-full py-3 font-bold"
+                  disabled={!tokenIdToLoad || isApproving}
+                  onClick={() => tokenIdToLoad && approve()}
+                >
+                  {(isApproving || approveStatus === "pending") ? (
+                    <Spinner className="text-black" />
+                  ) : (
+                    "Approve"
+                  )}
+                </Button>
+
+                <Button
+                  className="w-full py-3 font-bold"
+                  disabled={!tokenIdToLoad || isDepositing}
+                  onClick={() => load()}
+                >
+                  {(isDepositing || depositStatus === "pending") ? (
+                    <Spinner className="text-black" />
+                  ) : (
+                    "Load City"
+                  )}
+                </Button>
+              </>
+            )}
+          </div>
+        </TabsContent>
+
       </Tabs>
     </section>
   );
 }
 
-const ArrowDownIcon: React.FC = () => (
+const ArrowDownIcon = () => (
   <div className="flex justify-center">
     <div className="rounded-full bg-card/50 p-2 shadow-md ring-1 ring-border">
       <ArrowDown className="h-4 w-4 text-muted-foreground" />

@@ -11,35 +11,39 @@ import { useGetCityBalance } from "@/hooks/inspect";
 import { Spinner } from "@/components/ui/spinner";
 
 export default function Bridge() {
-
   const router = useRouter();
   const { primaryWallet } = useDynamicContext();
   const address = primaryWallet?.address as Address | undefined;
-  const { trigger, cityBalance } = useGetCityBalance(address);
+  const { trigger, cityBalance, isLoading } = useGetCityBalance(address);
 
+  // Redirect if no wallet
   useEffect(() => {
     if (primaryWallet === null) {
       router.replace("/");
     }
   }, [primaryWallet, router]);
 
-  // Trigger check for city on address load
+  // Trigger balance fetch
   useEffect(() => {
     if (address) {
       trigger();
     }
   }, [address, trigger]);
 
-  console.log("cityBalance: ", cityBalance);
-  
   return (
     <main className="bg-[url('/images/backgrounds/bg.png')] bg-cover bg-center bg-no-repeat w-full h-screen custom-scroll">
 
-        <BridgeTabs trigger={trigger} cityBalance={cityBalance || 0} />
-
-        <Border />
-        <FooterSection />
+      {primaryWallet === undefined || isLoading ? (
+        <div className="h-screen w-full flex items-center justify-center">
+          <Spinner className="text-white w-6 h-6" />
+        </div>
+      ) : (
+        <>
+          <BridgeTabs trigger={trigger} cityBalance={cityBalance} />
+          <Border />
+          <FooterSection />
+        </>
+      )}
     </main>
   );
 }
-

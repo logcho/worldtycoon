@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import useSWRMutation from "swr/mutation";
-import { hexToBigInt, hexToBool, hexToNumber } from "viem";
+import { hexToBool, hexToNumber } from "viem";
 import { Address } from "viem";
 
 const INSPECT_URL = process.env.NEXT_PUBLIC_INSPECT_URL!;
@@ -100,7 +100,6 @@ async function getCityBalanceRequest(url: string, { arg }: { arg: Address }) {
 
   if (!payload) {
     throw new Error("No payload returned for city balance");
-    return 0;
   }
 
   // Assuming the balance is a hex string representing a BigInt
