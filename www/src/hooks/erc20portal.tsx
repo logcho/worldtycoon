@@ -35,6 +35,6 @@ export const erc20PortalAbi = [
 
 export const useWriteErc20PortalDepositErc20Tokens = createUseWriteContract({
   abi: erc20PortalAbi,
-  address: "0x9C21AEb2093C32DDbC53eEF24B873BDCd1aDa1DB",
+  address: "0x92c6bca388e99d6b304f1af3c3cd749ff0b591e2",
   functionName: "depositERC20Tokens",
 });

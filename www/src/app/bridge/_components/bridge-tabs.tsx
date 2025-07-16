@@ -6,10 +6,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DynamicButton from "@/components/dynamic-button";
 import { fixedsys } from "@/lib/fonts";
 import { Address, formatUnits, stringToHex } from "viem";
-import { useReadErc20BalanceOf, useReadErc20Decimals, useReadErc20Symbol, useReadErc721GetApproved } from "@/hooks/contracts";
+import {
+  useReadErc20BalanceOf,
+  useReadErc20Decimals,
+  useReadErc20Symbol,
+  // useReadErc721GetApproved,
+} from "@/hooks/contracts";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { useWriteInputBoxAddInput } from "@/hooks/inputbox";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
 import { useWriteErc721PortalDepositErc721Tokens } from "@/hooks/erc721portal";
@@ -46,15 +51,11 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
   const { writeContractAsync, status: withdrawStatus } = useWriteInputBoxAddInput();
 
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const [isApproving, setIsApproving] = useState(false);
-  const [isDepositing, setIsDepositing] = useState(false);
+  // const [isApproving, setIsApproving] = useState(false);
+  // const [isDepositing, setIsDepositing] = useState(false);
   const [tokenIdToLoad, setTokenIdToLoad] = useState<bigint | undefined>(undefined);
 
   // Track last seen values to confirm blockchain state change
-  const lastCityBalanceRef = useRef(cityBalance);
-  const lastApprovedRef = useRef<bigint | undefined>(undefined);
-  const lastTokenIdRef = useRef<bigint | undefined>(undefined);
-
   const withdrawPayload = stringToHex(`{"method":"withdraw"}`);
   const mintPayload = stringToHex(`{"method":"mint"}`);
 
@@ -84,99 +85,43 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
 
   const {
     writeContractAsync: approveToken,
-    status: approveStatus,
+    // status: approveStatus,
   } = useWriteErc721Approve();
 
   const {
     writeContractAsync: depositToken,
-    status: depositStatus,
+    // status: depositStatus,
   } = useWriteErc721PortalDepositErc721Tokens();
 
-  const {
-    refetch: refetchApprovedAddress,
-  } = useReadErc721GetApproved({
-    address: NTF_CONTRACT_ADDRESS,
-    args: tokenIdToLoad !== undefined ? [tokenIdToLoad] : undefined,
-  });
-
   /** Approves the ERC721 token for loading into the dApp via the portal contract. */
-  const approve = async () => {
-    if (tokenIdToLoad === undefined) return;
+  const approveNFT = async () => {
+    if (!address || !tokenIdToLoad) return;
     try {
-      setIsApproving(true);
       await approveToken({
         address: NTF_CONTRACT_ADDRESS,
         args: [ERC721_PORTAL, tokenIdToLoad],
       });
-      lastApprovedRef.current = tokenIdToLoad;
     } catch (error) {
       console.error("ERC721 Approve error:", error);
-      setIsApproving(false);
     }
   };
 
   /** Deposits the approved ERC721 token into the dApp, effectively "loading" the city. */
-  const load = async () => {
+  const depositNFT = async () => {
     if (tokenIdToLoad === undefined) return;
     try {
-      setIsDepositing(true);
       const data = stringToHex(`Deposited NFT (${tokenIdToLoad})`);
       await depositToken({
         args: [NTF_CONTRACT_ADDRESS, DAPP_ADDRESS, tokenIdToLoad, data, data],
       });
-      lastTokenIdRef.current = tokenIdToLoad;
     } catch (error) {
       console.error("ERC721 Deposit error:", error);
-      setIsDepositing(false);
     }
   };
 
-  /** Refetch approval status after successful approval tx. */
-  useEffect(() => {
-    if (approveStatus === "success") {
-      const timeout = setTimeout(() => {
-        refetchApprovedAddress();
-      }, 5000);
-      return () => clearTimeout(timeout);
-    }
-  }, [approveStatus, refetchApprovedAddress]);
-
-  /** Handle deposit success: refetch state, stop spinner, trigger UI update. */
-  useEffect(() => {
-    if (depositStatus === "success") {
-      const timeout = setTimeout(() => {
-        trigger();
-      }, 5000);
-      return () => clearTimeout(timeout);
-    }
-  }, [depositStatus, trigger]);
-
-  /** Stop withdraw spinner once balance reflects the withdrawal. */
-  useEffect(() => {
-    if (isWithdrawing && cityBalance !== undefined && cityBalance < lastCityBalanceRef.current!) {
-      setIsWithdrawing(false);
-      lastCityBalanceRef.current = cityBalance;
-    }
-  }, [cityBalance, isWithdrawing]);
-
-  /** Stop approve spinner only after we detect tokenId changed (approved). */
-  useEffect(() => {
-    if (isApproving && tokenIdToLoad === lastApprovedRef.current) {
-      setIsApproving(false);
-    }
-  }, [tokenIdToLoad, isApproving]);
-
-  /** Stop load spinner only after deposit confirms tokenId change. */
-  useEffect(() => {
-    if (isDepositing && tokenIdToLoad === lastTokenIdRef.current) {
-      setIsDepositing(false);
-    }
-  }, [tokenIdToLoad, isDepositing]);
-
   const [tab, setTab] = useState<"withdraw" | "mint" | "load">(
-    cityBalance === undefined ? "load" : "withdraw"
+    !cityBalance ? "load" : "withdraw"
   );
-
 
   return (
     <section className="flex items-center justify-center w-full h-screen">
@@ -233,7 +178,7 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
           {canWithdraw ? (
             <>
               <div className="space-y-2 rounded-xl bg-card/40 p-5 shadow-md">
-                <div className="text-xs text-muted-foreground">Your City {NTF_CONTRACT_ADDRESS}</div>
+                <div className="text-xs text-muted-foreground">Your City</div>
                 <div className="flex items-center gap-3">
                   <DynamicButton />
                   <span className="truncate text-xs text-muted-foreground font-bitmap">@Cryptopolis</span>
@@ -287,10 +232,10 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
 
                 <Button
                   className="w-full py-3 font-bold"
-                  disabled={!tokenIdToLoad || isApproving}
-                  onClick={() => tokenIdToLoad && approve()}
+                  disabled={false}
+                  onClick={() => tokenIdToLoad && approveNFT()}
                 >
-                  {(isApproving || approveStatus === "pending") ? (
+                  {(false) ? (
                     <Spinner className="text-black" />
                   ) : (
                     "Approve"
@@ -299,10 +244,10 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
 
                 <Button
                   className="w-full py-3 font-bold"
-                  disabled={!tokenIdToLoad || isDepositing}
-                  onClick={() => load()}
+                  disabled={false}
+                  onClick={() => depositNFT()}
                 >
-                  {(isDepositing || depositStatus === "pending") ? (
+                  {false ? (
                     <Spinner className="text-black" />
                   ) : (
                     "Load City"

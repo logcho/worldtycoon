@@ -38,6 +38,6 @@ export const erc721PortalAbi = [
 
 export const useWriteErc721PortalDepositErc721Tokens = createUseWriteContract({
   abi: erc721PortalAbi,
-  address: "0x9C21AEb2093C32DDbC53eEF24B873BDCd1aDa1DB",
+  address: "0x237f8dd094c0e47f4236f12b4fa01d6dae89fb87",
   functionName: "depositERC721Token",
 });

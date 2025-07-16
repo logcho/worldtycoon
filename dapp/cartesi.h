@@ -28,7 +28,7 @@ const std::string ERC20_PORTAL_ADDRESS = "0x9c21aeb2093c32ddbc53eef24b873bdcd1ad
 /**
  * @brief Address of the standard ERC-721 portal contract.
  */
-const std::string ERC721_PORTAL_ADDRESS = "0x237F8DD094C0e47f4236f12b4Fa01d6Dae89fb87";
+const std::string ERC721_PORTAL_ADDRESS = "0x237f8dd094c0e47f4236f12b4fa01d6dae89fb87";
 
 // -----------------------------------------------------------------------------
 // HTTP POST API calls
