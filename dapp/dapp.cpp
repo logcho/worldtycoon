@@ -13,9 +13,8 @@ std::unordered_map <std::string, Micropolis*> cities;
 std::unordered_map <std::string, Micropolis*> cityStorage;
 
 const std::string TOKEN_CONTRACT_ADDRESS = "0x92c6bca388e99d6b304f1af3c3cd749ff0b591e2"; // Test Token: 0x92c6bca388e99d6b304f1af3c3cd749ff0b591e2
-// const std::string NFT_CONTRACT_ADDRESS = "0x36c02da8a0983159322a80ffe9f24b1acff8b570"; // Test Contract Address: 0x36c02da8a0983159322a80ffe9f24b1acff8b570
+const std::string NFT_CONTRACT_ADDRESS = "0x36c02da8a0983159322a80ffe9f24b1acff8b570"; // Test Contract Address: 0x36c02da8a0983159322a80ffe9f24b1acff8b570
 const std::string BUY_IN_AMOUNT = "0x00000000000000000000000000000000000000000000043c33c1937564800000"; // 20,000 18n decimals
-std::string NFT_CONTRACT_ADDRESS = "0x36c02da8a0983159322a80ffe9f24b1acff8b570"; // Comment out for deployment
 
 uint256_t tokenId = 1;
 
@@ -292,16 +291,6 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             tokenId++;
 
             return "accept";
-        }
-        // Comment out for deployment
-        else if(method == "setContract"){ // Method: setContract
-            std::string contract = parsedPayload.get("contract").to_str();
-            std::cout << "Contract: " << contract << std::endl;
-            NFT_CONTRACT_ADDRESS = contract;
-            std::cout << "Set NFT contract address to " << NFT_CONTRACT_ADDRESS << std::endl;
-        }
-        else if(method == "checkContract"){ // Method: checkContract
-            std::cout << "NFT contract address: " << NFT_CONTRACT_ADDRESS << std::endl;
         }
     }
 
