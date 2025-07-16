@@ -111,7 +111,20 @@ void createTransferVoucher(httplib::Client& cli, const std::string& recipient, c
  */
 std::string encodeMintNFTCall(const std::string &recipient, const std::string &tokenId) {
     std::string methodId = "3c168eab"; // keccak256("mintNFT(address,uint256)") first 4 bytes
-    return "0x" + methodId + padTo32Bytes(recipient) + padTo32Bytes(tokenId);
+
+    // recipient is a hex string like "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+    // remove "0x" and pad left to 64 chars (32 bytes)
+    std::string cleanRecipient = recipient.substr(2);
+    std::string paddedRecipient = padTo32Bytes(cleanRecipient);
+    
+    // gameHash is a uint256 hex string, e.g. "0x123abc..."
+    // remove "0x" and pad left to 64 chars (32 bytes)
+    std::string paddedGameHash = padTo32Bytes(tokenId);
+    
+    // Combine all parts: methodId + recipient + gameHash
+    std::string data = methodId + paddedRecipient + paddedGameHash;
+    
+    return "0x" + data;
 }
 
 /**

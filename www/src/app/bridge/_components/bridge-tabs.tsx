@@ -50,11 +50,15 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
   const [isDepositing, setIsDepositing] = useState(false);
   const [tokenIdToLoad, setTokenIdToLoad] = useState<bigint | undefined>(undefined);
 
+  // Track last seen values to confirm blockchain state change
   const lastCityBalanceRef = useRef(cityBalance);
+  const lastApprovedRef = useRef<bigint | undefined>(undefined);
+  const lastTokenIdRef = useRef<bigint | undefined>(undefined);
 
   const withdrawPayload = stringToHex(`{"method":"withdraw"}`);
   const mintPayload = stringToHex(`{"method":"mint"}`);
 
+  /** Withdraw SIM tokens from the city safe to the user's wallet. */
   const withdraw = async () => {
     try {
       setIsWithdrawing(true);
@@ -66,6 +70,7 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
     }
   };
 
+  /** Mint an NFT representing the user's city. */
   const mint = async () => {
     try {
       setIsWithdrawing(true);
@@ -88,14 +93,13 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
   } = useWriteErc721PortalDepositErc721Tokens();
 
   const {
-    // data: approvedAddress,
     refetch: refetchApprovedAddress,
   } = useReadErc721GetApproved({
     address: NTF_CONTRACT_ADDRESS,
     args: tokenIdToLoad !== undefined ? [tokenIdToLoad] : undefined,
   });
-  
-  
+
+  /** Approves the ERC721 token for loading into the dApp via the portal contract. */
   const approve = async () => {
     if (tokenIdToLoad === undefined) return;
     try {
@@ -104,12 +108,14 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
         address: NTF_CONTRACT_ADDRESS,
         args: [ERC721_PORTAL, tokenIdToLoad],
       });
+      lastApprovedRef.current = tokenIdToLoad;
     } catch (error) {
       console.error("ERC721 Approve error:", error);
       setIsApproving(false);
     }
   };
 
+  /** Deposits the approved ERC721 token into the dApp, effectively "loading" the city. */
   const load = async () => {
     if (tokenIdToLoad === undefined) return;
     try {
@@ -118,32 +124,34 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
       await depositToken({
         args: [NTF_CONTRACT_ADDRESS, DAPP_ADDRESS, tokenIdToLoad, data, data],
       });
+      lastTokenIdRef.current = tokenIdToLoad;
     } catch (error) {
       console.error("ERC721 Deposit error:", error);
       setIsDepositing(false);
     }
   };
-  
 
+  /** Refetch approval status after successful approval tx. */
   useEffect(() => {
     if (approveStatus === "success") {
-      const timeout = setTimeout(() => {        
+      const timeout = setTimeout(() => {
         refetchApprovedAddress();
-      }, 4000);
+      }, 5000);
       return () => clearTimeout(timeout);
     }
-  }, [approveStatus]);
+  }, [approveStatus, refetchApprovedAddress]);
 
+  /** Handle deposit success: refetch state, stop spinner, trigger UI update. */
   useEffect(() => {
     if (depositStatus === "success") {
       const timeout = setTimeout(() => {
         trigger();
-        setIsDepositing(false);
-      }, 4000);
+      }, 5000);
       return () => clearTimeout(timeout);
     }
-  }, [depositStatus]);
+  }, [depositStatus, trigger]);
 
+  /** Stop withdraw spinner once balance reflects the withdrawal. */
   useEffect(() => {
     if (isWithdrawing && cityBalance !== undefined && cityBalance < lastCityBalanceRef.current!) {
       setIsWithdrawing(false);
@@ -151,9 +159,24 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
     }
   }, [cityBalance, isWithdrawing]);
 
+  /** Stop approve spinner only after we detect tokenId changed (approved). */
+  useEffect(() => {
+    if (isApproving && tokenIdToLoad === lastApprovedRef.current) {
+      setIsApproving(false);
+    }
+  }, [tokenIdToLoad, isApproving]);
+
+  /** Stop load spinner only after deposit confirms tokenId change. */
+  useEffect(() => {
+    if (isDepositing && tokenIdToLoad === lastTokenIdRef.current) {
+      setIsDepositing(false);
+    }
+  }, [tokenIdToLoad, isDepositing]);
+
   const [tab, setTab] = useState<"withdraw" | "mint" | "load">(
     cityBalance === undefined ? "load" : "withdraw"
   );
+
 
   return (
     <section className="flex items-center justify-center w-full h-screen">
@@ -210,7 +233,7 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
           {canWithdraw ? (
             <>
               <div className="space-y-2 rounded-xl bg-card/40 p-5 shadow-md">
-                <div className="text-xs text-muted-foreground">Your City</div>
+                <div className="text-xs text-muted-foreground">Your City {NTF_CONTRACT_ADDRESS}</div>
                 <div className="flex items-center gap-3">
                   <DynamicButton />
                   <span className="truncate text-xs text-muted-foreground font-bitmap">@Cryptopolis</span>

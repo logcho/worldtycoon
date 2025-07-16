@@ -288,7 +288,7 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             cities.erase(msgSender);
             std::cout << "Generating voucher for minting..." << std::endl;
             std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
-            createMintNFTVoucher(cli, msgSender, stringTokenId, TOKEN_CONTRACT_ADDRESS);           
+            createMintNFTVoucher(cli, msgSender, stringTokenId, NFT_CONTRACT_ADDRESS);           
             tokenId++;
 
             return "accept";

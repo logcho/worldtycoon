@@ -126,7 +126,7 @@ export default function CreatePage({ trigger }: CreatePageProps) {
     if (approveStatus === "success") {
       const timeout = setTimeout(() => {
         refetchAllowance();
-      }, 4000);
+      }, 5000);
       return () => clearTimeout(timeout);
     }
   }, [approveStatus, refetchAllowance]);
