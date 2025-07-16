@@ -65,6 +65,8 @@ cartesi run --epoch-length 1
 
 Run the GameHasHNFT contract (dapp/contracts/GameHasHNFT.sol) on Foundry using [Remix](https://remix.ethereum.org) or Anvil.
 
+Once you withdraw or mint you can claim the voucher in http://localhost:8080/explorer/
+
 If the address of the deployed contract is different than the value already set, change it manually in both the dapp.cpp and bridge-taps.tsx
 
 Note: Using the foundry test token will require you to switch to that chain manually
