@@ -10,11 +10,11 @@ import {
   useReadErc20BalanceOf,
   useReadErc20Decimals,
   useReadErc20Symbol,
-  // useReadErc721GetApproved,
+  useReadErc721GetApproved,
 } from "@/hooks/contracts";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { useWriteInputBoxAddInput } from "@/hooks/inputbox";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
 import { useWriteErc721PortalDepositErc721Tokens } from "@/hooks/erc721portal";
@@ -51,8 +51,8 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
   const { writeContractAsync, status: withdrawStatus } = useWriteInputBoxAddInput();
 
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  // const [isApproving, setIsApproving] = useState(false);
-  // const [isDepositing, setIsDepositing] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isDepositing, setIsDepositing] = useState(false);
   const [tokenIdToLoad, setTokenIdToLoad] = useState<bigint | undefined>(undefined);
 
   // Track last seen values to confirm blockchain state change
@@ -85,24 +85,34 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
 
   const {
     writeContractAsync: approveToken,
-    // status: approveStatus,
+    status: approveStatus,
   } = useWriteErc721Approve();
 
   const {
     writeContractAsync: depositToken,
-    // status: depositStatus,
+    status: depositStatus,
   } = useWriteErc721PortalDepositErc721Tokens();
+
+  const {
+    data: approvedAddress,
+    refetch: refetchApprovedAddress,
+  } = useReadErc721GetApproved({
+    address: NTF_CONTRACT_ADDRESS,
+    args: tokenIdToLoad !== undefined ? [tokenIdToLoad] : undefined,
+  });
 
   /** Approves the ERC721 token for loading into the dApp via the portal contract. */
   const approveNFT = async () => {
     if (!address || !tokenIdToLoad) return;
     try {
+      setIsApproving(true);
       await approveToken({
         address: NTF_CONTRACT_ADDRESS,
         args: [ERC721_PORTAL, tokenIdToLoad],
       });
     } catch (error) {
       console.error("ERC721 Approve error:", error);
+      setIsApproving(false);
     }
   };
 
@@ -110,14 +120,45 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
   const depositNFT = async () => {
     if (tokenIdToLoad === undefined) return;
     try {
+      setIsDepositing(true)
       const data = stringToHex(`Deposited NFT (${tokenIdToLoad})`);
       await depositToken({
         args: [NTF_CONTRACT_ADDRESS, DAPP_ADDRESS, tokenIdToLoad, data, data],
       });
     } catch (error) {
       console.error("ERC721 Deposit error:", error);
+      setIsDepositing(false);
     }
   };
+
+  useEffect(() => {
+    if (approveStatus === "success") {
+      const timeout = setTimeout(() => {
+        refetchApprovedAddress();
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [approveStatus, refetchApprovedAddress]);
+
+  useEffect(() => {
+    if (isApproving && approvedAddress == ERC721_PORTAL) {
+      setIsApproving(false);
+    }
+  }, [approvedAddress, isApproving]);
+
+  useEffect(() => {
+    if (depositStatus === "success") {
+      const timeout = setTimeout(() => {
+        trigger();
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [depositStatus, trigger]);
+
+
+  const canApprove = tokenIdToLoad !== undefined;
+
+  const canDeposit = tokenIdToLoad !== undefined && approvedAddress == ERC721_PORTAL;
 
   const [tab, setTab] = useState<"withdraw" | "mint" | "load">(
     !cityBalance ? "load" : "withdraw"
@@ -232,10 +273,10 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
 
                 <Button
                   className="w-full py-3 font-bold"
-                  disabled={false}
+                  disabled={!canApprove}
                   onClick={() => tokenIdToLoad && approveNFT()}
                 >
-                  {(false) ? (
+                  {(approveStatus === "pending" || isApproving) ? (
                     <Spinner className="text-black" />
                   ) : (
                     "Approve"
@@ -244,10 +285,10 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
 
                 <Button
                   className="w-full py-3 font-bold"
-                  disabled={false}
+                  disabled={!canDeposit}
                   onClick={() => depositNFT()}
                 >
-                  {false ? (
+                  {isDepositing ? (
                     <Spinner className="text-black" />
                   ) : (
                     "Load City"
