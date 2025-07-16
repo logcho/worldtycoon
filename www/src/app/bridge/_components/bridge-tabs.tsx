@@ -160,9 +160,7 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
 
   const canDeposit = tokenIdToLoad !== undefined && approvedAddress == ERC721_PORTAL;
 
-  const [tab, setTab] = useState<"withdraw" | "mint" | "load">(
-    !cityBalance ? "load" : "withdraw"
-  );
+  const [tab, setTab] = useState<"withdraw" | "mint" | "load">("withdraw");
 
   return (
     <section className="flex items-center justify-center w-full h-screen">
