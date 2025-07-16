@@ -352,8 +352,18 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
             std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
             return "reject";
         }
-        // TODO: Handle getEvaluation logic
         createGameReport(cli, cities[address]);
+    }
+    else if(method == "getMapFunds"){ // Method: getMapFunds
+        std::string address = toLower(parsedPayload.get("address").to_str());
+        if(!cities.count(address)){
+            std::cout << "City does not yet exist at address: " << address << std::endl;
+            std::cout << "Unable to getCity" << std::endl;
+            std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
+            return "reject";
+        }
+        createMapReport(cli, convertMapToUint16Vector(cities[address]->map[0], WORLD_W, WORLD_H)); // Map Report
+        createReport(cli, eth::numberToHex(cities[address]->totalFunds)); // City Funds
     }
     else if(method == "getCityBalance"){ // Method: getCity
         std::string address = toLower(parsedPayload.get("address").to_str());
@@ -363,7 +373,6 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
             createReport(cli, "0x00");
             return "accept";
         }
-        // TODO: Handle getEvaluation logic
         createReport(cli, eth::numberToHex(cities[address]->totalFunds));
     }
     return "accept";

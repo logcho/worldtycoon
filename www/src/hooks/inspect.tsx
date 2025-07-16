@@ -126,3 +126,48 @@ export const useGetCityBalance = (address?: Address) => {
     isLoading: isMutating,
   };
 };
+
+async function getMapFundsRequest(url: string, { arg }: { arg: Address }) {
+  const response = await fetch(
+    `${url}/{"method":"getMapFunds","address":"${arg}"}`
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch");
+  }
+
+  const json = await response.json();
+
+  const map = json?.reports?.[0]?.payload;
+  const funds = json?.reports?.[1]?.payload;
+
+  if (!map || !funds) {
+    return undefined;
+  }
+
+  return {
+    map,
+    funds,
+  };
+}
+
+export const useGetMapFunds = (address?: Address) => {
+  const {
+    trigger: _trigger,
+    data,
+    error,
+    isMutating,
+  } = useSWRMutation(INSPECT_URL, getMapFundsRequest);
+
+  const trigger = useCallback(() => {
+    if (!address) return;
+    _trigger(address);
+  }, [_trigger, address]);
+
+  return {
+    trigger,
+    mapFunds: data,
+    error,
+    isLoading: isMutating,
+  };
+};

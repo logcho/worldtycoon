@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DynamicButton from "@/components/dynamic-button";
 import { fixedsys } from "@/lib/fonts";
-import { Address, formatUnits, stringToHex } from "viem";
+import { Address, formatUnits, Hex, hexToNumber, stringToHex } from "viem";
 import {
   useReadErc20BalanceOf,
   useReadErc20Decimals,
@@ -19,13 +19,21 @@ import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
 import { useWriteErc721PortalDepositErc721Tokens } from "@/hooks/erc721portal";
 import { useWriteErc721Approve } from "@/hooks/contracts";
+import MiniMap from "./mini-map";
+
+type MapFunds = {
+  map: Hex;
+  funds: Hex;
+};
+
 
 type BridgeTabsProps = {
   cityBalance?: number;
+  mapFunds?: MapFunds;
   trigger: () => void;
 };
 
-export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
+export default function BridgeTabs({ cityBalance, trigger, mapFunds }: BridgeTabsProps) {
   const { primaryWallet } = useDynamicContext();
   const address = primaryWallet?.address as Address | undefined;
 
@@ -37,6 +45,9 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
   const { data: symbol } = useReadErc20Symbol({ address: TOKEN_ADDRESS });
   const { data: decimals = 18 } = useReadErc20Decimals({ address: TOKEN_ADDRESS });
 
+  const map = mapFunds ? mapFunds.map : undefined;
+  const funds = mapFunds ? hexToNumber(mapFunds.funds) : undefined;
+
   const {
     data: balance = 0,
     isLoading: balanceLoading,
@@ -46,7 +57,7 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
   });
 
   const formattedBalance = balance ? formatUnits(balance, decimals) : "0";
-  const canWithdraw = cityBalance && cityBalance > 0;
+  const canWithdraw = funds !== undefined;
 
   const { writeContractAsync, status: withdrawStatus } = useWriteInputBoxAddInput();
 
@@ -177,7 +188,7 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
 
         {/* Withdraw Tab */}
         <TabsContent value="withdraw" className="space-y-6 pt-4">
-          {canWithdraw ? (
+          {mapFunds ? (
             <>
               <div className="space-y-2 rounded-xl bg-card/40 p-5 shadow-md">
                 <div className="text-xs text-muted-foreground">Withdraw</div>
@@ -186,7 +197,7 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
                   <span className="truncate text-xs text-muted-foreground font-bitmap">@Cryptopolis</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  City Balance: <span className="font-bold text-primary">{cityBalance} {symbol ?? ""}</span>
+                  City Funds: <span className="font-bold text-primary">{funds} {symbol ?? ""}</span>
                 </div>
               </div>
               <ArrowDownIcon />
@@ -214,7 +225,7 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
 
         {/* Mint Tab */}
         <TabsContent value="mint" className="space-y-6 pt-4">
-          {canWithdraw ? (
+          {mapFunds ? (
             <>
               <div className="space-y-2 rounded-xl bg-card/40 p-5 shadow-md">
                 <div className="text-xs text-muted-foreground">Your City</div>
@@ -223,7 +234,8 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
                   <span className="truncate text-xs text-muted-foreground font-bitmap">@Cryptopolis</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  City Value: <span className="font-bold text-primary">{cityBalance} {symbol ?? ""}</span>
+                  City Funds: <span className="font-bold text-primary">{funds} {symbol ?? ""}</span>
+                  <MiniMap mapValue={map} />
                 </div>
               </div>
               <ArrowDownIcon />
@@ -252,7 +264,7 @@ export default function BridgeTabs({ cityBalance, trigger }: BridgeTabsProps) {
         {/* Load Tab */}
         <TabsContent value="load" className="space-y-6 pt-4">
           <div className="rounded-xl bg-card/40 p-5 shadow-md space-y-4">
-            {cityBalance ? (
+            {mapFunds ? (
               <div className="text-center text-sm text-muted-foreground">
                 You already have a city loaded. You can only have one city at a time.
               </div>

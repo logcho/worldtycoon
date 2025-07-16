@@ -7,14 +7,13 @@ import FooterSection from "./_components/footer";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { Address } from "viem";
 import { useEffect } from "react";
-import { useGetCityBalance } from "@/hooks/inspect";
-import { Spinner } from "@/components/ui/spinner";
+import { useGetMapFunds } from "@/hooks/inspect";
 
 export default function Bridge() {
   const router = useRouter();
   const { primaryWallet } = useDynamicContext();
   const address = primaryWallet?.address as Address | undefined;
-  const { trigger, cityBalance, isLoading } = useGetCityBalance(address);
+  const { trigger, mapFunds } = useGetMapFunds(address);
 
   // Redirect if no wallet
   useEffect(() => {
@@ -32,18 +31,9 @@ export default function Bridge() {
 
   return (
     <main className="bg-[url('/images/backgrounds/bg.png')] bg-cover bg-center bg-no-repeat w-full h-screen custom-scroll">
-
-      {primaryWallet === undefined || isLoading ? (
-        <div className="h-screen w-full flex items-center justify-center">
-          <Spinner className="text-white w-6 h-6" />
-        </div>
-      ) : (
-        <>
-          <BridgeTabs trigger={trigger} cityBalance={cityBalance} />
-          <Border />
-          <FooterSection />
-        </>
-      )}
+      <BridgeTabs trigger={trigger} mapFunds={mapFunds} />
+      <Border />
+      <FooterSection />
     </main>
   );
 }
