@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DynamicButton from "@/components/dynamic-button";
@@ -20,6 +19,9 @@ import { Label } from "@/components/ui/label";
 import { useWriteErc721PortalDepositErc721Tokens } from "@/hooks/erc721portal";
 import { useWriteErc721Approve } from "@/hooks/contracts";
 import MiniMap from "./mini-map";
+import { ArrowDownIcon } from "./arrow-down-icon";
+import { WIDTH, HEIGHT, TILE_SIZE } from "@/config/constants";
+import axios from "axios";
 
 type MapFunds = {
   map: Hex;
@@ -28,12 +30,11 @@ type MapFunds = {
 
 
 type BridgeTabsProps = {
-  cityBalance?: number;
   mapFunds?: MapFunds;
   trigger: () => void;
 };
 
-export default function BridgeTabs({ cityBalance, trigger, mapFunds }: BridgeTabsProps) {
+export default function BridgeTabs({ trigger, mapFunds }: BridgeTabsProps) {
   const { primaryWallet } = useDynamicContext();
   const address = primaryWallet?.address as Address | undefined;
 
@@ -173,6 +174,15 @@ export default function BridgeTabs({ cityBalance, trigger, mapFunds }: BridgeTab
 
   const [tab, setTab] = useState<"withdraw" | "mint" | "load">("withdraw");
 
+  const [cityImageUrl, setCityImageUrl] = useState<string | null>(null);
+
+  const handleGenerateImage = async () => {
+    if(!map) return;
+    const blob = await generateCityImage(map);
+    const url = URL.createObjectURL(blob);
+    setCityImageUrl(url); // shows in <img> below
+  };
+
   return (
     <section className="flex items-center justify-center w-full h-screen">
       <Tabs
@@ -253,6 +263,11 @@ export default function BridgeTabs({ cityBalance, trigger, mapFunds }: BridgeTab
               >
                 {(withdrawStatus === "pending" || isWithdrawing) ? <Spinner className="text-black" /> : "Mint City NFT"}
               </Button>
+              <Button onClick={handleGenerateImage}>
+                test
+              </Button>
+              {cityImageUrl && <img src={cityImageUrl} alt="City Image" />}
+
             </>
           ) : (
             <div className="rounded-xl bg-card/40 p-5 shadow-md text-center text-sm text-muted-foreground">
@@ -314,10 +329,45 @@ export default function BridgeTabs({ cityBalance, trigger, mapFunds }: BridgeTab
   );
 }
 
-const ArrowDownIcon = () => (
-  <div className="flex justify-center">
-    <div className="rounded-full bg-card/50 p-2 shadow-md ring-1 ring-border">
-      <ArrowDown className="h-4 w-4 text-muted-foreground" />
-    </div>
-  </div>
-);
+const TILESET_URL = "/images/tilesets/micropolis_tiles.png";
+
+const generateCityImage = async (mapValue: Hex): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = WIDTH * TILE_SIZE;
+    canvas.height = HEIGHT * TILE_SIZE;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return reject("Canvas context not available");
+
+    const tileset = new Image();
+    tileset.src = TILESET_URL;
+
+    tileset.onload = () => {
+      const hexStr = mapValue.substring(2);
+      const pairs = hexStr.match(/.{1,4}/g) || [];
+      const map = new Uint16Array(pairs.map((pair) => parseInt(pair, 16)));
+
+      const tilesetCols = Math.floor(tileset.width / TILE_SIZE);
+
+      for (let row = 0; row < HEIGHT; row++) {
+        for (let col = 0; col < WIDTH; col++) {
+          const idx = col * HEIGHT + row;
+          const tile = map[idx] & 0x03ff;
+          const sx = (tile % tilesetCols) * TILE_SIZE;
+          const sy = Math.floor(tile / tilesetCols) * TILE_SIZE;
+          const dx = col * TILE_SIZE;
+          const dy = row * TILE_SIZE;
+          ctx.drawImage(tileset, sx, sy, TILE_SIZE, TILE_SIZE, dx, dy, TILE_SIZE, TILE_SIZE);
+        }
+      }
+
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else reject("Failed to generate image blob");
+      }, "image/png");
+    };
+
+    tileset.onerror = () => reject("Failed to load tileset image");
+  });
+};
+
