@@ -103,27 +103,50 @@ void createTransferVoucher(httplib::Client& cli, const std::string& recipient, c
 }
 
 /**
- * @brief Encodes a mintNFT(address,uint256) function call.
+ * @brief Encodes a mintNFT(address,uint256,string) function call.
  * Generates the full ABI-encoded payload for minting an ERC-721 token.
  * @param recipient The recipient address as a hex string (with or without "0x").
  * @param tokenId The token ID as a hex string (with or without "0x").
+ * @param imageUrl The image URL to include in the token metadata.
  * @return A hex-encoded string including the function selector and arguments.
  */
-std::string encodeMintNFTCall(const std::string &recipient, const std::string &tokenId) {
-    std::string methodId = "3c168eab"; // keccak256("mintNFT(address,uint256)") first 4 bytes
+std::string encodeMintNFTCall(const std::string &recipient, const std::string &tokenId, const std::string &imageUrl) {
+    // std::string methodId = "3c168eab"; // keccak256("mintNFT(address,uint256)") first 4 bytes
 
-    // recipient is a hex string like "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-    // remove "0x" and pad left to 64 chars (32 bytes)
-    std::string cleanRecipient = recipient.substr(2);
-    std::string paddedRecipient = padTo32Bytes(cleanRecipient);
-    
-    // gameHash is a uint256 hex string, e.g. "0x123abc..."
-    // remove "0x" and pad left to 64 chars (32 bytes)
-    std::string paddedGameHash = padTo32Bytes(tokenId);
-    
-    // Combine all parts: methodId + recipient + gameHash
-    std::string data = methodId + paddedRecipient + paddedGameHash;
-    
+    std::string methodId = "1e576912"; // keccak256("mintNFT(address,uint256,string)") first 4 bytes
+
+    // Clean and pad recipient address
+    std::string paddedRecipient = padTo32Bytes(recipient);
+
+    // Clean and pad tokenId
+    std::string paddedTokenId = padTo32Bytes(tokenId);
+
+    // For dynamic string: offset is 0x40 (2 arguments * 32 bytes)
+    std::string stringOffset = padTo32Bytes("40");
+
+    std::string offset = padTo32Bytes("60");
+
+    // Encode string length
+    size_t strLen = imageUrl.size();
+    std::stringstream ssLen;
+    ssLen << std::hex << strLen;
+    std::string paddedLength = padTo32Bytes(ssLen.str());
+
+    // Encode UTF-8 string to hex
+    std::string hexString;
+    for (char c : imageUrl) {
+        std::stringstream ss;
+        ss << std::hex << std::setw(2) << std::setfill('0') << (int)(uint8_t)c;
+        hexString += ss.str();
+    }
+
+    // Pad hex string to 32-byte boundary
+    while ((hexString.length() / 2) % 32 != 0) {
+        hexString += "00";
+    }
+
+    // Final encoded data
+    std::string data = methodId + paddedRecipient + paddedTokenId + offset + paddedLength + hexString;
     return "0x" + data;
 }
 
@@ -134,10 +157,11 @@ std::string encodeMintNFTCall(const std::string &recipient, const std::string &t
  * @param cli The configured httplib::Client object used for HTTP requests.
  * @param recipient Address to send tokens to (hex string).
  * @param tokenId The token ID as a hex string (with or without "0x").
+ * @param imageUrl The image URL to include in the token metadata.
  * @param destination The token address.
  */
-void createMintNFTVoucher(httplib::Client &cli, const std::string &recipient, const std::string &tokenId, const std::string& destination) {
-    std::string mintNFT = encodeMintNFTCall(recipient, tokenId);
+void createMintNFTVoucher(httplib::Client &cli, const std::string &recipient, const std::string &tokenId, const std::string &imageUrl, const std::string& destination) {
+    std::string mintNFT = encodeMintNFTCall(recipient, tokenId, imageUrl);
     // Format the payload expected by Cartesi
     std::string payload = "{\"destination\":\"" + destination + "\",\"payload\":\"" + mintNFT + "\"}";
     // Payload should be ABI encoded call to the NFT contract

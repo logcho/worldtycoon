@@ -279,7 +279,8 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
                 std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
                 return "reject";
             }
-
+            std::string image = parsedPayload.get("image").to_str();
+            std::cout << "Image URL: " << image << std::endl;
             std::string stringTokenId = tokenId.str();
             std::cout << "String Token Id: " << stringTokenId << std::endl;
             cityStorage[stringTokenId] = cities[msgSender];
@@ -287,7 +288,7 @@ std::string handle_advance(httplib::Client &cli, picojson::value data)
             cities.erase(msgSender);
             std::cout << "Generating voucher for minting..." << std::endl;
             std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
-            createMintNFTVoucher(cli, msgSender, stringTokenId, NFT_CONTRACT_ADDRESS);           
+            createMintNFTVoucher(cli, msgSender, stringTokenId, image, NFT_CONTRACT_ADDRESS);           
             tokenId++;
 
             return "accept";

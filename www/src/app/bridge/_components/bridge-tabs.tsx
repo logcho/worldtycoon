@@ -22,6 +22,7 @@ import MiniMap from "./mini-map";
 import { ArrowDownIcon } from "./arrow-down-icon";
 import { WIDTH, HEIGHT, TILE_SIZE } from "@/config/constants";
 import axios from "axios";
+// import { gameStorageNftAbi } from "@/abi/gameStorageNftAbi";
 
 type MapFunds = {
   map: Hex;
@@ -69,7 +70,6 @@ export default function BridgeTabs({ trigger, mapFunds }: BridgeTabsProps) {
 
   // Track last seen values to confirm blockchain state change
   const withdrawPayload = stringToHex(`{"method":"withdraw"}`);
-  const mintPayload = stringToHex(`{"method":"mint"}`);
 
   /** Withdraw SIM tokens from the city safe to the user's wallet. */
   const withdraw = async () => {
@@ -87,13 +87,36 @@ export default function BridgeTabs({ trigger, mapFunds }: BridgeTabsProps) {
   const mint = async () => {
     try {
       setIsWithdrawing(true);
+
+      const imageUrl = await handleUploadImage();
+
+      if (!imageUrl) {
+        throw new Error("Image upload failed. imageUrl is undefined.");
+      }
+
+      console.log("Image uploaded:", imageUrl);
+
+      const metaDataUrl = await uploadMetadataToPinata(imageUrl);
+
+      console.log("Meta data uploaded:", metaDataUrl);
+
+      const mintPayload = stringToHex(`{"method":"mint","image":"${metaDataUrl}"}`)
+
       await writeContractAsync({ args: [DAPP_ADDRESS, mintPayload] });
       setTimeout(() => trigger(), 5000);
     } catch (error) {
       console.error("Mint error:", error);
       setIsWithdrawing(false);
     }
+    
   };
+
+  // const data = encodeFunctionData({
+  //   abi: gameStorageNftAbi,
+  //   functionName: 'mintNFT',
+  //   args: ["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", 1, "https://gateway.pinata.cloud/ipfs/bafkreidfdftygmkquz6z3iuhul66od4w4fhmj6t5mqwar3s62vy3gqseay"]
+  // })
+  // console.log("ABI ENCODING:", data);
 
   const {
     writeContractAsync: approveToken,
@@ -174,14 +197,36 @@ export default function BridgeTabs({ trigger, mapFunds }: BridgeTabsProps) {
 
   const [tab, setTab] = useState<"withdraw" | "mint" | "load">("withdraw");
 
-  const [cityImageUrl, setCityImageUrl] = useState<string | null>(null);
+  // const [cityImageUrl, setCityImageUrl] = useState<string | null>(null);
 
-  const handleGenerateImage = async () => {
+  // const handleGenerateImage = async () => {
+  //   if(!map) return;
+  //   const blob = await generateCityImage(map);
+  //   const url = URL.createObjectURL(blob);
+  //   setCityImageUrl(url); // shows in <img> below
+  // };
+
+  const handleUploadImage = async () => {
     if(!map) return;
     const blob = await generateCityImage(map);
-    const url = URL.createObjectURL(blob);
-    setCityImageUrl(url); // shows in <img> below
+    const result = await uploadToPinata(blob);
+
+    return `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
   };
+
+  const uploadMetadataToPinata = async (imageUrl: string) => {
+    const metadata = {
+      name: "My NFT City",
+      description: "A generated city image.",
+      image: imageUrl
+    };
+    
+    const metadataBlob = new Blob([JSON.stringify(metadata)], { type: "application/json" });
+  
+    const result = await uploadToPinata(metadataBlob);
+    return `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
+  };
+  
 
   return (
     <section className="flex items-center justify-center w-full h-screen">
@@ -263,10 +308,19 @@ export default function BridgeTabs({ trigger, mapFunds }: BridgeTabsProps) {
               >
                 {(withdrawStatus === "pending" || isWithdrawing) ? <Spinner className="text-black" /> : "Mint City NFT"}
               </Button>
-              <Button onClick={handleGenerateImage}>
-                test
+              {/* <Button                 
+                  className="w-full py-4 font-bold"
+                  onClick={handleGenerateImage}
+                >
+                Test Image Generation
               </Button>
-              {cityImageUrl && <img src={cityImageUrl} alt="City Image" />}
+              <Button                 
+                  className="w-full py-4 font-bold"
+                  onClick={handleUploadImage}
+                >
+                Test Image Upload
+              </Button>
+              {cityImageUrl && <img src={cityImageUrl} alt="City Image" />} */}
 
             </>
           ) : (
@@ -371,3 +425,28 @@ const generateCityImage = async (mapValue: Hex): Promise<Blob> => {
   });
 };
 
+export const uploadToPinata = async (blob: Blob) => {
+  const formData = new FormData();
+  formData.append("file", blob, "city.png");
+
+  const metadata = JSON.stringify({
+    name: "City NFT Image",
+  });
+  formData.append("pinataMetadata", metadata);
+
+  const options = JSON.stringify({
+    cidVersion: 1,
+  });
+  formData.append("pinataOptions", options);
+
+  const res = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
+    maxBodyLength: Infinity,
+    headers: {
+      "Content-Type": "multipart/form-data",
+      pinata_api_key: process.env.NEXT_PUBLIC_PINATA_API_KEY,
+      pinata_secret_api_key: process.env.NEXT_PUBLIC_PINATA_API_KEY_SECRET,
+    },
+  });
+
+  return res.data; // Contains the IPFS hash!
+};
