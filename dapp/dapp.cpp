@@ -337,6 +337,7 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
     }
     else if(method == "getEvaluation"){ // Method: getEvaluation
         std::string address = toLower(parsedPayload.get("address").to_str());
+        std::cout << "Checking if " << address << " has a city..." << std::endl;
         if(!cities.count(address)){
             std::cout << "City does not yet exist at address: " << address << std::endl;
             std::cout << "Unable to getEvaluation" << std::endl;
@@ -347,6 +348,7 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
     }
     else if(method == "getCity"){ // Method: getCity
         std::string address = toLower(parsedPayload.get("address").to_str());
+        std::cout << "Checking if " << address << " has a city..." << std::endl;
         if(!cities.count(address)){
             std::cout << "City does not yet exist at address: " << address << std::endl;
             std::cout << "Unable to getCity" << std::endl;
@@ -357,6 +359,7 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
     }
     else if(method == "getMapFunds"){ // Method: getMapFunds
         std::string address = toLower(parsedPayload.get("address").to_str());
+        std::cout << "Checking if " << address << " has a city..." << std::endl;
         if(!cities.count(address)){
             std::cout << "City does not yet exist at address: " << address << std::endl;
             std::cout << "Unable to getCity" << std::endl;
@@ -368,6 +371,7 @@ std::string handle_inspect(httplib::Client &cli, picojson::value data)
     }
     else if(method == "getCityBalance"){ // Method: getCity
         std::string address = toLower(parsedPayload.get("address").to_str());
+        std::cout << "Checking if " << address << " has a city..." << std::endl;
         if(!cities.count(address)){
             std::cout << "City does not yet exist at address: " << address << std::endl;
             std::cout << std::setw(20) << std::setfill('-') << "" << std::endl; // Output a divider for readability within console
